@@ -7,7 +7,6 @@
 #define GAME_MAX_BULLETS 128
 
 int move_dir = 0;
-bool game_running = false;
 bool fire_pressed = 0;
 
 
@@ -72,7 +71,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
     switch (key) {
         case GLFW_KEY_ESCAPE:
             if (action == GLFW_PRESS)
-                game_running = false;
+                glfwSetWindowShouldClose(window, true);
             break;
         case GLFW_KEY_RIGHT:
             if (action == GLFW_PRESS)
@@ -155,11 +154,11 @@ void buffer_clear(Buffer* buffer, uint32_t color)
  *       only if the sprite rectangles do.
  */
 bool sprite_overlap_check(
-        const Sprite &sp_a, size_t x_a, size_t y_a,
-        const Sprite &sp_b, size_t x_b, size_t y_b)
+        const Sprite& sp_a, size_t x_a, size_t y_a,
+        const Sprite& sp_b, size_t x_b, size_t y_b)
 {
     if (x_a < x_b + sp_b.width && x_a + sp_a.width > x_b &&
-        x_a < y_b + sp_b.height && y_a + sp_a.height > y_b) {
+        y_a < y_b + sp_b.height && y_a + sp_a.height > y_b) {
         return true;
     }
 
@@ -240,6 +239,7 @@ GLFWwindow* initialize(const size_t buffer_width, const size_t buffer_height)
     GLFWwindow* window;
     window = glfwCreateWindow(buffer_width, buffer_height, "Space Invaders", NULL, NULL);
     if (!window) {
+        fprintf(stderr, "Error creating GLFW window.\n");
         glfwTerminate();
         return NULL;
     }
@@ -623,30 +623,30 @@ int main(void)
         death_counters[i] = 10;
     }
 
-    uint32_t clear_color = rgb_to_uint32(0, 128, 0);
+    uint32_t clear_color = rgb_to_uint32(50, 80, 75);
+    //rgb_to_uint32(0, 128, 0);
 
     size_t score = 0;
     size_t credits = 0;
     int player_move_dir = 0;
-    game_running = true;
-    while (!glfwWindowShouldClose(window) && game_running) {
+    while (!glfwWindowShouldClose(window)) {
         buffer_clear(&buffer, clear_color);
 
         buffer_draw_text(&buffer, text_spritesheet, "SCORE", 4,
                         game.height - text_spritesheet.height - 7,
-                        rgb_to_uint32(128, 0, 0)
+                        rgb_to_uint32(160, 96, 0)
         );
         char credit_text[16];
         sprintf(credit_text, "CREDIT %02lu", credits);
-        buffer_draw_text(&buffer, text_spritesheet, credit_text, 164, 7, rgb_to_uint32(128, 0,0 ));
+        buffer_draw_text(&buffer, text_spritesheet, credit_text, 164, 7, rgb_to_uint32(160, 96,0 ));
         buffer_draw_number(&buffer, number_spritesheet, score,
                             4 + 2 * number_spritesheet.width,
                             game.height - 2 * number_spritesheet.height - 12,
-                            rgb_to_uint32(128, 0, 0)
+                            rgb_to_uint32(160, 96, 0)
         );
 
         for (size_t i = 0; i < game.width; ++i) {
-            buffer.data[game.width * 16 + i] = rgb_to_uint32(128, 0, 0);
+            buffer.data[game.width * 16 + i] = rgb_to_uint32(160, 96, 0);
         }
 
         for (size_t ai = 0; ai < game.num_aliens+1; ++ai) {
@@ -655,22 +655,22 @@ int main(void)
             }
             const Alien& alien = game.aliens[ai];
             if (alien.type == ALIEN_DEAD) {
-                buffer_draw_sprite(&buffer, alien_death_sprite, alien.x, alien.y, rgb_to_uint32(128, 0, 0));
+                buffer_draw_sprite(&buffer, alien_death_sprite, alien.x, alien.y, rgb_to_uint32(160, 96, 0));
             } else {
                 const SpriteAnimation& animation = alien_animation[alien.type - 1];
                 size_t current_frame = animation.time / animation.frame_duration;
                 const Sprite& sprite = *animation.frames[current_frame];
-                buffer_draw_sprite(&buffer, sprite, alien.x, alien.y, rgb_to_uint32(128, 0, 0));
+                buffer_draw_sprite(&buffer, sprite, alien.x, alien.y, rgb_to_uint32(160, 96, 0));
             }
         }
         
         for (size_t bi = 0; bi < game.num_bullets; ++bi) {
             const Bullet& bullet = game.bullets[bi];
             const Sprite& sprite = bullet_sprite;
-            buffer_draw_sprite(&buffer, sprite, bullet.x, bullet.y, rgb_to_uint32(128, 0, 0));
+            buffer_draw_sprite(&buffer, sprite, bullet.x, bullet.y, rgb_to_uint32(160, 96, 0));
         }
         
-        buffer_draw_sprite(&buffer, player_sprite, game.player.x, game.player.y, rgb_to_uint32(128, 0, 0));
+        buffer_draw_sprite(&buffer, player_sprite, game.player.x, game.player.y, rgb_to_uint32(160, 96, 0));
 
         for (size_t i = 0; i < 3; ++i) {
             ++alien_animation[i].time;
