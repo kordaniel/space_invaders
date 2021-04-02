@@ -4,7 +4,7 @@ BUILDDIR := build
 
 CC       := gcc
 CXX      := g++
-CXXFLAGS := --std=c++11 -Wall -Wshadow -fsanitize=undefined
+CXXFLAGS := --std=c++11 -Wall -Werror -Wshadow -fsanitize=undefined
 LDFLAGS  := -framework OpenGL
 LDLIBS   := -lglfw -lglew
 
