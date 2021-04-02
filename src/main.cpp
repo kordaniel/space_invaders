@@ -109,46 +109,74 @@ double random(uint32_t* rng)
     return (double) xorshift32(rng) / std::numeric_limits<uint32_t>::max();
 }
 
-struct Buffer {
-    size_t width, height;
-    uint32_t* data;
+class Shape {
+    public:
+        size_t width, height;
 };
 
-struct Sprite {
-    size_t width, height;
-    uint8_t* data;
+class CartesianPoint {
+    public:
+        size_t x, y;
 };
 
-struct Alien {
-    size_t x, y;
-    uint8_t type;
+
+class Buffer: public Shape {
+    public:
+        uint32_t* data;
+        Buffer(const size_t buff_width, const size_t buff_height) {
+            width = buff_width;
+            height = buff_height;
+            data = new uint32_t[width * height];
+        }
+
+        void clear(uint32_t color) {
+            for (size_t i = 0; i < width * height; ++i)
+                data[i] = color;
+        }
 };
 
-struct Bullet {
-    size_t x, y;
-    int dir;
+class Sprite: public Shape {
+    public:
+        uint8_t* data;
 };
 
-struct Player {
-    size_t x, y;
-    size_t life;
+class Alien: public CartesianPoint {
+    public:
+        uint8_t type;
 };
 
-struct Game {
-    size_t width, height;
-    size_t num_aliens;
-    size_t num_bullets;
-    Alien* aliens;
-    Player player;
-    Bullet bullets[GAME_MAX_BULLETS];
+class Bullet: public CartesianPoint {
+    public:
+        int dir;
 };
 
-struct SpriteAnimation {
-    bool loop;
-    size_t num_frames;
-    size_t frame_duration;
-    size_t time;
-    Sprite** frames;
+class Player: public CartesianPoint {
+    public:
+        size_t life;
+};
+
+class Game: public Shape {
+    public:
+        size_t num_aliens;
+        size_t num_bullets;
+        Alien* aliens;
+        Player player;
+        Bullet bullets[GAME_MAX_BULLETS];
+        Game(void) {
+            printf("Initializing gameobject\n");
+        }
+        ~Game(void) {
+            printf("Destructing gameobject\n");
+        }
+};
+
+class SpriteAnimation {
+    public:
+        bool loop;
+        size_t num_frames;
+        size_t frame_duration;
+        size_t time;
+        Sprite** frames;
 };
 
 enum AlienType: uint8_t {
@@ -157,12 +185,6 @@ enum AlienType: uint8_t {
     ALIEN_TYPE_B = 2,
     ALIEN_TYPE_C = 3
 };
-
-void buffer_clear(Buffer* buffer, uint32_t color)
-{
-    for (size_t i = 0; i < buffer->width * buffer->height; ++i)
-        buffer->data[i] = color;
-}
 
 /**
  * NOTE: We don't actually check if the pixels collide,
@@ -295,13 +317,8 @@ void initialize_opengl()
 
 Buffer initialize_buffer(const size_t buffer_width, const size_t buffer_height)
 {
-    Buffer buffer; /* Graphics buffer */
-    buffer.width  = buffer_width;
-    buffer.height = buffer_height;
-    buffer.data   = new uint32_t[buffer.width * buffer.height];
-
-    buffer_clear(&buffer, 0);
-
+    Buffer buffer(buffer_width, buffer_height); /* Graphics buffer */
+    buffer.clear(0);
     return buffer;
 }
 
@@ -684,7 +701,7 @@ int main(void)
     size_t credits = 0;
     int player_move_dir = 0;
     while (!glfwWindowShouldClose(window)) {
-        buffer_clear(&buffer, clear_color);
+        buffer.clear(clear_color);
 
         if (game.player.life == 0) {
             buffer_draw_text(&buffer, text_spritesheet, "GAME OVER", game.width / 2 - 30, game.height / 2, rgb_to_uint32(128, 0, 0));
