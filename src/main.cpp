@@ -1,6 +1,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstdint>
+#include <chrono>
+
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -27,7 +29,6 @@ inline void gl_debug(const char* file, int line)
 }
 
 #undef GL_ERROR_CASE
-
 
 void error_callback(int error, const char* description)
 {
@@ -77,17 +78,6 @@ class Shape {
 class Sprite: public Shape {
     public:
         uint8_t* data;
-        /*
-        Sprite() {};
-        Sprite(size_t width, size_t height, uint8_t* data)
-        {
-            this->width  = width;
-            this->height = height;
-            this->data   = data;
-        }*/
-        ~Sprite() {
-            delete[] data;
-        }
 };
 
 class Sprites {
@@ -101,15 +91,32 @@ class Sprites {
         Sprite alien_bullet_sprites[2];
 
         Sprite text_spritesheet;
-        Sprite number_spritesheet;
+        Sprite number_spritesheet; /* Does not allocate memory for .data */
 
-        Sprites(void) {
+        Sprites(void)
+        {
             this->init_aliens();
             this->init_alien_death();
             this->init_player();
             this->init_player_bullet();
             this->init_alien_bullet();
             this->init_spritesheets();
+        }
+
+        ~Sprites(void)
+        {
+            /*
+             * Has no memory allocated
+             * delete[] this->number_spritesheet.data;
+             */
+            delete[] this->text_spritesheet.data;
+            for (size_t i = 0; i < 2; ++i)
+                delete[] this->alien_bullet_sprites[i].data;
+            delete[] this->player_bullet_sprite.data;
+            delete[] this->player_sprite.data;
+            delete[] this->alien_death_sprite.data;
+            for (size_t i = 0; i < 2 * nALIENS; ++i)
+                delete[] this->alien_sprites[i].data;
         }
 
     private:
@@ -437,6 +444,7 @@ class Buffer: public Shape
             printf("Renderer used: %s\n", glGetString(GL_RENDERER));
             printf("Shading Language: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+            //glfwSwapInterval(0); /* vsync OFF */
             glfwSwapInterval(1); /* vsync ON */
             glClearColor(1.0, 0.0, 0.0, 1.0);
         }
@@ -494,7 +502,7 @@ class Buffer: public Shape
                 fprintf(stderr, "[ERROR] validating shader.\n");
                 glfwTerminate();
                 glDeleteVertexArrays(1, &fullscreen_triangle_vao);
-                delete[] data;
+                //////////////////////////////delete[] data;
                 exit(EXIT_FAILURE);
             }
 
@@ -550,7 +558,27 @@ class Buffer: public Shape
         }
 };
 
+void calculate_framerate()
+{
+    // static std::chrono::time_point<std::chrono::steady_clock> prev_time
+    static auto prev_time  = std::chrono::steady_clock::now();
+    static uint16_t frames = 0;
 
+    ++frames;
+
+    auto curr_time = std::chrono::steady_clock::now();
+
+    std::chrono::duration<double> diff = curr_time - prev_time;
+
+    if (diff < std::chrono::seconds(1)) {
+        return;
+    }
+
+    prev_time = curr_time;
+    printf("%f seconds to achieve:\n", diff.count());
+    printf("FPS: %d\n\n", frames);
+    frames = 0;
+}
 
 int main(void)
 {
@@ -562,14 +590,16 @@ int main(void)
     uint8_t b = (uint8_t) 0;
     uint8_t a = (uint8_t) 255;
     //uint32_t clear_color = 0;
+
     while (!glfwWindowShouldClose(buffer.get_glfw_window())) {
         //printf("RUNNING\n");
+        calculate_framerate();
         r+=1;
         g+=2;
         b+=3;
         buffer.clear((uint32_t) (r << 24)| (g << 16) | (b << 8) | a);
-
         buffer.draw();
+
         glfwPollEvents();
 
     }
