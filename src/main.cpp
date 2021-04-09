@@ -3,46 +3,18 @@
 #include <cstdint>
 
 #include "Size.h"
+#include "Position.h"
 #include "Sprites.h"
 #include "Buffer.h"
+#include "Spaceobject.h"
 
-
-class Position {
-    public:
-        size_t x, y;
-};
-
-
-
-class SpaceObject: public Size, public Position
-{
-    public:
-        SpaceObject(size_t x_pos, size_t y_pos):
-            Size(10, 10)
-        {
-            //width = xx, height = xx
-            lifes          = 3;
-            move_direction = 0;
-            x = x_pos;
-            y = y_pos;
-        }
-
-        ~SpaceObject(void)
-        {
-            //
-        }
-
-    private:
-        size_t lifes;
-        int move_direction;
-};
 
 class Game: public Size
 {
     public:
-        Game(size_t width, size_t height):
+        Game(size_t width, size_t height, Sprites &sprites):
             Size(width, height),
-            player{SpaceObject(100,200)}
+            player(Spaceobject(100,200, sprites.player_sprite))
         {
             //
         }
@@ -52,8 +24,8 @@ class Game: public Size
         }
 
     //private:
-        SpaceObject player;
-        //std::vector<SpaceObject> objects;
+        Spaceobject player;
+        //std::vector<Spaceobject> objects;
 };
 
 
@@ -63,7 +35,7 @@ int main(void)
     Sprites sprites;
     Buffer buffer(buff_width, buff_height);
 
-    //Game game(buff_width, buff_height);
+    Game game(buff_width, buff_height, sprites);
 
     //SpaceObject player;
     //player = new SpaceObject(100, 100);
@@ -80,8 +52,10 @@ int main(void)
         g+=2;
         b+=3;
         buffer.clear((uint32_t) (r << 24) | (g << 16) | (b << 8) | a);
+        buffer.append_object(game.player);
         buffer.draw();
-
+        //printf("Player: x: %zu y: %zu\n", game.player.x, game.player.y);
+        //printf("Player: w: %zu h: %zu\n" ,game.player.obj_sprite.width, game.player.obj_sprite.height);
         glfwPollEvents();
 
     }

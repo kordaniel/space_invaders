@@ -72,6 +72,26 @@ void Buffer::clear(uint32_t color)
     }
 }
 
+void Buffer::append_object(Spaceobject& obj)
+{
+    const uint8_t spr_x = obj.x;
+    const uint8_t spr_y = obj.y;
+    const uint8_t spr_width  = obj.obj_sprite.width;
+    const uint8_t spr_height = obj.obj_sprite.height;
+    const uint8_t* sprite    = obj.obj_sprite.data;
+
+    for (size_t xi = 0; xi < spr_width; ++xi) {
+        for (size_t yi = 0; yi < spr_height; ++yi) {
+            if (sprite[yi * spr_width + xi]
+                && (spr_height - 1 + spr_y - yi) < height
+                && (spr_x + xi) < width) {
+                    data[(spr_height - 1 + spr_y - yi) * width + (spr_x + xi)] = 0;
+                }
+        }
+        //
+    }
+}
+
 void Buffer::draw(void)
 {
     update_fps();
@@ -137,8 +157,8 @@ void Buffer::initialize_opengl(void)
     printf("Renderer used: %s\n", glGetString(GL_RENDERER));
     printf("Shading Language: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    //glfwSwapInterval(0); // vsync OFF
-    glfwSwapInterval(1); // vsync ON
+    glfwSwapInterval(0); // vsync OFF
+    //glfwSwapInterval(1); // vsync ON
     glClearColor(1.0, 0.0, 0.0, 1.0);
 }
 

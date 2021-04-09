@@ -9,6 +9,7 @@
 #include <GLFW/glfw3.h>
 
 #include "Size.h"
+#include "Spaceobject.h"
 
 #define GL_ERROR_CASE(glerror)\
     case glerror: snprintf(error, sizeof(error), "%s", #glerror)
@@ -45,6 +46,7 @@ class Buffer: public Size
         Buffer(size_t, size_t);
         ~Buffer(void);
         void clear(uint32_t);
+        void append_object(Spaceobject&);
         void draw(void);
         GLFWwindow* get_glfw_window(void);
     private:
