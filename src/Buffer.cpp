@@ -59,6 +59,9 @@ Buffer::Buffer(size_t width, size_t height):
 
 Buffer::~Buffer(void)
 {
+    glfwDestroyWindow(glfw_window);
+    glfwTerminate();
+    glDeleteVertexArrays(1, &fullscreen_triangle_vao);
     delete[] data;
 }
 
