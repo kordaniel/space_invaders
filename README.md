@@ -30,7 +30,7 @@ foo@bar:space_invaders$ make
 ```
 This will place the executable inside the build-directory. Then simply run with:
 ```console
-foo@bar:space_invaders$ ./build/space_inv
+foo@bar:space_invaders$ ./bin/space_inv
 ```
 That's it. Play and enjoy the beauty of what is Space Invaders! Also please report bugs if you find any!
 
