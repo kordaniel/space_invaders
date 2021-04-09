@@ -10,7 +10,7 @@ class Spaceobject: public Size, public Position
     public:
         Spaceobject(size_t, size_t, Sprite&);
     //private:
-    Sprite obj_sprite;
+    Sprite &obj_sprite;
     size_t lives;
     int move_direction;
 };

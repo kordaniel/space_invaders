@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdint>
 
+#include "Io.h"
 #include "Size.h"
 #include "Position.h"
 #include "Sprites.h"
@@ -14,9 +15,19 @@ class Game: public Size
     public:
         Game(size_t width, size_t height, Sprites &sprites):
             Size(width, height),
-            player(Spaceobject(100,200, sprites.player_sprite))
+            player(Spaceobject(width / 2 - 5, 30, sprites.player_sprite))
         {
-            //
+            for (size_t xi = 0; xi < 11; ++xi) {
+                for (size_t yi = 0; yi < 5; ++yi) {
+                    const size_t alien_type = (5-yi) / 2 + 1;
+
+                    Sprite& alien_sprite = sprites.alien_sprites[2 * alien_type - 1];
+                    const size_t xpos = 24 + 16 * xi + (13 - alien_sprite.width)/2;
+                    const size_t ypos = 128 + 17 * yi;
+
+                    aliens.push_back(Spaceobject(xpos, ypos, alien_sprite));
+                }
+            }
         }
         ~Game(void)
         {
@@ -25,7 +36,7 @@ class Game: public Size
 
     //private:
         Spaceobject player;
-        //std::vector<Spaceobject> objects;
+        std::vector<Spaceobject> aliens;
 };
 
 
@@ -53,6 +64,9 @@ int main(void)
         b+=3;
         buffer.clear((uint32_t) (r << 24) | (g << 16) | (b << 8) | a);
         buffer.append_object(game.player);
+        for (auto &alien : game.aliens) {
+            buffer.append_object(alien);
+        }
         buffer.draw();
         //printf("Player: x: %zu y: %zu\n", game.player.x, game.player.y);
         //printf("Player: w: %zu h: %zu\n" ,game.player.obj_sprite.width, game.player.obj_sprite.height);
