@@ -2,33 +2,34 @@
 
 // Section with two functions that should not be used outside this module
 // ----------------------------------------------------------------------
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     switch (key) {
         case GLFW_KEY_ESCAPE:
             if (action == GLFW_PRESS)
                 //glfwSetWindowShouldClose(window, true);
-                printf("ESC\n");
+                io::print_to_stdout("ESC PRESSED");
             break;
         case GLFW_KEY_RIGHT:
             if (action == GLFW_PRESS)
                 //move_dir += 1;
-                printf("right_down\n");
+                io::print_to_stdout("right_down");
             else if (action == GLFW_RELEASE)
-                printf("right_up\n");
+                io::print_to_stdout("right_up");
                 //move_dir -= 1;
             break;
         case GLFW_KEY_LEFT:
             if (action == GLFW_PRESS)
-                printf("left_down\n");
+                io::print_to_stdout("left_down");
                 //move_dir -= 1;
             else if (action == GLFW_RELEASE)
-                printf("right_up\n");
+                io::print_to_stdout("right_up");
                 //move_dir += 1;
             break;
         case GLFW_KEY_SPACE:
             if (action == GLFW_RELEASE)
-                printf("space_up\n");
+                io::print_to_stdout("space_up");
                 //fire_pressed = true;
             break;
         default:
@@ -38,7 +39,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 void error_callback(int error, const char* description)
 {
-    fprintf(stderr, "Error: %s\n", description);
+    io::print_to_stderr_varargs("[ERROR]: ", description);
 }
 // ----------------------------------------------------------------------
 
@@ -114,7 +115,7 @@ void Buffer::initialize_glfw_window(void)
 {
     glfwSetErrorCallback(error_callback);
     if (!glfwInit()) {
-        fprintf(stderr, "[ERROR]: when trying to initialize glfw.\n");
+        io::print_to_stderr("[ERROR]: when trying to initialize glfw.");
         delete[] data;
         exit(EXIT_FAILURE);
     }
@@ -126,7 +127,7 @@ void Buffer::initialize_glfw_window(void)
 
     glfw_window = glfwCreateWindow(width, height, "Space Invaders", nullptr, nullptr);
     if (!glfw_window) {
-        fprintf(stderr, "[ERROR]: when trying to create glfw window.\n");
+        io::print_to_stderr("[ERROR]: when trying to create glfw window.");
         delete[] data;
         glfwTerminate();
         exit(EXIT_FAILURE);
@@ -136,8 +137,8 @@ void Buffer::initialize_glfw_window(void)
     glfwMakeContextCurrent(glfw_window);
     err = glewInit();
     if (err != GLEW_OK) {
-        fprintf(stderr, "[ERROR]: initializing GLEW.\n");
-        fprintf(stderr, "%s\n", glewGetErrorString(err));
+        io::print_to_stderr("[ERROR]: initializing GLEW.");
+        io::print_to_stderr_varargs(glewGetErrorString(err));
         delete[] data;
         glfwTerminate();
         exit(EXIT_FAILURE);
@@ -153,9 +154,9 @@ void Buffer::initialize_opengl(void)
 
     gl_debug(__FILE__, __LINE__);
 
-    printf("Using OpenGL: %d.%d\n", glVersion[0], glVersion[1]);
-    printf("Renderer used: %s\n", glGetString(GL_RENDERER));
-    printf("Shading Language: %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    io::print_to_stdout_varargs("Using OpenGL: ", glVersion[0], ".", glVersion[1]);
+    io::print_to_stdout_varargs("Renderer used: ", glGetString(GL_RENDERER));
+    io::print_to_stdout_varargs("Shading language: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     glfwSwapInterval(0); // vsync OFF
     //glfwSwapInterval(1); // vsync ON
@@ -212,7 +213,7 @@ void Buffer::initialize_shaders(void)
     glLinkProgram(shader_id);
 
     if (!validate_program(shader_id)) {
-        fprintf(stderr, "[ERROR] validating shader.\n");
+        io::print_to_stderr("[ERROR]: Validating shader.");
         glfwTerminate();
         glDeleteVertexArrays(1, &fullscreen_triangle_vao);
         delete[] data;
@@ -250,8 +251,10 @@ void Buffer::validate_shader(GLuint shader, const char *file = nullptr)
 
     glGetShaderInfoLog(shader, BUFFER_SIZE, &length, buffer);
     if (length > 0) {
-        fprintf(stderr, "[ERROR]: Shader %d(%s) compile error: %s\n",
-                shader, (file? file: ""), buffer);
+        io::print_to_stderr_varargs("[ERROR]: Shader ", shader,
+                                    "(", (file? file: ""),
+                                    ") compile error: ", buffer
+        );
     }
 }
 
@@ -263,7 +266,7 @@ bool Buffer::validate_program(GLuint program)
 
     glGetProgramInfoLog(program, BUFFER_SIZE, &length, buffer);
     if (length > 0) {
-        fprintf(stderr, "[ERROR]: Program %d link error: %s\n", program, buffer);
+        io::print_to_stderr_varargs("[ERROR]: Program ", program, " link error: ", buffer);
         return false;
     }
 
@@ -282,6 +285,6 @@ void Buffer::update_fps(void)
     }
 
     time_prev_update = time_now;
-    printf("FPS: %d.\tElapsed time: %fs\n", n_frames, time_delta.count());
+    io::print_to_stdout_varargs("FPS: ", n_frames, ".\tElapsed time: ", time_delta.count(), "s.");
     n_frames = 0;
 }
