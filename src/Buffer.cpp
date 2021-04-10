@@ -43,11 +43,22 @@ void error_callback(int error, const char* description)
 }
 // ----------------------------------------------------------------------
 
+
+// Colors are 32bits, 8 bits each for R,G,B and alpha values.
+namespace colors
+{
+    enum Colors: uint32_t {
+        RED      = (uint32_t) (128 << 24) |                          255,
+        ORANGE   = (uint32_t) (160 << 24) | (96 << 16)             | 255,
+        BG_GREEN = (uint32_t) (50  << 24) | (80 << 16) | (75 << 8) | 255
+    };
+} // end namespace colors
+
 Buffer::Buffer(size_t width, size_t height):
     Size(width, height)
 {
     data = new uint32_t[width * height];
-    clear(0);
+    clear();
 
     initialize_glfw_window();
     initialize_opengl();
@@ -64,6 +75,11 @@ Buffer::~Buffer(void)
     glfwTerminate();
     glDeleteVertexArrays(1, &fullscreen_triangle_vao);
     delete[] data;
+}
+
+void Buffer::clear(void)
+{
+    clear(colors::BG_GREEN);
 }
 
 void Buffer::clear(uint32_t color)
@@ -86,7 +102,7 @@ void Buffer::append_object(Spaceobject& obj)
             if (sprite[yi * spr_width + xi]
                 && (spr_height - 1 + spr_y - yi) < height
                 && (spr_x + xi) < width) {
-                    data[(spr_height - 1 + spr_y - yi) * width + (spr_x + xi)] = 0;
+                    data[(spr_height - 1 + spr_y - yi) * width + (spr_x + xi)] = colors::ORANGE;
                 }
         }
         //
@@ -158,8 +174,8 @@ void Buffer::initialize_opengl(void)
     io::print_to_stdout_varargs("Renderer used: ", glGetString(GL_RENDERER));
     io::print_to_stdout_varargs("Shading language: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    glfwSwapInterval(0); // vsync OFF
-    //glfwSwapInterval(1); // vsync ON
+    //glfwSwapInterval(0); // vsync OFF
+    glfwSwapInterval(1); // vsync ON
     glClearColor(1.0, 0.0, 0.0, 1.0);
 }
 

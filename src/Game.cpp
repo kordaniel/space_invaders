@@ -10,7 +10,6 @@ Game::Game(size_t width, size_t height, Sprites &sprites):
     init_aliens(sprites);
 }
 
-
 void Game::init_aliens(Sprites &sprites)
 {
     aliens.reserve(alien_rows * alien_cols);
@@ -26,4 +25,9 @@ void Game::init_aliens(Sprites &sprites)
             aliens.push_back(Spaceobject(xpos, ypos, alien_sprite));
         }
     }
+}
+
+void Game::create_bullet(size_t x_pos, size_t y_pos, Sprite& sprite)
+{
+    bullets.emplace_front(x_pos, y_pos, sprite);
 }

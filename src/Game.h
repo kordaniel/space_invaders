@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <list>
 
 #include "Size.h"
 #include "Spaceobject.h"
@@ -15,8 +16,10 @@ class Game: public Size
         int alien_move_dir;
         Spaceobject player;
         std::vector<Spaceobject> aliens;
+        std::list<Spaceobject> bullets;
 
         Game(size_t, size_t, Sprites &);
+        void create_bullet(size_t, size_t, Sprite&);
     
     private:
         void init_aliens(Sprites &);
