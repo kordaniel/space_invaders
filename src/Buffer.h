@@ -46,6 +46,7 @@ class Buffer: public Size
     public:
         Buffer(size_t, size_t);
         ~Buffer(void);
+        void clear(void);
         void clear(uint32_t);
         void append_object(Spaceobject&);
         void draw(void);

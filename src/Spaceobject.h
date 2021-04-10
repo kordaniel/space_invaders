@@ -1,6 +1,8 @@
 #ifndef SPACEOBJECT_H
 #define SPACEOBJECT_H
 
+#include <cstdint>
+
 #include "Size.h"
 #include "Position.h"
 #include "Sprites.h"
