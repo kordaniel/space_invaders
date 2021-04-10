@@ -1,16 +1,11 @@
 #include "Buffer.h"
 
-// Section with two functions that should not be used outside this module
+// Section with 4 functions that should not be used outside this module
 // ----------------------------------------------------------------------
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     switch (key) {
-        case GLFW_KEY_ESCAPE:
-            if (action == GLFW_PRESS)
-                //glfwSetWindowShouldClose(window, true);
-                io::print_to_stdout("ESC PRESSED");
-            break;
         case GLFW_KEY_RIGHT:
             if (action == GLFW_PRESS)
                 //move_dir += 1;
@@ -32,9 +27,31 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
                 io::print_to_stdout("space_up");
                 //fire_pressed = true;
             break;
+        case GLFW_KEY_ESCAPE:
+            if (action == GLFW_PRESS)
+                glfwSetWindowShouldClose(window, true);
+            break;
+        case GLFW_KEY_F:
+            if (action == GLFW_PRESS)
+                glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 2560, 1440, 60);
+            break;
+        case GLFW_KEY_G:
+            if (action == GLFW_PRESS)
+                glfwSetWindowMonitor(window, NULL, 0, 0, 224, 256, 60);
+            break;
         default:
             break;
     }
+}
+
+void window_close_callback(GLFWwindow* window)
+{
+    io::print_to_stdout("Window close callback called!");
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+    io::print_to_stdout_varargs("Framebuffer size: ", width, ", ", height);
 }
 
 void error_callback(int error, const char* description)
@@ -55,7 +72,11 @@ namespace colors
 } // end namespace colors
 
 Buffer::Buffer(size_t width, size_t height):
-    Size(width, height)
+    Size(width, height),
+    window_title("Space Invaders! FPS:     "),
+    time_prev_update(std::chrono::steady_clock::now()),
+    n_frames(0),
+    fps_prev(0)
 {
     data = new uint32_t[width * height];
     clear();
@@ -64,9 +85,6 @@ Buffer::Buffer(size_t width, size_t height):
     initialize_opengl();
     initialize_buffer_texture();
     initialize_shaders();
-
-    time_prev_update = std::chrono::steady_clock::now();
-    n_frames = 0;
 }
 
 Buffer::~Buffer(void)
@@ -140,8 +158,9 @@ void Buffer::initialize_glfw_window(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    glfw_window = glfwCreateWindow(width, height, "Space Invaders", nullptr, nullptr);
+    glfw_window = glfwCreateWindow(width, height, window_title, nullptr, nullptr);
     if (!glfw_window) {
         io::print_to_stderr("[ERROR]: when trying to create glfw window.");
         delete[] data;
@@ -149,6 +168,8 @@ void Buffer::initialize_glfw_window(void)
         exit(EXIT_FAILURE);
     }
 
+    glfwSetWindowCloseCallback(glfw_window, window_close_callback);
+    glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
     glfwSetKeyCallback(glfw_window, key_callback);
     glfwMakeContextCurrent(glfw_window);
     err = glewInit();
@@ -159,7 +180,6 @@ void Buffer::initialize_glfw_window(void)
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
-
 }
 
 void Buffer::initialize_opengl(void)
@@ -301,6 +321,20 @@ void Buffer::update_fps(void)
     }
 
     time_prev_update = time_now;
+
+    if (n_frames == fps_prev) {
+        n_frames = 0;
+        return;
+    }
+
+    fps_prev = n_frames;
+
     io::print_to_stdout_varargs("FPS: ", n_frames, ".\tElapsed time: ", time_delta.count(), "s.");
-    n_frames = 0;
+
+    for (size_t i = 24; i > 20; --i) {
+        window_title[i] = (char) (n_frames % 10 + 48);
+        n_frames /= 10;
+    }
+    assert(n_frames == 0);
+    glfwSetWindowTitle(glfw_window, window_title);
 }

@@ -53,6 +53,7 @@ class Buffer: public Size
         GLFWwindow* get_glfw_window(void);
     private:
         uint32_t* data; // 8 bits each for R,G,B,Alpha values
+        char window_title[26];
         GLFWwindow *glfw_window;
         GLenum err;
         GLuint buffer_texture;
@@ -63,6 +64,7 @@ class Buffer: public Size
         // Used for computing FPS
         std::chrono::time_point<std::chrono::steady_clock> time_prev_update;
         uint16_t n_frames;
+        uint16_t fps_prev;
         // --------- | | ---------
 
         void initialize_glfw_window(void);
