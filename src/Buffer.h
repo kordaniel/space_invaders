@@ -11,6 +11,7 @@
 #include "Io.h"
 #include "Size.h"
 #include "Spaceobject.h"
+#include "Game.h"
 
 #define GL_ERROR_CASE(glerror)\
     case glerror: snprintf(error, sizeof(error), "%s", #glerror)
@@ -74,6 +75,10 @@ class Buffer: public Size
         void init_shader(const char*, GLenum);
         void validate_shader(GLuint, const char*);
         bool validate_program(GLuint);
+        bool y_is_in_bounds(const size_t&);
+        bool x_is_in_bounds(const size_t&);
+        bool pixel_is_in_bounds(const size_t&, const size_t&);
+        size_t compute_sprite_yx_start_indx(const size_t&, const size_t&, const size_t&);
         void update_fps(void);
 };
 

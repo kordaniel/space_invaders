@@ -2,42 +2,50 @@
 
 // Section with 4 functions that should not be used outside this module
 // ----------------------------------------------------------------------
-
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    Game *game = reinterpret_cast<Game *>(glfwGetWindowUserPointer(window));
+
     switch (key) {
         case GLFW_KEY_RIGHT:
-            if (action == GLFW_PRESS)
-                //move_dir += 1;
-                io::print_to_stdout("right_down");
-            else if (action == GLFW_RELEASE)
-                io::print_to_stdout("right_up");
-                //move_dir -= 1;
+            if (action == GLFW_PRESS) {
+                game->player.SetDirectionRight(true);
+            } else if (action == GLFW_RELEASE) {
+                game->player.SetDirectionRight(false);
+            }
             break;
         case GLFW_KEY_LEFT:
-            if (action == GLFW_PRESS)
-                io::print_to_stdout("left_down");
-                //move_dir -= 1;
-            else if (action == GLFW_RELEASE)
-                io::print_to_stdout("right_up");
-                //move_dir += 1;
+            if (action == GLFW_PRESS) {
+                game->player.SetDirectionLeft(true);
+            } else if (action == GLFW_RELEASE) {
+                game->player.SetDirectionLeft(false);
+            }
+            break;
+        case GLFW_KEY_UP:
+            if (action == GLFW_PRESS) {
+                game->player.SetDirectionUp(true);
+            } else if (action == GLFW_RELEASE) {
+                game->player.SetDirectionUp(false);
+            }
+            break;
+        case GLFW_KEY_DOWN:
+            if (action == GLFW_PRESS) {
+                game->player.SetDirectionDown(true);
+            } else if (action == GLFW_RELEASE) {
+                game->player.SetDirectionDown(false);
+            }
             break;
         case GLFW_KEY_SPACE:
-            if (action == GLFW_RELEASE)
-                io::print_to_stdout("space_up");
-                //fire_pressed = true;
+            io::print_to_stdout("space_down");
             break;
         case GLFW_KEY_ESCAPE:
-            if (action == GLFW_PRESS)
-                glfwSetWindowShouldClose(window, true);
+            glfwSetWindowShouldClose(window, true);
             break;
         case GLFW_KEY_F:
-            if (action == GLFW_PRESS)
-                glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 2560, 1440, 60);
+            glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 2560, 1440, 60);
             break;
         case GLFW_KEY_G:
-            if (action == GLFW_PRESS)
-                glfwSetWindowMonitor(window, NULL, 0, 0, 224, 256, 60);
+            glfwSetWindowMonitor(window, nullptr, 0, 0, 224, 256, 60);
             break;
         default:
             break;
@@ -109,21 +117,38 @@ void Buffer::clear(uint32_t color)
 
 void Buffer::append_object(Spaceobject& obj)
 {
-    const uint8_t spr_x = obj.x;
-    const uint8_t spr_y = obj.y;
-    const uint8_t spr_width  = obj.obj_sprite.width;
-    const uint8_t spr_height = obj.obj_sprite.height;
+    const size_t &spr_x      = obj.x;
+    const size_t &spr_y      = obj.y;
+    const size_t &spr_width  = obj.obj_sprite.width;
+    const size_t &spr_height = obj.obj_sprite.height;
     const uint8_t* sprite    = obj.obj_sprite.data;
 
-    for (size_t xi = 0; xi < spr_width; ++xi) {
-        for (size_t yi = 0; yi < spr_height; ++yi) {
-            if (sprite[yi * spr_width + xi]
+    size_t y_startidx;
+
+    for (size_t yi = 0; yi < spr_height; ++yi) {
+        if (!y_is_in_bounds(spr_height - 1 + spr_y - yi)) {
+            io::print_to_stdout("Trying to draw outofbounds Y!!");
+            continue;
+        }
+
+        y_startidx = compute_sprite_yx_start_indx(spr_x, (spr_y - yi), spr_height);
+        for (size_t xi = 0; xi < spr_width; ++xi) {
+            if (!sprite[yi * spr_width + xi]) {
+                continue;
+            } else if (!x_is_in_bounds(spr_x + xi)) {
+                io::print_to_stdout("Trying to draw outofbounds X!!");
+                io::print_to_stdout_varargs(spr_x, ", ", xi, " = ", (spr_x + xi));
+                continue;
+            }
+            data[y_startidx + xi] = colors::ORANGE;
+            /*if (sprite[yi * spr_width + xi]
                 && (spr_height - 1 + spr_y - yi) < height
                 && (spr_x + xi) < width) {
-                    data[(spr_height - 1 + spr_y - yi) * width + (spr_x + xi)] = colors::ORANGE;
+                    //data[(spr_height - 1 + spr_y - yi) * width + (spr_x + xi)] = colors::ORANGE;
+                    data[y_startidx + xi] = colors::ORANGE;
                 }
+            */
         }
-        //
     }
 }
 
@@ -307,6 +332,26 @@ bool Buffer::validate_program(GLuint program)
     }
 
     return true;
+}
+
+bool Buffer::y_is_in_bounds(const size_t& y)
+{
+    return y < height;
+}
+
+bool Buffer::x_is_in_bounds(const size_t& x)
+{
+    return x < width;
+}
+
+bool Buffer::pixel_is_in_bounds(const size_t& x, const size_t& y)
+{
+    return x_is_in_bounds(x) && y_is_in_bounds(y);
+}
+
+size_t Buffer::compute_sprite_yx_start_indx(const size_t& x, const size_t& y, const size_t& spr_height)
+{
+    return width * (spr_height - 1 + y) + x;
 }
 
 void Buffer::update_fps(void)

@@ -9,7 +9,7 @@
 
 namespace directions
 {
-    enum Directions: int32_t {
+    enum Directions: int {
         STATIONARY =  0,
         UP         =  1,
         DOWN       = -1,
@@ -22,13 +22,27 @@ namespace directions
 class Spaceobject: public Size, public Position
 {
     public:
-        Spaceobject(size_t, size_t, Sprite&, directions::Directions, directions::Directions);
+        Spaceobject(size_t, size_t, Sprite&, int);
         Spaceobject(size_t, size_t, Sprite &);
     //private:
         Sprite &obj_sprite;
         size_t lives;
-        directions::Directions move_direction;
-        directions::Directions move_speed;
+        int move_speed;
+
+        void move(void);
+        int getNextX(void);
+        int getNextY(void);
+        void SetDirectionUp(bool);
+        void SetDirectionDown(bool);
+        void SetDirectionLeft(bool);
+        void SetDirectionRight(bool);
+        void SetDirectionStationary(void);
+        size_t GetRightMostX(void);
+        size_t GetTopMostY(void);
+
+    private:
+        void setHorizontalDirection(directions::Directions, bool);
+        void setVerticalDirection(directions::Directions, bool);
 };
 
 #endif
