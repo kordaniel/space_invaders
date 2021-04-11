@@ -20,6 +20,7 @@ class Game: public Size
 
         Game(size_t, size_t, Sprites &);
         void create_bullet(size_t, size_t, Sprite&);
+        void update_player(void);
     
     private:
         void init_aliens(Sprites &);

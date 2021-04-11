@@ -14,15 +14,14 @@ void Game::init_aliens(Sprites &sprites)
 {
     aliens.reserve(alien_rows * alien_cols);
 
-    for (size_t xi = 0; xi < alien_cols; ++xi) {
-        for (size_t yi = 0; yi < alien_rows; ++yi) {
-            const size_t alien_type = (5-yi) / 2 + 1;
+    for (size_t yi = 0; yi < alien_rows; ++yi) {
+        const size_t alien_type = (alien_rows - yi) / 2 + 1;
 
+        for (size_t xi = 0; xi < alien_cols; ++xi) {
             Sprite& alien_sprite = sprites.alien_sprites[2 * alien_type - 1];
             const size_t xpos = 24 + 16 * xi + (13 - alien_sprite.width)/2;
             const size_t ypos = 128 + 17 * yi;
-
-            aliens.push_back(Spaceobject(xpos, ypos, alien_sprite));
+            aliens.emplace_back(xpos, ypos, alien_sprite);
         }
     }
 }
@@ -30,4 +29,18 @@ void Game::init_aliens(Sprites &sprites)
 void Game::create_bullet(size_t x_pos, size_t y_pos, Sprite& sprite)
 {
     bullets.emplace_front(x_pos, y_pos, sprite);
+}
+
+void Game::update_player(void)
+{
+    const int proposedX = player.getNextX();
+    const int proposedY = player.getNextY();
+    if (proposedX < 0 || proposedY < 0) {
+        return;
+    }
+    if (proposedX + player.obj_sprite.width > width
+            || proposedY + player.obj_sprite.height > height) {
+        return;
+    }
+    player.move();
 }
