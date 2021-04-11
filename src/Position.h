@@ -9,6 +9,8 @@ class Position
         Position(size_t, size_t);
         size_t x;
         size_t y;
+        int x_d;
+        int y_d;
 };
 
 #endif

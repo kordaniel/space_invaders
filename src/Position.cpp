@@ -2,7 +2,9 @@
 
 Position::Position(size_t pos_x, size_t pos_y):
     x(pos_x),
-    y(pos_y)
+    y(pos_y),
+    x_d(0),
+    y_d(0)
 {
     //
 }
