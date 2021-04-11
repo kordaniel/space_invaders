@@ -1,13 +1,13 @@
 #include "Sprites.h"
 
-Sprite::Sprite(size_t width, size_t height, const uint8_t* sprite_data):
+Sprite::Sprite(int32_t width, int32_t height, const uint8_t* sprite_data):
     Size(width, height),
     data(sprite_data)
 {
     //
 }
 
-size_t Sprite::get_length(void)
+int32_t Sprite::get_length(void)
 {
     return width * height;
 }

@@ -11,15 +11,15 @@
 class Game: public Size
 {
     public:
-        size_t alien_rows;
-        size_t alien_cols;
-        int alien_move_dir;
+        int32_t alien_rows;
+        int32_t alien_cols;
+        int32_t alien_move_dir;
         Spaceobject player;
         std::vector<Spaceobject> aliens;
         std::list<Spaceobject> bullets;
 
-        Game(size_t, size_t, Sprites &);
-        void create_bullet(size_t, size_t, Sprite&);
+        Game(int32_t, int32_t, Sprites &);
+        void create_bullet(int32_t, int32_t, Sprite&);
         void update_player(void);
     
     private:

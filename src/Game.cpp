@@ -1,6 +1,6 @@
 #include "Game.h"
 
-Game::Game(size_t width, size_t height, Sprites &sprites):
+Game::Game(int32_t width, int32_t height, Sprites &sprites):
         Size(width, height),
         alien_rows(5),
         alien_cols(11),
@@ -26,15 +26,15 @@ void Game::init_aliens(Sprites &sprites)
     }
 }
 
-void Game::create_bullet(size_t x_pos, size_t y_pos, Sprite& sprite)
+void Game::create_bullet(int32_t x_pos, int32_t y_pos, Sprite& sprite)
 {
     bullets.emplace_front(x_pos, y_pos, sprite);
 }
 
 void Game::update_player(void)
 {
-    const int proposedX = player.getNextX();
-    const int proposedY = player.getNextY();
+    const int32_t proposedX = player.getNextX();
+    const int32_t proposedY = player.getNextY();
     if (proposedX < 0 || proposedY < 0) {
         return;
     }

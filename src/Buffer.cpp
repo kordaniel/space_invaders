@@ -79,7 +79,7 @@ namespace colors
     };
 } // end namespace colors
 
-Buffer::Buffer(size_t width, size_t height):
+Buffer::Buffer(int32_t width, int32_t height):
     Size(width, height),
     window_title("Space Invaders! FPS:     "),
     time_prev_update(std::chrono::steady_clock::now()),
@@ -117,22 +117,22 @@ void Buffer::clear(uint32_t color)
 
 void Buffer::append_object(Spaceobject& obj)
 {
-    const size_t &spr_x      = obj.x;
-    const size_t &spr_y      = obj.y;
-    const size_t &spr_width  = obj.obj_sprite.width;
-    const size_t &spr_height = obj.obj_sprite.height;
-    const uint8_t* sprite    = obj.obj_sprite.data;
+    const int32_t &spr_x      = obj.x;
+    const int32_t &spr_y      = obj.y;
+    const int32_t &spr_width  = obj.obj_sprite.width;
+    const int32_t &spr_height = obj.obj_sprite.height;
+    const uint8_t* sprite     = obj.obj_sprite.data;
 
-    size_t y_startidx;
+    int32_t y_startidx;
 
-    for (size_t yi = 0; yi < spr_height; ++yi) {
+    for (int32_t yi = 0; yi < spr_height; ++yi) {
         if (!y_is_in_bounds(spr_height - 1 + spr_y - yi)) {
             io::print_to_stdout("Trying to draw outofbounds Y!!");
             continue;
         }
 
         y_startidx = compute_sprite_yx_start_indx(spr_x, (spr_y - yi), spr_height);
-        for (size_t xi = 0; xi < spr_width; ++xi) {
+        for (int32_t xi = 0; xi < spr_width; ++xi) {
             if (!sprite[yi * spr_width + xi]) {
                 continue;
             } else if (!x_is_in_bounds(spr_x + xi)) {
@@ -334,22 +334,22 @@ bool Buffer::validate_program(GLuint program)
     return true;
 }
 
-bool Buffer::y_is_in_bounds(const size_t& y)
+bool Buffer::y_is_in_bounds(const int32_t& y)
 {
     return y < height;
 }
 
-bool Buffer::x_is_in_bounds(const size_t& x)
+bool Buffer::x_is_in_bounds(const int32_t& x)
 {
     return x < width;
 }
 
-bool Buffer::pixel_is_in_bounds(const size_t& x, const size_t& y)
+bool Buffer::pixel_is_in_bounds(const int32_t& x, const int32_t& y)
 {
     return x_is_in_bounds(x) && y_is_in_bounds(y);
 }
 
-size_t Buffer::compute_sprite_yx_start_indx(const size_t& x, const size_t& y, const size_t& spr_height)
+int32_t Buffer::compute_sprite_yx_start_indx(const int32_t& x, const int32_t& y, const int32_t& spr_height)
 {
     return width * (spr_height - 1 + y) + x;
 }

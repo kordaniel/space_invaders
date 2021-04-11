@@ -1,16 +1,16 @@
 #ifndef POSITION_H
 #define POSITION_H
 
-#include <cstdlib>
+#include <cstdint>
 
 class Position
 {
     public:
-        Position(size_t, size_t);
-        size_t x;
-        size_t y;
-        int x_d;
-        int y_d;
+        Position(int32_t, int32_t);
+        int32_t x;
+        int32_t y;
+        int32_t x_d;
+        int32_t y_d;
 };
 
 #endif

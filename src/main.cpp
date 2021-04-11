@@ -13,7 +13,7 @@
 
 int main(void)
 {
-    const size_t buff_width = 224, buff_height = 256;
+    const int32_t buff_width = 224, buff_height = 256;
     Sprites sprites;
     Buffer buffer(buff_width, buff_height);
     Game game(buff_width, buff_height, sprites);
@@ -27,7 +27,7 @@ int main(void)
     //uint32_t clear_color = 0;
 */
     srand(time(NULL));
-    size_t x = 0, y = 0, count = 0, bullets = 0;
+    //size_t x = 0, y = 0, count = 0, bullets = 0;
     while (!glfwWindowShouldClose(buffer.get_glfw_window())) {
         //printf("RUNNING\n");
   //      r+=1;

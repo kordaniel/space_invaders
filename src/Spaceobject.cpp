@@ -1,8 +1,8 @@
 #include "Spaceobject.h"
 
-Spaceobject::Spaceobject(size_t x_pos, size_t y_pos,
+Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos,
                          Sprite &obj_sprite,
-                         int _move_speed):
+                         int32_t _move_speed):
     Size(obj_sprite.width, obj_sprite.height),
     Position(x_pos, y_pos),
     obj_sprite(obj_sprite),
@@ -12,7 +12,7 @@ Spaceobject::Spaceobject(size_t x_pos, size_t y_pos,
     //
 }
 
-Spaceobject::Spaceobject(size_t x_pos, size_t y_pos, Sprite &obj_sprite):
+Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos, Sprite &obj_sprite):
     Spaceobject(x_pos, y_pos, obj_sprite, 2)
 {
     //
@@ -47,7 +47,7 @@ void Spaceobject::move(void)
     }
 }
 
-int Spaceobject::getNextX(void)
+int32_t Spaceobject::getNextX(void)
 {
     switch (x_d) {
         case directions::LEFT:
@@ -62,7 +62,7 @@ int Spaceobject::getNextX(void)
     }
 }
 
-int Spaceobject::getNextY(void)
+int32_t Spaceobject::getNextY(void)
 {
     switch (y_d) {
         case directions::UP:
@@ -103,12 +103,12 @@ void Spaceobject::SetDirectionStationary(void)
     y_d = directions::STATIONARY;
 }
 
-size_t Spaceobject::GetRightMostX(void)
+int32_t Spaceobject::GetRightMostX(void)
 {
     return x + obj_sprite.width;
 }
 
-size_t Spaceobject::GetTopMostY(void)
+int32_t Spaceobject::GetTopMostY(void)
 {
     return y + obj_sprite.height;
 }

@@ -1,6 +1,6 @@
 #include "Size.h"
 
-Size::Size(size_t width, size_t height):
+Size::Size(int32_t width, int32_t height):
     width(width),
     height(height)
 {

@@ -2,6 +2,7 @@
 #define BUFFER_H
 
 #include <cstdlib>
+#include <cstdint>
 #include <cstdio>
 #include <chrono>
 
@@ -45,7 +46,7 @@ inline void gl_debug(const char* file, int line)
 class Buffer: public Size
 {
     public:
-        Buffer(size_t, size_t);
+        Buffer(int32_t, int32_t);
         ~Buffer(void);
         void clear(void);
         void clear(uint32_t);
@@ -75,10 +76,10 @@ class Buffer: public Size
         void init_shader(const char*, GLenum);
         void validate_shader(GLuint, const char*);
         bool validate_program(GLuint);
-        bool y_is_in_bounds(const size_t&);
-        bool x_is_in_bounds(const size_t&);
-        bool pixel_is_in_bounds(const size_t&, const size_t&);
-        size_t compute_sprite_yx_start_indx(const size_t&, const size_t&, const size_t&);
+        bool y_is_in_bounds(const int32_t&);
+        bool x_is_in_bounds(const int32_t&);
+        bool pixel_is_in_bounds(const int32_t&, const int32_t&);
+        int32_t compute_sprite_yx_start_indx(const int32_t&, const int32_t&, const int32_t&);
         void update_fps(void);
 };
 

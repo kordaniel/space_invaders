@@ -1,14 +1,14 @@
 #ifndef SIZE_H
 #define SIZE_H
 
-#include <cstdlib>
+#include <cstdint>
 
 class Size
 {
     public:
-        size_t width;
-        size_t height;
-        Size(size_t, size_t);
+        int32_t width;
+        int32_t height;
+        Size(int32_t, int32_t);
 };
 
 #endif
