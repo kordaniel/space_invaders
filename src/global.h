@@ -1,7 +1,12 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#define DEBUG 1
+/*
+ * Define DEBUG to compile the project with included
+ * error printing.
+ */
+#define DEBUG
+
 
 #include <cstdint>
 
