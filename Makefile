@@ -4,6 +4,7 @@ SRCDIR    := src
 BUILDDIR  := build
 TARGETDIR := bin
 SRCEXT    := cpp
+HDREXT    := h
 
 TARGET    := $(TARGETDIR)/$(APPNAME)
 
@@ -27,7 +28,7 @@ $(APPNAME): $(OBJECTS)
 	@echo " Linking binary: $@..."
 	$(CXX) $(CXXFLAGS) $(LDLIBS) $(LDFLAGS) $^ -o $(TARGETDIR)/$(APPNAME)
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT) $(SRCDIR)/global.h $(SRCDIR)/%.$(HDREXT)
 	@echo " Compiling object: $@.."
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
