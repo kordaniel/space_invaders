@@ -2,9 +2,10 @@
 #define BUFFER_H
 
 #include <cstdlib>
-#include <cstdint>
 #include <cstdio>
 #include <chrono>
+
+#include "global.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -13,6 +14,7 @@
 #include "Size.h"
 #include "Spaceobject.h"
 #include "Game.h"
+
 
 #define GL_ERROR_CASE(glerror)\
     case glerror: snprintf(error, sizeof(error), "%s", #glerror)

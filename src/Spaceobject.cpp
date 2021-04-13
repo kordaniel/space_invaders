@@ -18,32 +18,22 @@ Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos, Sprite &obj_sprite):
     //
 }
 
-void Spaceobject::move(void)
+void Spaceobject::move(int32_t lim_west, int32_t lim_east, int32_t lim_north, int32_t lim_south)
 {
-    switch (x_d) {
-        case directions::LEFT:
-            //if (x >= move_speed)
-            x -= move_speed;
-            break;
-        case directions::RIGHT:
-            //if (x+move_speed < 224)
-            x += move_speed;
-            break;
-        default:
-            //
-            break;
+    if (x_d == directions::LEFT) {
+        //x = std::max(x - move_speed, 0);
+        x = x - move_speed;
+    } else if (x_d == directions::RIGHT) {
+        //x = std::min(x + move_speed, lim_east - width);
+        x += move_speed;
     }
-    switch (y_d) {
-        case directions::UP:
-            //if (true)
-            y += move_speed;
-            break;
-        case directions::DOWN:
-            y -= move_speed;
-            break;
-        default:
-            //
-            break;
+
+    if (y_d == directions::STATIONARY) {
+        return;
+    } else if (y_d == directions::DOWN) {
+        y = std::max(y - move_speed, lim_south);
+    } else if (y_d == directions::UP) {
+        y = std::min(y + move_speed, lim_north - height);
     }
 }
 
@@ -113,7 +103,11 @@ int32_t Spaceobject::GetTopMostY(void)
     return y + obj_sprite.height;
 }
 
-
+void Spaceobject::ReverseDirection(void)
+{
+    x_d *= -1;
+    y_d *= -1;
+}
 // Private methods
 
 void Spaceobject::setHorizontalDirection(directions::Directions direction, bool setOrUnset)

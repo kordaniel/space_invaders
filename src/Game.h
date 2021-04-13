@@ -1,9 +1,10 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <cstdint>
 #include <vector>
 #include <list>
+
+#include "global.h"
 
 #include "Size.h"
 #include "Spaceobject.h"

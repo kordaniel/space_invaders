@@ -33,14 +33,5 @@ void Game::create_bullet(int32_t x_pos, int32_t y_pos, Sprite& sprite)
 
 void Game::update_player(void)
 {
-    const int32_t proposedX = player.getNextX();
-    const int32_t proposedY = player.getNextY();
-    if (proposedX < 0 || proposedY < 0) {
-        return;
-    }
-    if (proposedX + player.obj_sprite.width > width
-            || proposedY + player.obj_sprite.height > height) {
-        return;
-    }
-    player.move();
+    player.move(0, width, height, 0);
 }

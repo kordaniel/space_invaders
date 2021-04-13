@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include "global.h"
+
 namespace io
 {
 

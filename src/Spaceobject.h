@@ -1,7 +1,9 @@
 #ifndef SPACEOBJECT_H
 #define SPACEOBJECT_H
 
-#include <cstdint>
+#include <algorithm>
+
+#include "global.h"
 
 #include "Size.h"
 #include "Position.h"
@@ -29,7 +31,7 @@ class Spaceobject: public Size, public Position
         int32_t lives;
         int32_t move_speed;
 
-        void move(void);
+        void move(int32_t, int32_t, int32_t, int32_t);
         int32_t getNextX(void);
         int32_t getNextY(void);
         void SetDirectionUp(bool);
@@ -39,6 +41,7 @@ class Spaceobject: public Size, public Position
         void SetDirectionStationary(void);
         int32_t GetRightMostX(void);
         int32_t GetTopMostY(void);
+        void ReverseDirection(void);
 
     private:
         void setHorizontalDirection(directions::Directions, bool);

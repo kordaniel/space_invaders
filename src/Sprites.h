@@ -1,10 +1,11 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
-#include <cstdint>
 #include <vector>
 
-#include "Size.h" // includes cstdlib
+#include "global.h"
+
+#include "Size.h"
 
 class Sprite: public Size
 {

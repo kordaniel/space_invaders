@@ -135,11 +135,17 @@ void Buffer::append_object(Spaceobject& obj)
         for (int32_t xi = 0; xi < spr_width; ++xi) {
             if (!sprite[yi * spr_width + xi]) {
                 continue;
-            } else if (!x_is_in_bounds(spr_x + xi)) {
-                io::print_to_stdout("Trying to draw outofbounds X!!");
-                io::print_to_stdout_varargs(spr_x, ", ", xi, " = ", (spr_x + xi));
-                continue;
             }
+            
+            #ifdef DEBUG
+                else if (!x_is_in_bounds(spr_x + xi)) {
+                    io::print_to_stdout("Trying to draw outofbounds X!!");
+                    io::print_to_stdout_varargs(spr_x, ", ", xi, " = ", (spr_x + xi));
+                    
+                    continue;
+                }
+            #endif
+            
             data[y_startidx + xi] = colors::ORANGE;
             /*if (sprite[yi * spr_width + xi]
                 && (spr_height - 1 + spr_y - yi) < height

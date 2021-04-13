@@ -1,7 +1,7 @@
 #ifndef SIZE_H
 #define SIZE_H
 
-#include <cstdint>
+#include "global.h"
 
 class Size
 {

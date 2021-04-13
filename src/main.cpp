@@ -1,15 +1,4 @@
-#include <cstdlib>
-#include <cstdio>
-#include <cstdint>
-
-#include "Io.h"
-#include "Size.h"
-#include "Position.h"
-#include "Sprites.h"
-#include "Spaceobject.h"
-#include "Buffer.h"
-#include "Game.h"
-
+#include "main.h"
 
 int main(void)
 {
