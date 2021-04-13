@@ -21,11 +21,9 @@ Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos, Sprite &obj_sprite):
 void Spaceobject::move(int32_t lim_west, int32_t lim_east, int32_t lim_north, int32_t lim_south)
 {
     if (x_d == directions::LEFT) {
-        //x = std::max(x - move_speed, 0);
-        x = x - move_speed;
+        x = std::max(x - move_speed, 0);
     } else if (x_d == directions::RIGHT) {
-        //x = std::min(x + move_speed, lim_east - width);
-        x += move_speed;
+        x = std::min(x + move_speed, lim_east - width);
     }
 
     if (y_d == directions::STATIONARY) {
@@ -34,36 +32,6 @@ void Spaceobject::move(int32_t lim_west, int32_t lim_east, int32_t lim_north, in
         y = std::max(y - move_speed, lim_south);
     } else if (y_d == directions::UP) {
         y = std::min(y + move_speed, lim_north - height);
-    }
-}
-
-int32_t Spaceobject::getNextX(void)
-{
-    switch (x_d) {
-        case directions::LEFT:
-            return x -= move_speed;
-            break;
-        case directions::RIGHT:
-            return x += move_speed;
-            break;
-        default:
-            return x;
-            break;
-    }
-}
-
-int32_t Spaceobject::getNextY(void)
-{
-    switch (y_d) {
-        case directions::UP:
-            return y += move_speed;
-            break;
-        case directions::DOWN:
-            return y -= move_speed;
-            break;
-        default:
-            return y;
-            break;
     }
 }
 
