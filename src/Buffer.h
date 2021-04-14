@@ -83,7 +83,7 @@ class Buffer: public Size
         void initialize_opengl(void);
         void initialize_buffer_texture(void);
         void initialize_shaders(void);
-        void init_shader(const char*, GLenum);
+        void compile_shader(GLenum, const char*);
         void validate_shader(GLuint, const char*);
         bool validate_program(GLuint);
         bool y_is_in_bounds(const int32_t&);

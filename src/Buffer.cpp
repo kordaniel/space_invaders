@@ -1,5 +1,9 @@
 #include "Buffer.h"
 
+#include <fstream>
+#include <string>
+#include <sstream>
+
 // Section with 4 functions that should not be used outside this module
 // ----------------------------------------------------------------------
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -68,6 +72,38 @@ void error_callback(int error, const char* description)
 }
 // ----------------------------------------------------------------------
 
+struct ShaderProgramSource
+{
+    std::string VertexSource;
+    std::string FragmentSource;
+};
+
+static ShaderProgramSource ParseShader(const std::string& filepath)
+{
+    enum ShaderType: int
+    {
+        NONE = -1, VERTEX = 0, FRAGMENT = 1
+    };
+
+    std::ifstream stream(filepath);
+    std::string line;
+    std::stringstream shaders[2];
+    ShaderType type = ShaderType::NONE;
+
+    while (getline(stream, line)) {
+        if (line.find("#shader") != std::string::npos) {
+            if (line.find("vertex") != std::string::npos) {
+                type = ShaderType::VERTEX;
+            } else if (line.find("fragment") != std::string::npos) {
+                type = ShaderType::FRAGMENT;
+            }
+        } else {
+            shaders[type] << line << '\n';
+        }
+    }
+
+    return { shaders[0].str(), shaders[1].str() };
+}
 
 Buffer::Buffer(int32_t width, int32_t height):
     Size(width, height),
@@ -89,6 +125,7 @@ Buffer::~Buffer(void)
 {
     glfwDestroyWindow(glfw_window);
     glfwTerminate();
+    glDeleteProgram(shader_id);
     glDeleteVertexArrays(1, &fullscreen_triangle_vao);
     delete[] data;
 }
@@ -238,7 +275,9 @@ void Buffer::initialize_buffer_texture(void)
 
 void Buffer::initialize_shaders(void)
 {
+    ShaderProgramSource source = ParseShader("res/shaders/Shaders.shader");
     glGenVertexArrays(1, &fullscreen_triangle_vao);
+/*
     static const char* fragment_shader =
         "\n"
         "#version 330\n"
@@ -265,11 +304,11 @@ void Buffer::initialize_shaders(void)
         "    \n"
         "    gl_Position = vec4(2.0 * TexCoord - 1.0, 0.0, 1.0);\n"
         "}\n";
-
+*/
     shader_id = glCreateProgram();
 
-    init_shader(vertex_shader, GL_VERTEX_SHADER);
-    init_shader(fragment_shader, GL_FRAGMENT_SHADER);
+    compile_shader(GL_VERTEX_SHADER, source.VertexSource.c_str());
+    compile_shader(GL_FRAGMENT_SHADER, source.FragmentSource.c_str());
 
     glLinkProgram(shader_id);
 
@@ -292,13 +331,13 @@ void Buffer::initialize_shaders(void)
     glBindVertexArray(fullscreen_triangle_vao);
 }
 
-void Buffer::init_shader(const char *shader_code, GLenum type)
+void Buffer::compile_shader(GLenum type, const char *shader_sourcecode)
 {
     GLuint shader = glCreateShader(type);
 
-    glShaderSource(shader, 1, &shader_code, nullptr);
+    glShaderSource(shader, 1, &shader_sourcecode, nullptr);
     glCompileShader(shader);
-    validate_shader(shader, shader_code);
+    validate_shader(shader, shader_sourcecode);
     glAttachShader(shader_id, shader);
 
     glDeleteShader(shader);
