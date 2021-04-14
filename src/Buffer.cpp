@@ -296,7 +296,7 @@ void Buffer::init_shader(const char *shader_code, GLenum type)
 {
     GLuint shader = glCreateShader(type);
 
-    glShaderSource(shader, 1, &shader_code, 0);
+    glShaderSource(shader, 1, &shader_code, nullptr);
     glCompileShader(shader);
     validate_shader(shader, shader_code);
     glAttachShader(shader_id, shader);
@@ -306,6 +306,14 @@ void Buffer::init_shader(const char *shader_code, GLenum type)
 
 void Buffer::validate_shader(GLuint shader, const char *file = nullptr)
 {
+    // Allocate dynamic char[] buffer on the stack to make sure we have room for the full message
+    //
+    //int length_on_stack;
+    //glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length_on_stack);
+    //char* message = (char*)alloca(length_on_stack * sizeof(char));
+    //glGetShaderInfoLog(shader, length_on_stack, &length_on_stack, message);
+    // ...
+
     static const unsigned int BUFFER_SIZE = 512;
     char buffer[BUFFER_SIZE];
     GLsizei length = 0;
