@@ -16,8 +16,10 @@ int main(void)
     //uint32_t clear_color = 0;
 */
     srand(time(NULL));
-    //size_t x = 0, y = 0, count = 0, bullets = 0;
+    //size_t x = 0, y = 0, 
+    size_t count = 0, bullets = 0;
     while (!glfwWindowShouldClose(buffer.get_glfw_window())) {
+        ++count;
         //printf("RUNNING\n");
   //      r+=1;
   //      g+=2;
@@ -33,19 +35,23 @@ int main(void)
         }
 */
 
-/* RANDOMLY DELETE RANDOM BULLET AND DRAW THE REST
+// RANDOMLY DELETE RANDOM BULLET AND DRAW THE REST
         bullets = 0;
         //std::list<Spaceobject>::iterator
         for (auto it = game.bullets.begin(); it != game.bullets.end(); ++it) {
             ++bullets;
-            if (count % 60 == 0 && rand() % 100 < 10) {
-                --bullets;
-                game.bullets.erase(it);
-                continue;
-            }
+            //if (count % 60 == 0 && rand() % 100 < 10) {
+            //    --bullets;
+            //    game.bullets.erase(it);
+            //    continue;
+            //}
             buffer.append_object(*it);
         }
-*/
+        if (count % 60 == 0) {
+            io::print_to_stderr_varargs("BULLETS: ", bullets);
+        }
+
+
         /* DELETE IN WHILELOOP
         auto it = game.bullets.begin();
         while (it != game.bullets.end()) {
@@ -62,10 +68,13 @@ int main(void)
         }
         */
         //io::print_to_stdout_varargs("AFTER:", bullets);
-        //game.player.move();
+
         game.update_player();
+        game.update_bullets();
+
         buffer.append_object(game.player);
         for (auto &alien : game.aliens) {
+            if (alien.lives == 0) continue;
             buffer.append_object(alien);
         }
 

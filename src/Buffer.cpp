@@ -36,7 +36,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
             }
             break;
         case GLFW_KEY_SPACE:
-            io::print_to_stdout("space_down");
+            game->create_player_bullet();
             break;
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, true);
@@ -126,11 +126,12 @@ void Buffer::append_object(Spaceobject& obj)
     int32_t y_startidx;
 
     for (int32_t yi = 0; yi < spr_height; ++yi) {
-        if (!y_is_in_bounds(spr_height - 1 + spr_y - yi)) {
-            io::print_to_stdout("Trying to draw outofbounds Y!!");
-            continue;
-        }
-
+        #ifdef DEBUG
+            if (!y_is_in_bounds(spr_height - 1 + spr_y - yi)) {
+                io::print_to_stdout_varargs("Trying to draw outofbounds Y!!", (spr_height - 1 + spr_y - yi));
+                continue;
+            }
+        #endif
         y_startidx = compute_sprite_yx_start_indx(spr_x, (spr_y - yi), spr_height);
         for (int32_t xi = 0; xi < spr_width; ++xi) {
             if (!sprite[yi * spr_width + xi]) {
@@ -141,19 +142,11 @@ void Buffer::append_object(Spaceobject& obj)
                 else if (!x_is_in_bounds(spr_x + xi)) {
                     io::print_to_stdout("Trying to draw outofbounds X!!");
                     io::print_to_stdout_varargs(spr_x, ", ", xi, " = ", (spr_x + xi));
-                    
                     continue;
                 }
             #endif
             
             data[y_startidx + xi] = colors::ORANGE;
-            /*if (sprite[yi * spr_width + xi]
-                && (spr_height - 1 + spr_y - yi) < height
-                && (spr_x + xi) < width) {
-                    //data[(spr_height - 1 + spr_y - yi) * width + (spr_x + xi)] = colors::ORANGE;
-                    data[y_startidx + xi] = colors::ORANGE;
-                }
-            */
         }
     }
 }
@@ -342,12 +335,12 @@ bool Buffer::validate_program(GLuint program)
 
 bool Buffer::y_is_in_bounds(const int32_t& y)
 {
-    return y < height;
+    return 0 <= y && y < height;
 }
 
 bool Buffer::x_is_in_bounds(const int32_t& x)
 {
-    return x < width;
+    return 0 <= x && x < width;
 }
 
 bool Buffer::pixel_is_in_bounds(const int32_t& x, const int32_t& y)

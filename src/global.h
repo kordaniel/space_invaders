@@ -7,7 +7,6 @@
  */
 #define DEBUG
 
-
 #include <cstdint>
 
 #endif
