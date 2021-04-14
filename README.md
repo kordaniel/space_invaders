@@ -28,10 +28,12 @@ Compiling using make:
 ```console
 foo@bar:space_invaders$ make
 ```
-This will place the executable inside the build-directory. Then simply run with:
+This will place the executable inside the bin-directory. Then simply run with:
 ```console
 foo@bar:space_invaders$ ./bin/space_inv
 ```
+Note: The program HAS to be run from the root directory of the repository. When the game is run, it will read the sourcecode for the shaders from the relative directory `res/shaders/Shaders.shader`. 
+
 That's it. Play and enjoy the beauty of what is Space Invaders! Also please report bugs if you find any!
 
 ## Notes on Linux
