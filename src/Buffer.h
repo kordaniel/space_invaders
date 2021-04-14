@@ -40,10 +40,17 @@ inline void gl_debug(const char* file, int line)
 
 #undef GL_ERROR_CASE
 
-// These 2 functions are not declared here, they only live inside
-// the Buffer.cpp module (for now).
-// void key_callback(GLFWwindow*, int, int, int, int);
-// void error_callback(int, const char*);
+
+// Colors are 32bits, 8 bits each for R,G,B and alpha values.
+namespace colors
+{
+    enum Colors: uint32_t {
+        RED      = (uint32_t) (128 << 24) |                          255,
+        ORANGE   = (uint32_t) (160 << 24) | (96 << 16)             | 255,
+        BG_GREEN = (uint32_t) (50  << 24) | (80 << 16) | (75 << 8) | 255
+    };
+} // end namespace colors
+
 
 class Buffer: public Size
 {
@@ -52,7 +59,8 @@ class Buffer: public Size
         ~Buffer(void);
         void clear(void);
         void clear(uint32_t);
-        void append_object(Spaceobject&);
+        void append_object(Spaceobject&, colors::Colors color = colors::ORANGE);
+        void append_horizontal_line(int32_t, colors::Colors color = colors::ORANGE);
         void draw(void);
         GLFWwindow* get_glfw_window(void);
     private:
@@ -82,6 +90,7 @@ class Buffer: public Size
         bool x_is_in_bounds(const int32_t&);
         bool pixel_is_in_bounds(const int32_t&, const int32_t&);
         int32_t compute_sprite_yx_start_indx(const int32_t&, const int32_t&, const int32_t&);
+        int32_t compute_y_start_indx(const int32_t&);
         void update_fps(void);
 };
 

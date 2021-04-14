@@ -69,16 +69,6 @@ void error_callback(int error, const char* description)
 // ----------------------------------------------------------------------
 
 
-// Colors are 32bits, 8 bits each for R,G,B and alpha values.
-namespace colors
-{
-    enum Colors: uint32_t {
-        RED      = (uint32_t) (128 << 24) |                          255,
-        ORANGE   = (uint32_t) (160 << 24) | (96 << 16)             | 255,
-        BG_GREEN = (uint32_t) (50  << 24) | (80 << 16) | (75 << 8) | 255
-    };
-} // end namespace colors
-
 Buffer::Buffer(int32_t width, int32_t height):
     Size(width, height),
     window_title("Space Invaders! FPS:     "),
@@ -115,7 +105,7 @@ void Buffer::clear(uint32_t color)
     }
 }
 
-void Buffer::append_object(Spaceobject& obj)
+void Buffer::append_object(Spaceobject& obj, colors::Colors color)
 {
     const int32_t &spr_x      = obj.x;
     const int32_t &spr_y      = obj.y;
@@ -146,8 +136,19 @@ void Buffer::append_object(Spaceobject& obj)
                 }
             #endif
             
-            data[y_startidx + xi] = colors::ORANGE;
+            data[y_startidx + xi] = color;
         }
+    }
+}
+
+void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
+    if (!y_is_in_bounds(y)) {
+        return;
+    }
+
+    const int32_t y_start = compute_y_start_indx(y);
+    for (int32_t x = 0; x < width; ++x) {
+        data[y_start + x] = color;
     }
 }
 
@@ -351,6 +352,11 @@ bool Buffer::pixel_is_in_bounds(const int32_t& x, const int32_t& y)
 int32_t Buffer::compute_sprite_yx_start_indx(const int32_t& x, const int32_t& y, const int32_t& spr_height)
 {
     return width * (spr_height - 1 + y) + x;
+}
+
+int32_t Buffer::compute_y_start_indx(const int32_t &y)
+{
+    return width * y;
 }
 
 void Buffer::update_fps(void)

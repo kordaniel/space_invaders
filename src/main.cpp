@@ -34,7 +34,7 @@ int main(void)
             y += 8;
         }
 */
-
+        buffer.append_horizontal_line(16);
 // RANDOMLY DELETE RANDOM BULLET AND DRAW THE REST
         bullets = 0;
         //std::list<Spaceobject>::iterator
@@ -45,7 +45,7 @@ int main(void)
             //    game.bullets.erase(it);
             //    continue;
             //}
-            buffer.append_object(*it);
+            buffer.append_object(*it, colors::RED);
         }
         if (count % 60 == 0) {
             io::print_to_stderr_varargs("BULLETS: ", bullets);
