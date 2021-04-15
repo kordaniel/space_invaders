@@ -3,6 +3,8 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <vector>
 
 #include "global.h"
 
@@ -34,6 +36,10 @@ inline void print_to_stderr_varargs(T t, Args... args) {
 
 void print_to_stdout(const std::string &);
 void print_to_stderr(const std::string &);
+
+bool readTextFileIntoVector(const std::string&,
+                            std::vector<std::string>&,
+                            bool includeEmptylines = true);
 
 } // End namespace io
 
