@@ -4,6 +4,8 @@
 #include <cstdlib>
 #include <cstdio>
 #include <chrono>
+#include <string>
+#include <sstream>
 
 #include "global.h"
 
@@ -39,6 +41,52 @@ inline void gl_debug(const char* file, int line)
 }
 
 #undef GL_ERROR_CASE
+
+// Struct to hold the shaders sourcecode. Default constructor creates
+// default fallback shaders.
+struct ShaderProgramSource
+{
+    std::string VertexSource;
+    std::string FragmentSource;
+
+    ShaderProgramSource(std::string vertex_src, std::string fragment_src):
+        VertexSource(vertex_src),
+        FragmentSource(fragment_src)
+    {
+        //
+    }
+    ShaderProgramSource(void):
+        VertexSource(
+        "\n"
+        "#version 330\n"
+        "\n"
+        "noperspective out vec2 TexCoord;\n"
+        "\n"
+        "void main(void){\n"
+        "\n"
+        "    TexCoord.x = (gl_VertexID == 2)? 2.0: 0.0;\n"
+        "    TexCoord.y = (gl_VertexID == 1)? 2.0: 0.0;\n"
+        "    \n"
+        "    gl_Position = vec4(2.0 * TexCoord - 1.0, 0.0, 1.0);\n"
+        "}\n"
+        ),
+        FragmentSource(
+        "\n"
+        "#version 330\n"
+        "\n"
+        "uniform sampler2D buffer;\n"
+        "noperspective in vec2 TexCoord;\n"
+        "\n"
+        "out vec3 outColor;\n"
+        "\n"
+        "void main(void) {\n"
+        "   outColor = texture(buffer, TexCoord).rgb;\n"
+        "}\n"
+        )
+    {
+        //
+    }
+};
 
 
 // Colors are 32bits, 8 bits each for R,G,B and alpha values.
@@ -79,6 +127,7 @@ class Buffer: public Size
         uint16_t fps_prev;
         // --------- | | ---------
 
+        ShaderProgramSource read_and_parse_shader(const std::string&);
         void initialize_glfw_window(void);
         void initialize_opengl(void);
         void initialize_buffer_texture(void);

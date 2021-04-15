@@ -1,9 +1,5 @@
 #include "Buffer.h"
 
-#include <fstream>
-#include <string>
-#include <sstream>
-
 // Section with 4 functions that should not be used outside this module
 // ----------------------------------------------------------------------
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -72,38 +68,6 @@ void error_callback(int error, const char* description)
 }
 // ----------------------------------------------------------------------
 
-struct ShaderProgramSource
-{
-    std::string VertexSource;
-    std::string FragmentSource;
-};
-
-static ShaderProgramSource ParseShader(const std::string& filepath)
-{
-    enum ShaderType: int
-    {
-        NONE = -1, VERTEX = 0, FRAGMENT = 1
-    };
-
-    std::ifstream stream(filepath);
-    std::string line;
-    std::stringstream shaders[2];
-    ShaderType type = ShaderType::NONE;
-
-    while (getline(stream, line)) {
-        if (line.find("#shader") != std::string::npos) {
-            if (line.find("vertex") != std::string::npos) {
-                type = ShaderType::VERTEX;
-            } else if (line.find("fragment") != std::string::npos) {
-                type = ShaderType::FRAGMENT;
-            }
-        } else {
-            shaders[type] << line << '\n';
-        }
-    }
-
-    return { shaders[0].str(), shaders[1].str() };
-}
 
 Buffer::Buffer(int32_t width, int32_t height):
     Size(width, height),
@@ -207,6 +171,45 @@ GLFWwindow* Buffer::get_glfw_window(void)
     return glfw_window;
 }
 
+// ----------------------------- PRIVATE METHODS -----------------------------
+
+ShaderProgramSource Buffer::read_and_parse_shader(const std::string& filepath)
+{
+    enum ShaderType: int
+    {
+        NONE = -1, VERTEX = 0, FRAGMENT = 1
+    };
+
+    std::vector<std::string> shadersRawSource;
+    bool read_success = io::readTextFileIntoVector(filepath, shadersRawSource, false);
+    if (!read_success) {
+        io::print_to_stdout("Falling back to default shaders!");
+        return { };
+    }
+
+    std::stringstream shaders[2];
+    ShaderType type = ShaderType::NONE;
+
+    for (auto &rawLine : shadersRawSource) {
+        if (rawLine.find("#shader") != std::string::npos) {
+            if (rawLine.find("vertex") != std::string::npos) {
+                type = ShaderType::VERTEX;
+            } else if (rawLine.find("fragment") != std::string::npos) {
+                type = ShaderType::FRAGMENT;
+            } else {
+                // Syntax error in shaderfile
+                //  => Let the program crash if there are more lines to parse.
+                io::print_to_stderr_varargs("[ERROR]: Syntax error in shaderfile: ", filepath);
+                type = ShaderType::NONE;
+            }
+        } else {
+            shaders[type] << rawLine << '\n';
+        }
+    }
+
+    return { shaders[ShaderType::VERTEX].str(), shaders[ShaderType::FRAGMENT].str() };
+}
+
 void Buffer::initialize_glfw_window(void)
 {
     glfwSetErrorCallback(error_callback);
@@ -275,40 +278,13 @@ void Buffer::initialize_buffer_texture(void)
 
 void Buffer::initialize_shaders(void)
 {
-    ShaderProgramSource source = ParseShader("res/shaders/Shaders.shader");
+    ShaderProgramSource shaderSource = read_and_parse_shader("res/shaders/Shaders.shader");
     glGenVertexArrays(1, &fullscreen_triangle_vao);
-/*
-    static const char* fragment_shader =
-        "\n"
-        "#version 330\n"
-        "\n"
-        "uniform sampler2D buffer;\n"
-        "noperspective in vec2 TexCoord;\n"
-        "\n"
-        "out vec3 outColor;\n"
-        "\n"
-        "void main(void) {\n"
-        "   outColor = texture(buffer, TexCoord).rgb;\n"
-        "}\n";
 
-    static const char* vertex_shader =
-        "\n"
-        "#version 330\n"
-        "\n"
-        "noperspective out vec2 TexCoord;\n"
-        "\n"
-        "void main(void){\n"
-        "\n"
-        "    TexCoord.x = (gl_VertexID == 2)? 2.0: 0.0;\n"
-        "    TexCoord.y = (gl_VertexID == 1)? 2.0: 0.0;\n"
-        "    \n"
-        "    gl_Position = vec4(2.0 * TexCoord - 1.0, 0.0, 1.0);\n"
-        "}\n";
-*/
     shader_id = glCreateProgram();
 
-    compile_shader(GL_VERTEX_SHADER, source.VertexSource.c_str());
-    compile_shader(GL_FRAGMENT_SHADER, source.FragmentSource.c_str());
+    compile_shader(GL_VERTEX_SHADER, shaderSource.VertexSource.c_str());
+    compile_shader(GL_FRAGMENT_SHADER, shaderSource.FragmentSource.c_str());
 
     glLinkProgram(shader_id);
 
