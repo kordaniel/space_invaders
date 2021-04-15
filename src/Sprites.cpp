@@ -7,11 +7,6 @@ Sprite::Sprite(int32_t width, int32_t height, const uint8_t* sprite_data):
     //
 }
 
-int32_t Sprite::get_length(void)
-{
-    return width * height;
-}
-
 Sprites::Sprites(void):
     player_sprite(Sprite(11, 7, _PLAYER_SPRITE)),
     player_bullet_sprite(Sprite(1, 3, _PLAYER_BULLET_SPRITE)),

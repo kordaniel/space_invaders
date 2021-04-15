@@ -1,5 +1,31 @@
 #include "Buffer.h"
 
+#ifdef DEBUG
+// First 2 functions will integrate with the IDE to set breakpoints to help debugging.
+// MSVC: __debugbreak()
+// Xcode: __builtin_debugtrap() or __builtin_trap()
+// Posix: #include <signal.h> => raise(SIGTRAP) This should work with gdb
+    #include <signal.h>
+    #define ASSERT(x) if (!(x)) raise(SIGTRAP);
+    #define GLCall(x) GLClearError();\
+        x;\
+        ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+
+    static void GLClearError() { while (glGetError() != GL_NO_ERROR); }
+    static bool GLLogCall(const char* function, const char* file, int line)
+    {
+        while (GLenum error = glGetError()) {
+            // NOTE: We check for errors in a while loop since there might be several errors in the queue.
+            //       !!!! To keep things simple, we only print the first error before exiting for now !!!!
+            io::print_to_stderr_varargs("[OpenGL Error] (", error, "): ", function, " ", file, ":", line);
+            return false;
+        }
+        return true;
+    }
+#else
+    #define GLCall(x) x
+#endif
+
 // Section with 4 functions that should not be used outside this module
 // ----------------------------------------------------------------------
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -36,7 +62,9 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
             }
             break;
         case GLFW_KEY_SPACE:
-            game->create_player_bullet();
+            if (action == GLFW_RELEASE) {
+                game->create_player_bullet();
+            }
             break;
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, true);
@@ -87,10 +115,10 @@ Buffer::Buffer(int32_t width, int32_t height):
 
 Buffer::~Buffer(void)
 {
-    glfwDestroyWindow(glfw_window);
-    glfwTerminate();
-    glDeleteProgram(shader_id);
-    glDeleteVertexArrays(1, &fullscreen_triangle_vao);
+    GLCall(glfwDestroyWindow(glfw_window));
+    GLCall(glfwTerminate());
+    GLCall(glDeleteProgram(shader_id));
+    GLCall(glDeleteVertexArrays(1, &fullscreen_triangle_vao));
     delete[] data;
 }
 
@@ -153,17 +181,55 @@ void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
     }
 }
 
+void Buffer::append_text(int32_t x, int32_t y,
+                         Sprite& text_spritesheet,
+                         const std::string& text,
+                         colors::Colors color)
+{
+    const int32_t stride = text_spritesheet.getTotalSize();
+    int32_t         xpos = x;
+    Sprite        sprite = text_spritesheet;
+    char        currChar = 0;
+
+    for (auto &ch : text) {
+        currChar = ch - 32;
+        if (currChar < 0 || currChar > 65) {
+            io::print_to_stdout_varargs("[ERROR]: Unable to draw character: ", currChar);
+            continue;
+        }
+
+        sprite.data = text_spritesheet.data + currChar * stride;
+
+        for (int32_t yi = 0; yi < sprite.height; ++yi) {
+            if (sprite.height - 1 + y - yi >= height) {
+                continue;
+            }
+            for (int32_t xi = 0; xi < sprite.width; ++xi) {
+                if (xpos + xi >= width) {
+                    continue;
+                }
+                if (sprite.data[yi * sprite.width + xi]) {
+                    data[(sprite.height - 1 + y - yi) * width + xpos + xi] = color;
+                }
+            }
+        }
+
+        xpos += sprite.width + 1;
+    }
+
+}
+
 void Buffer::draw(void)
 {
     update_fps();
-    glTexSubImage2D(
+    GLCall(glTexSubImage2D(
         GL_TEXTURE_2D, 0, 0, 0,
         width, height,
         GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
         data
-    );
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    glfwSwapBuffers(glfw_window);
+    ));
+    GLCall(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
+    GLCall(glfwSwapBuffers(glfw_window));
 }
 
 GLFWwindow* Buffer::get_glfw_window(void)
@@ -250,43 +316,44 @@ void Buffer::initialize_glfw_window(void)
 void Buffer::initialize_opengl(void)
 {
     int glVersion[2] = {-1, 1};
-    glGetIntegerv(GL_MAJOR_VERSION, &glVersion[0]);
-    glGetIntegerv(GL_MINOR_VERSION, &glVersion[1]);
+    GLCall(glGetIntegerv(GL_MAJOR_VERSION, &glVersion[0]));
+    GLCall(glGetIntegerv(GL_MINOR_VERSION, &glVersion[1]));
 
-    gl_debug(__FILE__, __LINE__);
+    GLCall(gl_debug(__FILE__, __LINE__));
 
     io::print_to_stdout_varargs("Using OpenGL: ", glVersion[0], ".", glVersion[1]);
     io::print_to_stdout_varargs("Renderer used: ", glGetString(GL_RENDERER));
     io::print_to_stdout_varargs("Shading language: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     //glfwSwapInterval(0); // vsync OFF
-    glfwSwapInterval(1); // vsync ON
-    glClearColor(1.0, 0.0, 0.0, 1.0);
+    GLCall(glfwSwapInterval(1)); // vsync ON
+    GLCall(glClearColor(1.0, 0.0, 0.0, 1.0));
 }
 
 void Buffer::initialize_buffer_texture(void)
 {
-    glGenTextures(1, &buffer_texture);
-    glBindTexture(GL_TEXTURE_2D, buffer_texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0,
-                GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    GLCall(glGenTextures(1, &buffer_texture));
+    GLCall(glBindTexture(GL_TEXTURE_2D, buffer_texture));
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0,
+                GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, data
+    ));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
 }
 
 void Buffer::initialize_shaders(void)
 {
     ShaderProgramSource shaderSource = read_and_parse_shader("res/shaders/Shaders.shader");
-    glGenVertexArrays(1, &fullscreen_triangle_vao);
+    GLCall(glGenVertexArrays(1, &fullscreen_triangle_vao));
 
     shader_id = glCreateProgram();
 
     compile_shader(GL_VERTEX_SHADER, shaderSource.VertexSource.c_str());
     compile_shader(GL_FRAGMENT_SHADER, shaderSource.FragmentSource.c_str());
 
-    glLinkProgram(shader_id);
+    GLCall(glLinkProgram(shader_id));
 
     if (!validate_program(shader_id)) {
         io::print_to_stderr("[ERROR]: Validating shader.");
@@ -296,27 +363,27 @@ void Buffer::initialize_shaders(void)
         exit(EXIT_FAILURE);
     }
 
-    glUseProgram(shader_id);
+    GLCall(glUseProgram(shader_id));
 
     location = glGetUniformLocation(shader_id, "buffer");
-    glUniform1i(location, 0);
+    GLCall(glUniform1i(location, 0));
 
-    glDisable(GL_DEPTH_TEST);
-    glActiveTexture(GL_TEXTURE0);
+    GLCall(glDisable(GL_DEPTH_TEST));
+    GLCall(glActiveTexture(GL_TEXTURE0));
 
-    glBindVertexArray(fullscreen_triangle_vao);
+    GLCall(glBindVertexArray(fullscreen_triangle_vao));
 }
 
 void Buffer::compile_shader(GLenum type, const char *shader_sourcecode)
 {
     GLuint shader = glCreateShader(type);
 
-    glShaderSource(shader, 1, &shader_sourcecode, nullptr);
-    glCompileShader(shader);
-    validate_shader(shader, shader_sourcecode);
-    glAttachShader(shader_id, shader);
+    GLCall(glShaderSource(shader, 1, &shader_sourcecode, nullptr));
+    GLCall(glCompileShader(shader));
+    GLCall(validate_shader(shader, shader_sourcecode));
+    GLCall(glAttachShader(shader_id, shader));
 
-    glDeleteShader(shader);
+    GLCall(glDeleteShader(shader));
 }
 
 void Buffer::validate_shader(GLuint shader, const char *file = nullptr)
@@ -409,5 +476,5 @@ void Buffer::update_fps(void)
         n_frames /= 10;
     }
     assert(n_frames == 0);
-    glfwSetWindowTitle(glfw_window, window_title);
+    GLCall(glfwSetWindowTitle(glfw_window, window_title));
 }

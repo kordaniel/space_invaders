@@ -12,7 +12,6 @@ class Sprite: public Size
     public:
         const uint8_t* data;
         Sprite(int32_t, int32_t, const uint8_t*);
-        int32_t get_length(void);
 };
 
 class Sprites

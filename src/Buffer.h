@@ -57,31 +57,31 @@ struct ShaderProgramSource
     }
     ShaderProgramSource(void):
         VertexSource(
-        "\n"
-        "#version 330\n"
-        "\n"
-        "noperspective out vec2 TexCoord;\n"
-        "\n"
-        "void main(void){\n"
-        "\n"
-        "    TexCoord.x = (gl_VertexID == 2)? 2.0: 0.0;\n"
-        "    TexCoord.y = (gl_VertexID == 1)? 2.0: 0.0;\n"
-        "    \n"
-        "    gl_Position = vec4(2.0 * TexCoord - 1.0, 0.0, 1.0);\n"
-        "}\n"
+R"(
+#version 330
+
+noperspective out vec2 TexCoord;
+
+void main(void) {
+
+    TexCoord.x = (gl_VertexID == 2)? 2.0: 0.0;
+    TexCoord.y = (gl_VertexID == 1)? 2.0: 0.0;
+
+    gl_Position = vec4(2.0 * TexCoord - 1.0, 0.0, 1.0);
+})"
         ),
         FragmentSource(
-        "\n"
-        "#version 330\n"
-        "\n"
-        "uniform sampler2D buffer;\n"
-        "noperspective in vec2 TexCoord;\n"
-        "\n"
-        "out vec3 outColor;\n"
-        "\n"
-        "void main(void) {\n"
-        "   outColor = texture(buffer, TexCoord).rgb;\n"
-        "}\n"
+R"(
+#version 330
+
+uniform sampler2D buffer;
+noperspective in vec2 TexCoord;
+
+out vec3 outColor;
+
+void main(void) {
+    outColor = texture(buffer, TexCoord).rgb;
+})"
         )
     {
         //
@@ -109,6 +109,7 @@ class Buffer: public Size
         void clear(uint32_t);
         void append_object(Spaceobject&, colors::Colors color = colors::ORANGE);
         void append_horizontal_line(int32_t, colors::Colors color = colors::ORANGE);
+        void append_text(int32_t, int32_t, Sprite&, const std::string&, colors::Colors = colors::ORANGE);
         void draw(void);
         GLFWwindow* get_glfw_window(void);
     private:

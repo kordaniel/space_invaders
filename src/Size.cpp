@@ -6,3 +6,8 @@ Size::Size(int32_t width, int32_t height):
 {
     //
 }
+
+int32_t Size::getTotalSize(void)
+{
+    return width * height;
+}
