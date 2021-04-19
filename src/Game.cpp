@@ -43,20 +43,21 @@ void Game::update_player(void)
 
 void Game::update_bullets(void)
 {
-    for (auto bulletptr = bullets.begin(); bulletptr != bullets.end(); ++bulletptr) {
+    for (auto bulletptr = bullets.begin(); bulletptr != bullets.end(); ) {
         bulletptr->move(0, width, height, 0);
-        if ((*bulletptr).GetTopMostY() == height) {
-            bullets.erase(bulletptr);
+        if (bulletptr->GetTopMostY() == height) {
+            bulletptr = bullets.erase(bulletptr);
             continue;
         }
 
-        for (auto alienptr = aliens.begin(); alienptr != aliens.end(); ++alienptr) {
-            if ((*bulletptr).overlaps(*alienptr)) {
+        for (auto alienptr = aliens.begin(); alienptr != aliens.end(); ) {
+            if (bulletptr->overlaps(*alienptr)) {
                 aliens.erase(alienptr);
-                bullets.erase(bulletptr);
+                bulletptr = bullets.erase(bulletptr);
                 break;
-            }
+            } else ++alienptr;
         }
+        ++bulletptr;
     }
 }
 
