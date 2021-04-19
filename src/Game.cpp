@@ -1,20 +1,19 @@
 #include "Game.h"
-#include "Io.h"
+
 Game::Game(int32_t width, int32_t height, Sprites &sprites):
         Size(width, height),
         alien_rows(5),
         alien_cols(11),
         alien_move_dir(0),
         player(Player(width / 2 - 5, 30, sprites.player_sprite)),
-        _sprites(sprites)
+        _sprites(sprites),
+        m_aliensShouldTurn(false)
 {
     init_aliens(sprites);
 }
 
 void Game::init_aliens(Sprites &sprites)
 {
-    aliens.reserve(alien_rows * alien_cols);
-
     for (size_t yi = 0; yi < alien_rows; ++yi) {
         const size_t alien_type = (alien_rows - yi) / 2 + 1;
 
@@ -22,7 +21,7 @@ void Game::init_aliens(Sprites &sprites)
             Sprite& alien_sprite = sprites.alien_sprites[2 * alien_type - 1];
             const size_t xpos = 24 + 16 * xi + (13 - alien_sprite.width)/2;
             const size_t ypos = 128 + 17 * yi;
-            aliens.emplace_back(xpos, ypos, alien_sprite);
+            aliens.emplace_front(xpos, ypos, directions::LEFT, directions::STATIONARY, 1, 3, alien_sprite);
         }
     }
 }
@@ -44,20 +43,36 @@ void Game::update_player(void)
 
 void Game::update_bullets(void)
 {
-    bool destruct_bullet;
     for (auto bulletptr = bullets.begin(); bulletptr != bullets.end(); ++bulletptr) {
-        destruct_bullet = false;
         bulletptr->move(0, width, height, 0);
+        if ((*bulletptr).GetTopMostY() == height) {
+            bullets.erase(bulletptr);
+            continue;
+        }
 
-        for (auto &alien : aliens) {
-            if ((*bulletptr).overlaps(alien)
-                || (*bulletptr).GetTopMostY() == height) {
-                destruct_bullet = true;
+        for (auto alienptr = aliens.begin(); alienptr != aliens.end(); ++alienptr) {
+            if ((*bulletptr).overlaps(*alienptr)) {
+                aliens.erase(alienptr);
+                bullets.erase(bulletptr);
                 break;
             }
         }
-        if (destruct_bullet) {
-            bullets.erase(bulletptr);
+    }
+}
+
+void Game::update_aliens(void)
+{
+    if (m_aliensShouldTurn) {
+        for (auto &alien : aliens) {
+            alien.y -= alien.height;
+            alien.ReverseDirection();
+            alien.move(0, width, height, 0);
+        }
+        m_aliensShouldTurn = false;
+    } else {
+        for (auto &alien : aliens) {
+            if (alien.move(0, width, height, 0))
+                m_aliensShouldTurn = true;
         }
     }
 }

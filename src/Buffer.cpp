@@ -129,7 +129,7 @@ void Buffer::clear(void)
 
 void Buffer::clear(uint32_t color)
 {
-    for (size_t i = 0; i < width * height; ++i) {
+    for (size_t i = 0; i < getTotalSize(); ++i) {
         data[i] = color;
     }
 }
@@ -171,9 +171,11 @@ void Buffer::append_object(Spaceobject& obj, colors::Colors color)
 }
 
 void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
+    #ifdef DEBUG
     if (!y_is_in_bounds(y)) {
         return;
     }
+    #endif
 
     const int32_t y_start = compute_y_start_indx(y);
     for (int32_t x = 0; x < width; ++x) {
@@ -187,41 +189,44 @@ void Buffer::append_text(int32_t x, int32_t y,
                          colors::Colors color)
 {
     const int32_t stride = text_spritesheet.getTotalSize();
+
     int32_t         xpos = x;
     Sprite        sprite = text_spritesheet;
     char        currChar = 0;
 
     for (auto &ch : text) {
         currChar = ch - 32;
+
         if (currChar < 0 || currChar > 65) {
             io::print_to_stdout_varargs("[ERROR]: Unable to draw character: ", currChar);
             continue;
         }
 
         sprite.data = text_spritesheet.data + currChar * stride;
+        append_sprite(xpos, y, (uint8_t*)sprite.data, sprite.width, sprite.height);
+        xpos += sprite.width + character_gap;
+    }
+}
 
-        for (int32_t yi = 0; yi < sprite.height; ++yi) {
-            if (sprite.height - 1 + y - yi >= height) {
-                continue;
-            }
-            for (int32_t xi = 0; xi < sprite.width; ++xi) {
-                if (xpos + xi >= width) {
-                    continue;
-                }
-                if (sprite.data[yi * sprite.width + xi]) {
-                    data[(sprite.height - 1 + y - yi) * width + xpos + xi] = color;
-                }
-            }
-        }
+void Buffer::append_integer(int32_t x, int32_t y, Sprite& text_spritesheet, int32_t number, colors::Colors color)
+{
+    #ifdef DEBUG
+    assert(number >= 0);
+    #endif
 
-        xpos += sprite.width + 1;
+    if (number == 0) {
+        append_sprite(x, y, text_spritesheet.getNumberSpritePtr(0),
+                      text_spritesheet.width, text_spritesheet.height,
+                      colors::Colors::ORANGE
+        );
+        return;
     }
 
+    append_digits(x, y, text_spritesheet, number, color);
 }
 
 void Buffer::draw(void)
 {
-    update_fps();
     GLCall(glTexSubImage2D(
         GL_TEXTURE_2D, 0, 0, 0,
         width, height,
@@ -230,6 +235,7 @@ void Buffer::draw(void)
     ));
     GLCall(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
     GLCall(glfwSwapBuffers(glfw_window));
+    update_fps();
 }
 
 GLFWwindow* Buffer::get_glfw_window(void)
@@ -325,8 +331,8 @@ void Buffer::initialize_opengl(void)
     io::print_to_stdout_varargs("Renderer used: ", glGetString(GL_RENDERER));
     io::print_to_stdout_varargs("Shading language: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    //glfwSwapInterval(0); // vsync OFF
-    GLCall(glfwSwapInterval(1)); // vsync ON
+    GLCall(glfwSwapInterval(0)); // vsync OFF
+    //GLCall(glfwSwapInterval(1)); // vsync ON
     GLCall(glClearColor(1.0, 0.0, 0.0, 1.0));
 }
 
@@ -439,15 +445,48 @@ bool Buffer::pixel_is_in_bounds(const int32_t& x, const int32_t& y)
     return x_is_in_bounds(x) && y_is_in_bounds(y);
 }
 
-int32_t Buffer::compute_sprite_yx_start_indx(const int32_t& x, const int32_t& y, const int32_t& spr_height)
+inline int32_t Buffer::compute_sprite_yx_start_indx(const int32_t& x, const int32_t& y, const int32_t& spr_height)
 {
     return width * (spr_height - 1 + y) + x;
 }
 
-int32_t Buffer::compute_y_start_indx(const int32_t &y)
+inline int32_t Buffer::compute_y_start_indx(const int32_t &y)
 {
     return width * y;
 }
+
+void Buffer::append_sprite(int32_t x, int32_t y, const uint8_t* sprite,
+                           int32_t spr_width,int32_t spr_height, colors::Colors color)
+{
+    int32_t y_startidx;
+    for (int32_t yi = 0; yi < spr_height; ++yi) {
+        y_startidx = compute_sprite_yx_start_indx(0, (y - yi), spr_height);
+        for (int32_t xi = 0; xi < spr_width; ++xi) {
+            if (sprite[yi * spr_width + xi])
+                data[y_startidx + x + xi] = color;
+        }
+    }
+}
+
+int32_t Buffer::append_digits(int32_t x, int32_t y,
+                              Sprite& text_spritesheet,
+                              int32_t number, colors::Colors color)
+{
+    // NOTE TODO: Add check for x bounds
+
+    if (number > 0) {
+        x = append_digits(x, y, text_spritesheet, number / 10, color);
+    } else if (number == 0) {
+        return x;
+    }
+
+    append_sprite(x, y, text_spritesheet.getNumberSpritePtr(number % 10),
+                  text_spritesheet.width, text_spritesheet.height, color
+    );
+    return x + text_spritesheet.width + character_gap;
+}
+
+
 
 void Buffer::update_fps(void)
 {
@@ -469,12 +508,14 @@ void Buffer::update_fps(void)
 
     fps_prev = n_frames;
 
-    io::print_to_stdout_varargs("FPS: ", n_frames, ".\tElapsed time: ", time_delta.count(), "s.");
+    io::print_to_stdout_varargs("FPS: ", (n_frames / time_delta.count()));
 
     for (size_t i = 24; i > 20; --i) {
         window_title[i] = (char) (n_frames % 10 + 48);
         n_frames /= 10;
     }
-    assert(n_frames == 0);
+    #ifdef DEBUG
+        assert(n_frames == 0);
+    #endif
     GLCall(glfwSetWindowTitle(glfw_window, window_title));
 }

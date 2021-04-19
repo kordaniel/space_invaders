@@ -16,7 +16,7 @@ class Game: public Size
         int32_t alien_cols;
         int32_t alien_move_dir;
         Player player;
-        std::vector<Spaceobject> aliens;
+        std::list<Spaceobject> aliens;
         std::list<Spaceobject> bullets;
 
         Game(int32_t, int32_t, Sprites &);
@@ -24,9 +24,11 @@ class Game: public Size
         void create_bullet(int32_t, int32_t, Sprite&);
         void update_player(void);
         void update_bullets(void);
+        void update_aliens(void);
     
     private:
         Sprites & _sprites;
+        bool m_aliensShouldTurn;
         void init_aliens(Sprites &);
 };
 

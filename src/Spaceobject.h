@@ -32,7 +32,7 @@ class Spaceobject: public Size, public Position
         int32_t lives;
         int32_t _move_speed;
 
-        void move(int32_t, int32_t, int32_t, int32_t);
+        bool move(int32_t, int32_t, int32_t, int32_t);
         void SetDirectionUp(bool);
         void SetDirectionDown(bool);
         void SetDirectionLeft(bool);

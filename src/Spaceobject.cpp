@@ -33,7 +33,7 @@ Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos, Sprite &obj_sprite):
     //
 }
 
-void Spaceobject::move(int32_t lim_west, int32_t lim_east, int32_t lim_north, int32_t lim_south)
+bool Spaceobject::move(int32_t lim_west, int32_t lim_east, int32_t lim_north, int32_t lim_south)
 {
     if (x_d == directions::LEFT) {
         x = std::max(x - _move_speed, 0);
@@ -42,12 +42,14 @@ void Spaceobject::move(int32_t lim_west, int32_t lim_east, int32_t lim_north, in
     }
 
     if (y_d == directions::STATIONARY) {
-        return;
+        return x == lim_west || GetRightMostX() == lim_east;
     } else if (y_d == directions::DOWN) {
         y = std::max(y - _move_speed, lim_south);
     } else if (y_d == directions::UP) {
         y = std::min(y + _move_speed, lim_north - height);
     }
+
+    return x == lim_west || GetRightMostX() == lim_east;
 }
 
 void Spaceobject::SetDirectionUp(bool keyPressed)

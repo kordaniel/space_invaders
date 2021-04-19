@@ -110,6 +110,7 @@ class Buffer: public Size
         void append_object(Spaceobject&, colors::Colors color = colors::ORANGE);
         void append_horizontal_line(int32_t, colors::Colors color = colors::ORANGE);
         void append_text(int32_t, int32_t, Sprite&, const std::string&, colors::Colors = colors::ORANGE);
+        void append_integer(int32_t, int32_t, Sprite&, int32_t, colors::Colors color = colors::ORANGE);
         void draw(void);
         GLFWwindow* get_glfw_window(void);
     private:
@@ -121,6 +122,7 @@ class Buffer: public Size
         GLuint fullscreen_triangle_vao;
         GLuint shader_id;
         GLint location;
+        const static int32_t character_gap = 2;// amount of space between chars
 
         // Used for computing FPS
         std::chrono::time_point<std::chrono::steady_clock> time_prev_update;
@@ -139,8 +141,10 @@ class Buffer: public Size
         bool y_is_in_bounds(const int32_t&);
         bool x_is_in_bounds(const int32_t&);
         bool pixel_is_in_bounds(const int32_t&, const int32_t&);
-        int32_t compute_sprite_yx_start_indx(const int32_t&, const int32_t&, const int32_t&);
-        int32_t compute_y_start_indx(const int32_t&);
+        inline int32_t compute_sprite_yx_start_indx(const int32_t&, const int32_t&, const int32_t&);
+        inline int32_t compute_y_start_indx(const int32_t&);
+        void append_sprite(int32_t, int32_t, const uint8_t*, int32_t, int32_t, colors::Colors color = colors::ORANGE);
+        int32_t append_digits(int32_t, int32_t, Sprite&, int32_t, colors::Colors);
         void update_fps(void);
 };
 
