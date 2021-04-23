@@ -27,6 +27,7 @@ class Spaceobject: public Size, public Position
         Spaceobject(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, Sprite&);
         Spaceobject(int32_t, int32_t, int32_t, Sprite&);
         Spaceobject(int32_t, int32_t, Sprite &);
+        Spaceobject(const Spaceobject& other) = delete;
     //private:
         Sprite &obj_sprite;
         int32_t lives;
@@ -54,6 +55,7 @@ class Player: public Spaceobject
 {
     public:
         Player(int32_t, int32_t, Sprite &);
+        Player(const Player& other) = delete;
         void SetDirectionUp(bool keyPressed);
         void SetDirectionDown(bool keyPressed);
 };

@@ -30,6 +30,7 @@
 // ----------------------------------------------------------------------
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    assert(scancode == scancode && mods == mods);
     Game *game = reinterpret_cast<Game *>(glfwGetWindowUserPointer(window));
 
     switch (key) {
@@ -82,16 +83,19 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 void window_close_callback(GLFWwindow* window)
 {
+    assert(window == window);
     io::print_to_stdout("Window close callback called!");
 }
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
+    assert(window == window);
     io::print_to_stdout_varargs("Framebuffer size: ", width, ", ", height);
 }
 
 void error_callback(int error, const char* description)
 {
+    assert(error == error);
     io::print_to_stderr_varargs("[ERROR]: ", description);
 }
 // ----------------------------------------------------------------------
@@ -129,7 +133,7 @@ void Buffer::clear(void)
 
 void Buffer::clear(uint32_t color)
 {
-    for (size_t i = 0; i < getTotalSize(); ++i) {
+    for (int32_t i = 0; i < getTotalSize(); ++i) {
         data[i] = color;
     }
 }
@@ -184,35 +188,33 @@ void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
 }
 
 void Buffer::append_text(int32_t x, int32_t y,
-                         Sprite& text_spritesheet,
+                         const Sprite& text_spritesheet,
                          const std::string& text,
                          colors::Colors color)
 {
-    const int32_t stride = text_spritesheet.getTotalSize();
-
-    int32_t         xpos = x;
-    Sprite        sprite = text_spritesheet;
-    char        currChar = 0;
+    const int32_t stride       = text_spritesheet.getTotalSize();
+    int32_t               xpos = x;
+    char              currChar = 0;
+    const uint8_t* sprite_char = text_spritesheet.data;
 
     for (auto &ch : text) {
         currChar = ch - 32;
 
+        #ifdef DEBUG
         if (currChar < 0 || currChar > 65) {
             io::print_to_stdout_varargs("[ERROR]: Unable to draw character: ", currChar);
             continue;
         }
-
-        sprite.data = text_spritesheet.data + currChar * stride;
-        append_sprite(xpos, y, (uint8_t*)sprite.data, sprite.width, sprite.height);
-        xpos += sprite.width + character_gap;
+        #endif
+        sprite_char = text_spritesheet.data + currChar * stride;
+        append_sprite(xpos, y, sprite_char, text_spritesheet.width, text_spritesheet.height, color);
+        xpos += text_spritesheet.width + character_gap;
     }
 }
 
 void Buffer::append_integer(int32_t x, int32_t y, Sprite& text_spritesheet, int32_t number, colors::Colors color)
 {
-    #ifdef DEBUG
     assert(number >= 0);
-    #endif
 
     if (number == 0) {
         append_sprite(x, y, text_spritesheet.getNumberSpritePtr(0),
@@ -331,8 +333,12 @@ void Buffer::initialize_opengl(void)
     io::print_to_stdout_varargs("Renderer used: ", glGetString(GL_RENDERER));
     io::print_to_stdout_varargs("Shading language: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
+    #ifdef DEBUG
     GLCall(glfwSwapInterval(0)); // vsync OFF
-    //GLCall(glfwSwapInterval(1)); // vsync ON
+    #else
+    GLCall(glfwSwapInterval(1)); // vsync ON
+    #endif
+
     GLCall(glClearColor(1.0, 0.0, 0.0, 1.0));
 }
 
@@ -490,7 +496,6 @@ int32_t Buffer::append_digits(int32_t x, int32_t y,
 
 void Buffer::update_fps(void)
 {
-    // TODO: Maybe add correction if time_delta grows "too large"..?
     using namespace std::chrono;
     ++n_frames;
     time_point<steady_clock> time_now = steady_clock::now();
@@ -514,8 +519,7 @@ void Buffer::update_fps(void)
         window_title[i] = (char) (n_frames % 10 + 48);
         n_frames /= 10;
     }
-    #ifdef DEBUG
-        assert(n_frames == 0);
-    #endif
+
+    assert(n_frames == 0);
     GLCall(glfwSetWindowTitle(glfw_window, window_title));
 }

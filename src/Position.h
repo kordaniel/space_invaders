@@ -8,6 +8,7 @@ class Position
     public:
         Position(int32_t, int32_t);
         Position(int32_t, int32_t, int32_t, int32_t);
+        Position(const Position& other) = delete;
         int32_t x;
         int32_t y;
         int32_t x_d;

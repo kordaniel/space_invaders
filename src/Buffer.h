@@ -104,12 +104,13 @@ class Buffer: public Size
 {
     public:
         Buffer(int32_t, int32_t);
+        Buffer(const Buffer& other) = delete;
         ~Buffer(void);
         void clear(void);
         void clear(uint32_t);
         void append_object(Spaceobject&, colors::Colors color = colors::ORANGE);
         void append_horizontal_line(int32_t, colors::Colors color = colors::ORANGE);
-        void append_text(int32_t, int32_t, Sprite&, const std::string&, colors::Colors = colors::ORANGE);
+        void append_text(int32_t, int32_t, const Sprite&, const std::string&, colors::Colors = colors::ORANGE);
         void append_integer(int32_t, int32_t, Sprite&, int32_t, colors::Colors color = colors::ORANGE);
         void draw(void);
         GLFWwindow* get_glfw_window(void);

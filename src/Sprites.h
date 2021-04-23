@@ -1,7 +1,7 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
-#include <vector>
+#include <array>
 
 #include "global.h"
 
@@ -12,8 +12,9 @@ class Sprite: public Size
     public:
         const uint8_t* data;
         Sprite(int32_t, int32_t, const uint8_t*);
-        const uint8_t* getSpritePtr(int32_t offset);
-        const uint8_t* getNumberSpritePtr(int32_t number);
+        Sprite(const Sprite& other) = delete;
+        const uint8_t* getSpritePtr(int32_t offset) const;
+        const uint8_t* getNumberSpritePtr(int32_t number) const;
 };
 
 class Sprites
@@ -189,12 +190,13 @@ class Sprites
         Sprite player_bullet_sprite;
 
         Sprite alien_death_sprite;
-        std::vector<Sprite> alien_sprites;
-        std::vector<Sprite> alien_bullet_sprites;
+        std::array<Sprite, 6> alien_sprites;        // TODO: Move num of alien_sprites &
+        std::array<Sprite, 2> alien_bullet_sprites; //       alien_bullet_sprites ..SOMEWHERE..? !!!
 
         Sprite text_spritesheet;
 
         Sprites(void);
+        Sprites(const Sprites& other) = delete;
 };
 
 #endif

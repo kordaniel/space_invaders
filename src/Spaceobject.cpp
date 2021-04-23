@@ -28,7 +28,7 @@ Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos,
 }
 
 Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos, Sprite &obj_sprite):
-    Spaceobject(x_pos, y_pos, 2, obj_sprite)
+    Spaceobject(x_pos, y_pos, 3, obj_sprite)
 {
     //
 }
@@ -143,10 +143,12 @@ Player::Player(int32_t xpos, int32_t ypos, Sprite &obj_sprite):
 
 void Player::SetDirectionUp(bool keyPressed)
 {
+    assert(keyPressed == keyPressed);
     return; // Player moves only along the horizontal axis
 }
 
 void Player::SetDirectionDown(bool keyPressed)
 {
+    assert(keyPressed == keyPressed);
     return; // Player moves only along the horizontal axis
 }

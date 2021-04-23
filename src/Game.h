@@ -20,6 +20,7 @@ class Game: public Size
         std::list<Spaceobject> bullets;
 
         Game(int32_t, int32_t, Sprites &);
+        Game(const Game& other) = delete;
         void create_player_bullet();
         void create_bullet(int32_t, int32_t, Sprite&);
         void update_player(void);
