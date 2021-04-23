@@ -10,7 +10,7 @@ TARGET    := $(TARGETDIR)/$(APPNAME)
 
 CXX       := g++
 CC        := gcc
-CXXFLAGS  := --std=c++11 -Wall -Wshadow -fsanitize=undefined
+CXXFLAGS  := --std=c++11 -Wall -Wextra -Wshadow -fsanitize=undefined -Werror# -pedantic -O3 -flto
 LDFLAGS   := -framework OpenGL
 LDLIBS    := -lglfw -lglew
 
@@ -22,7 +22,7 @@ OBJECTS   := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCFILES:.$(SRCEXT)=.o))
 
 .PHONY: directories
 
-all: directories $(OBJECTS) $(APPNAME)
+all: directories $(APPNAME)
 
 $(APPNAME): $(OBJECTS)
 	@echo " Linking binary: $@..."
