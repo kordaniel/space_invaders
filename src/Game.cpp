@@ -1,13 +1,12 @@
 #include "Game.h"
 
-Game::Game(int32_t width, int32_t height, Sprites &sprites):
-        Size(width, height),
-        alien_rows(5),
-        alien_cols(11),
-        alien_move_dir(0),
-        player(width / 2 - 5, 30, sprites.player_sprite),
-        _sprites(sprites),
-        m_aliensShouldTurn(false)
+Game::Game(int32_t width, int32_t height, Sprites &sprites)
+        : Size(width, height)
+        , alien_rows(5)
+        , alien_cols(11)
+        , player(width / 2 - 5, 30, sprites.player_sprite)
+        , _sprites(sprites)
+        , m_aliensShouldTurn(false)
 {
     init_aliens(sprites);
 }
@@ -76,4 +75,21 @@ void Game::update_aliens(void)
                 m_aliensShouldTurn = true;
         }
     }
+}
+
+Player& Game::getPlayer(void)
+{
+    return player;
+}
+
+std::list<Spaceobject>& Game::getAliens(void)
+{
+    // TODO: DELETE this method when possible
+    return aliens;
+}
+
+std::list<Spaceobject>& Game::getBullets(void)
+{
+    // TODO: DELETE this method when possible
+    return bullets;
 }

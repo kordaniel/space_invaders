@@ -33,7 +33,7 @@ int main(void)
     // Ugly hack to limit the speed of the game in DEBUG mode for now..
     // **************
     #ifdef DEBUG
-    uint32_t updatesPerSecHack = 1;
+    uint32_t updatesPerSecHack = 20;
     using std::chrono::time_point;
     using std::chrono::steady_clock;
 
@@ -65,14 +65,14 @@ int main(void)
                            sprites.text_spritesheet, "1234506789"
         );
 
-        buffer.append_text(4, 7, sprites.text_spritesheet, std::to_string(game.player.lives));
+        buffer.append_text(4, 7, sprites.text_spritesheet, std::to_string(game.getPlayer().lives));
 
-        buffer.append_object(game.player);
-        for (auto &alien : game.aliens) {
+        buffer.append_object(game.getPlayer());
+        for (auto &alien : game.getAliens()) {
             buffer.append_object(alien, colors::ORANGE);
         }
 
-        for (auto &bullet : game.bullets) {
+        for (auto &bullet : game.getBullets()) {
             buffer.append_object(bullet, colors::RED);
         }
 

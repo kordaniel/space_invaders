@@ -36,30 +36,30 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     switch (key) {
         case GLFW_KEY_RIGHT:
             if (action == GLFW_PRESS) {
-                game->player.SetDirectionRight(true);
+                game->getPlayer().SetDirectionRight(true);
             } else if (action == GLFW_RELEASE) {
-                game->player.SetDirectionRight(false);
+                game->getPlayer().SetDirectionRight(false);
             }
             break;
         case GLFW_KEY_LEFT:
             if (action == GLFW_PRESS) {
-                game->player.SetDirectionLeft(true);
+                game->getPlayer().SetDirectionLeft(true);
             } else if (action == GLFW_RELEASE) {
-                game->player.SetDirectionLeft(false);
+                game->getPlayer().SetDirectionLeft(false);
             }
             break;
         case GLFW_KEY_UP:
             if (action == GLFW_PRESS) {
-                game->player.SetDirectionUp(true);
+                game->getPlayer().SetDirectionUp(true);
             } else if (action == GLFW_RELEASE) {
-                game->player.SetDirectionUp(false);
+                game->getPlayer().SetDirectionUp(false);
             }
             break;
         case GLFW_KEY_DOWN:
             if (action == GLFW_PRESS) {
-                game->player.SetDirectionDown(true);
+                game->getPlayer().SetDirectionDown(true);
             } else if (action == GLFW_RELEASE) {
-                game->player.SetDirectionDown(false);
+                game->getPlayer().SetDirectionDown(false);
             }
             break;
         case GLFW_KEY_SPACE:
