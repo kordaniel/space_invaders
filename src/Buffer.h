@@ -1,13 +1,12 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
+#include "global.h"
 #include <cstdlib>
 #include <cstdio>
 #include <chrono>
 #include <string>
 #include <sstream>
-
-#include "global.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -145,7 +144,7 @@ class Buffer: public Size
         inline int32_t compute_sprite_yx_start_indx(const int32_t&, const int32_t&, const int32_t&);
         inline int32_t compute_y_start_indx(const int32_t&);
         void append_sprite(int32_t, int32_t, const uint8_t*, int32_t, int32_t, colors::Colors color = colors::ORANGE);
-        int32_t append_digits(int32_t, int32_t, Sprite&, int32_t, colors::Colors);
+        int32_t append_digits(int32_t, int32_t, Sprite&, int32_t, size_t, colors::Colors);
         void update_fps(void);
 };
 

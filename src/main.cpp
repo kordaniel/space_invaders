@@ -33,13 +33,14 @@ int main(void)
     // Ugly hack to limit the speed of the game in DEBUG mode for now..
     // **************
     #ifdef DEBUG
-    uint32_t updatesPerSecHack = 30;
+    uint32_t updatesPerSecHack = 1;
     using std::chrono::time_point;
     using std::chrono::steady_clock;
 
     time_point<steady_clock> time_prev_update = steady_clock::now();
     time_point<steady_clock> time_now = steady_clock::now();
     #endif
+
     while (!glfwWindowShouldClose(buffer.get_glfw_window())) {
         #ifdef DEBUG
         time_now = steady_clock::now();
@@ -54,45 +55,28 @@ int main(void)
         #endif
         // End ugly hack!
         // **************
+
+        buffer.append_text(164, 7, sprites.text_spritesheet, "CREDIT 00");
+
+        buffer.append_text(4, buff_height - sprites.text_spritesheet.height - 7, sprites.text_spritesheet, "SCORE");
+        // Actual score
+        buffer.append_text(4 + 2 * sprites.text_spritesheet.width,
+                           buff_height - 2 * sprites.text_spritesheet.height - 12,
+                           sprites.text_spritesheet, "1234506789"
+        );
+
+        buffer.append_text(4, 7, sprites.text_spritesheet, std::to_string(game.player.lives));
+
         buffer.append_object(game.player);
         for (auto &alien : game.aliens) {
-            if (alien.lives == 0) continue;
             buffer.append_object(alien, colors::ORANGE);
         }
 
         for (auto &bullet : game.bullets) {
             buffer.append_object(bullet, colors::RED);
         }
-        buffer.append_integer(1, 20, sprites.text_spritesheet, 100001, colors::Colors::RED);
-        buffer.append_integer(1, 30, sprites.text_spritesheet, 100000, colors::Colors::RED);
-        buffer.append_integer(1, 40, sprites.text_spritesheet, 99999, colors::Colors::RED);
-        buffer.append_integer(1, 50, sprites.text_spritesheet, 10001, colors::Colors::RED);
-        buffer.append_integer(1, 60, sprites.text_spritesheet, 10000, colors::Colors::RED);
-        buffer.append_integer(1, 70, sprites.text_spritesheet, 9999, colors::Colors::RED);
-        buffer.append_integer(buff_width - 10, 80, sprites.text_spritesheet, 1001, colors::Colors::RED);
-        buffer.append_integer(1, 90, sprites.text_spritesheet, 1000, colors::Colors::RED);
-        buffer.append_integer(1, 100, sprites.text_spritesheet, 999, colors::Colors::RED);
-        buffer.append_integer(1, 110, sprites.text_spritesheet, 1234567890, colors::Colors::RED);
-        buffer.append_integer(1, 120, sprites.text_spritesheet, 0, colors::Colors::RED);
-        buffer.append_integer(1, 130, sprites.text_spritesheet, 01, colors::Colors::RED);
-        
 
         buffer.append_horizontal_line(16);
-        buffer.append_text(4, buff_height - sprites.text_spritesheet.height - 7, sprites.text_spritesheet, "SCORE");
-        buffer.append_text(164, 7, sprites.text_spritesheet, "CREDIT 00");
-
-        buffer.append_text(buff_width - (sprites.text_spritesheet.width*2)-1, buff_height - sprites.text_spritesheet.height, sprites.text_spritesheet, "XX");
-
-        //buffer.append_text(0, 0, sprites.text_spritesheet, "XYX");
-
-        // Actual score
-        buffer.append_text(4 + 2 * sprites.text_spritesheet.width,
-                           buff_height - 2 * sprites.text_spritesheet.height - 12,
-                           sprites.text_spritesheet, "1234506789"
-        );
-        // Actual credits
-        buffer.append_text(4, 7, sprites.text_spritesheet, std::to_string(game.player.lives));
-
 
         buffer.draw();
         buffer.clear();

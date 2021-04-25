@@ -100,7 +100,6 @@ void error_callback(int error, const char* description)
 }
 // ----------------------------------------------------------------------
 
-
 Buffer::Buffer(int32_t width, int32_t height):
     Size(width, height),
     window_title("Space Invaders! FPS:     "),
@@ -193,9 +192,10 @@ void Buffer::append_text(int32_t x, int32_t y,
                          colors::Colors color)
 {
     const int32_t stride       = text_spritesheet.getTotalSize();
-    int32_t               xpos = x;
-    char              currChar = 0;
+    const int32_t str_width    = text.length() * (text_spritesheet.width + character_gap) - character_gap;
     const uint8_t* sprite_char = text_spritesheet.data;
+    char currChar              = 0;
+    int32_t xpos               = x + str_width < width ? x : width - str_width;
 
     for (auto &ch : text) {
         currChar = ch - 32;
@@ -217,6 +217,9 @@ void Buffer::append_integer(int32_t x, int32_t y, Sprite& text_spritesheet, int3
     assert(number >= 0);
 
     if (number == 0) {
+        if (width < x + text_spritesheet.width) {
+            x = width - text_spritesheet.width;
+        }
         append_sprite(x, y, text_spritesheet.getNumberSpritePtr(0),
                       text_spritesheet.width, text_spritesheet.height,
                       colors::Colors::ORANGE
@@ -224,7 +227,7 @@ void Buffer::append_integer(int32_t x, int32_t y, Sprite& text_spritesheet, int3
         return;
     }
 
-    append_digits(x, y, text_spritesheet, number, color);
+    append_digits(x, y, text_spritesheet, number, 0, color);
 }
 
 void Buffer::draw(void)
@@ -476,14 +479,13 @@ void Buffer::append_sprite(int32_t x, int32_t y, const uint8_t* sprite,
 
 int32_t Buffer::append_digits(int32_t x, int32_t y,
                               Sprite& text_spritesheet,
-                              int32_t number, colors::Colors color)
+                              int32_t number, size_t digits, colors::Colors color)
 {
-    // NOTE TODO: Add check for x bounds
-
     if (number > 0) {
-        x = append_digits(x, y, text_spritesheet, number / 10, color);
+        x = append_digits(x, y, text_spritesheet, number / 10, ++digits, color);
     } else if (number == 0) {
-        return x;
+        const int32_t num_width = digits * (text_spritesheet.width + character_gap) - character_gap;
+        return x + num_width < width ? x : width - num_width;
     }
 
     append_sprite(x, y, text_spritesheet.getNumberSpritePtr(number % 10),
