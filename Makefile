@@ -1,3 +1,8 @@
+OSTYPE   :=
+ifneq ($(OS), Windows_NT)
+	OSTYPE := $(shell uname -s)
+endif
+
 APPNAME   := space_inv
 
 SRCDIR    := src
@@ -15,8 +20,11 @@ CXXFLAGS  := --std=c++11 -Wall -Wextra -Wshadow -fsanitize=undefined
 #CXXFLAGS  := $(CXXFLAGS) -O3 -flto
 
 CXXFLAGS  += $(shell pkg-config --cflags glew glfw3)
-LDFLAGS   := -framework OpenGL
-LDFLAGS   += $(shell pkg-config --libs glew glfw3)
+LDFLAGS   := $(shell pkg-config --libs glew glfw3)
+
+ifeq ($(OSTYPE),Darwin)
+	LDFLAGS   += -framework OpenGL
+endif
 
 RM        := rm -f
 MKDIR     := mkdir -p
