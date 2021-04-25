@@ -10,9 +10,13 @@ TARGET    := $(TARGETDIR)/$(APPNAME)
 
 CXX       := g++
 CC        := gcc
-CXXFLAGS  := --std=c++11 -Wall -Wextra -Wshadow -fsanitize=undefined -Werror# -pedantic -O3 -flto
+CXXFLAGS  := --std=c++11 -Wall -Wextra -Wshadow -fsanitize=undefined
+#CXXFLAGS  := $(CXXFLAGS) -Werror -pedantic
+#CXXFLAGS  := $(CXXFLAGS) -O3 -flto
+
+CXXFLAGS  += $(shell pkg-config --cflags glew glfw3)
 LDFLAGS   := -framework OpenGL
-LDLIBS    := -lglfw -lglew
+LDFLAGS   += $(shell pkg-config --libs glew glfw3)
 
 RM        := rm -f
 MKDIR     := mkdir -p
@@ -26,7 +30,7 @@ all: directories $(APPNAME)
 
 $(APPNAME): $(OBJECTS)
 	@echo " Linking binary: $@..."
-	$(CXX) $(CXXFLAGS) $(LDLIBS) $(LDFLAGS) $^ -o $(TARGETDIR)/$(APPNAME)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $(TARGETDIR)/$(APPNAME) -v
 
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT) $(SRCDIR)/global.h $(SRCDIR)/%.$(HDREXT)
 	@echo " Compiling object: $@.."

@@ -15,7 +15,7 @@ This is a Space invaders clone implemented in c++ & OpenGL. Based on the code fr
 
 ## Requirements
 * C++11 compliant environment
-* GNU Make for easy building
+* GNU Make & pkg-config for easy building
 * [GLFW](https://www.glfw.org/index.html)
 * [GLEW](http://glew.sourceforge.net/)
 
