@@ -15,12 +15,12 @@ void Game::init_aliens(Sprites &sprites)
 {
     for (int32_t yi = 0; yi < alien_rows; ++yi) {
         const size_t alien_type = (alien_rows - yi) / 2 + 1;
-
         for (int32_t xi = 0; xi < alien_cols; ++xi) {
             Sprite& alien_sprite = sprites.alien_sprites[2 * alien_type - 1];
+            //io::print_to_stdout_varargs("INIT: ", (2 * alien_type - 1));
             const size_t xpos = 24 + 16 * xi + (13 - alien_sprite.width)/2;
             const size_t ypos = 128 + 17 * yi;
-            aliens.emplace_front(xpos, ypos, directions::LEFT, directions::STATIONARY, 1, 3, alien_sprite);
+            aliens.emplace_front(xpos, ypos, directions::LEFT, directions::STATIONARY, 1, 3, alien_type, alien_sprite);
         }
     }
 }
@@ -82,7 +82,7 @@ Player& Game::getPlayer(void)
     return player;
 }
 
-std::list<Spaceobject>& Game::getAliens(void)
+std::list<Alien>& Game::getAliens(void)
 {
     // TODO: DELETE this method when possible
     return aliens;

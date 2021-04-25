@@ -18,7 +18,7 @@ public:
     void update_bullets(void);
     void update_aliens(void);
     Player& getPlayer(void);
-    std::list<Spaceobject>& getAliens(void);
+    std::list<Alien>& getAliens(void);
     std::list<Spaceobject>& getBullets(void);
     
 private:
@@ -27,7 +27,7 @@ private:
     Player player;
     Sprites & _sprites;
     bool m_aliensShouldTurn;
-    std::list<Spaceobject> aliens;
+    std::list<Alien> aliens;
     std::list<Spaceobject> bullets;
     void init_aliens(Sprites &);
     void create_bullet(int32_t, int32_t, Sprite&);

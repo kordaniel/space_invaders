@@ -1,15 +1,15 @@
 #include "Spaceobject.h"
 
-Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos,
-                         int32_t delta_x, int32_t delta_y,
-                         int32_t move_speed,
+Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
+                         int32_t xDirection, int32_t yDirection,
+                         int32_t moveSpeed,
                          int32_t lives,
-                         Sprite &obj_sprite):
-    Size(obj_sprite.width, obj_sprite.height),
-    Position(x_pos, y_pos, delta_x, delta_y),
-    obj_sprite(obj_sprite),
-    lives(lives),
-    _move_speed(move_speed)
+                         Sprite& objectSprite)
+    : Size(objectSprite.width, objectSprite.height)
+    , Position(xPosition, yPosition, xDirection, yDirection)
+    , obj_sprite(objectSprite)
+    , lives(lives)
+    , _move_speed(moveSpeed)
 {
     //
 }
@@ -151,4 +151,26 @@ void Player::SetDirectionDown(bool keyPressed)
 {
     assert(keyPressed == keyPressed);
     return; // Player moves only along the horizontal axis
+}
+
+// ============ CLASS: Alien  =============
+Alien::Alien(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
+             int32_t moveSpeed, int32_t lives, size_t alienType, Sprite& objectSprite)
+    : Spaceobject(xPosition, yPosition, xDirection, yDirection, moveSpeed, lives, objectSprite)
+{
+    switch (alienType) {
+        case 1:
+            m_type = Type::ALIEN_A;
+            break;
+        case 2:
+            m_type = Type::ALIEN_B;
+            break;
+        case 3:
+            m_type = Type::ALIEN_C;
+            break;
+        default:
+            m_type = Type::ALIEN_A; // TODO: Refactor to ALIEN_DEAD for clearer visual feedback ?
+            io::print_to_stderr("[ERROR]: Attempting to initialize an unsupported alien type, using ALIEN_A");
+            break;
+    }
 }

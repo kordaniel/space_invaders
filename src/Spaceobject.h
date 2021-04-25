@@ -8,6 +8,7 @@
 #include "Size.h"
 #include "Position.h"
 #include "Sprites.h"
+#include "Io.h"
 
 namespace directions
 {
@@ -24,7 +25,8 @@ namespace directions
 class Spaceobject: public Size, public Position
 {
     public:
-        Spaceobject(int32_t, int32_t, int32_t, int32_t, int32_t, int32_t, Sprite&);
+        Spaceobject(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
+                    int32_t moveSpeed, int32_t lives, Sprite& objectSprite);
         Spaceobject(int32_t, int32_t, int32_t, Sprite&);
         Spaceobject(int32_t, int32_t, Sprite &);
         Spaceobject(const Spaceobject& other) = delete;
@@ -58,6 +60,22 @@ class Player: public Spaceobject
         Player(const Player& other) = delete;
         void SetDirectionUp(bool keyPressed);
         void SetDirectionDown(bool keyPressed);
+};
+
+class Alien: public Spaceobject
+{
+public:
+    enum Type: size_t {
+        ALIEN_DEAD = 0,
+        ALIEN_A    = 1,
+        ALIEN_B    = 2,
+        ALIEN_C    = 3
+    };
+    Alien(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
+          int32_t moveSpeed, int32_t lives, size_t alienType, Sprite& objectSprite);
+
+private:
+    Type m_type;
 };
 
 #endif
