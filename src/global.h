@@ -14,6 +14,10 @@
 
 /* ********************************************** */
 
+#ifdef DEBUG
+#include "Timer.h"
+#endif
+
 #include <cstdint>
 #include <cassert>
 
