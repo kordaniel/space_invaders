@@ -101,51 +101,51 @@ namespace colors
 
 class Buffer: public Size
 {
-    public:
-        Buffer(int32_t, int32_t);
-        Buffer(const Buffer& other) = delete;
-        ~Buffer(void);
-        void clear(void);
-        void clear(uint32_t);
-        void append_object(Spaceobject&, colors::Colors color = colors::ORANGE);
-        void append_horizontal_line(int32_t, colors::Colors color = colors::ORANGE);
-        void append_text(int32_t, int32_t, const Sprite&, const std::string&, colors::Colors = colors::ORANGE);
-        void append_integer(int32_t, int32_t, Sprite&, int32_t, colors::Colors color = colors::ORANGE);
-        void draw(void);
-        GLFWwindow* get_glfw_window(void);
-    private:
-        uint32_t* data; // 8 bits each for R,G,B,Alpha values
-        char window_title[26];
-        GLFWwindow *glfw_window;
-        GLenum err;
-        GLuint buffer_texture;
-        GLuint fullscreen_triangle_vao;
-        GLuint shader_id;
-        GLint location;
-        const static int32_t character_gap = 2;// amount of space between chars
+public:
+    Buffer(int32_t, int32_t);
+    Buffer(const Buffer& other) = delete;
+    ~Buffer(void);
+    void clear(void);
+    void clear(uint32_t);
+    void append_object(Spaceobject&, colors::Colors color = colors::ORANGE);
+    void append_horizontal_line(int32_t, colors::Colors color = colors::ORANGE);
+    void append_text(int32_t, int32_t, const Sprite&, const std::string&, colors::Colors = colors::ORANGE);
+    void append_integer(int32_t, int32_t, Sprite&, int32_t, colors::Colors color = colors::ORANGE);
+    void draw(void);
+    GLFWwindow* get_glfw_window(void);
+private:
+    uint32_t* data; // 8 bits each for R,G,B,Alpha values
+    char window_title[26];
+    GLFWwindow *glfw_window;
+    GLenum err;
+    GLuint buffer_texture;
+    GLuint fullscreen_triangle_vao;
+    GLuint shader_id;
+    GLint location;
+    const static int32_t character_gap = 2;// amount of space between chars
 
-        // Used for computing FPS
-        std::chrono::time_point<std::chrono::steady_clock> time_prev_update;
-        uint16_t n_frames;
-        uint16_t fps_prev;
-        // --------- | | ---------
+    // Used for computing FPS
+    std::chrono::time_point<std::chrono::steady_clock> time_prev_update;
+    uint16_t n_frames;
+    uint16_t fps_prev;
+    // --------- | | ---------
 
-        ShaderProgramSource read_and_parse_shader(const std::string&);
-        void initialize_glfw_window(void);
-        void initialize_opengl(void);
-        void initialize_buffer_texture(void);
-        void initialize_shaders(void);
-        void compile_shader(GLenum, const char*);
-        void validate_shader(GLuint, const char*);
-        bool validate_program(GLuint);
-        bool y_is_in_bounds(const int32_t&);
-        bool x_is_in_bounds(const int32_t&);
-        bool pixel_is_in_bounds(const int32_t&, const int32_t&);
-        inline int32_t compute_sprite_yx_start_indx(const int32_t&, const int32_t&, const int32_t&);
-        inline int32_t compute_y_start_indx(const int32_t&);
-        void append_sprite(int32_t, int32_t, const uint8_t*, int32_t, int32_t, colors::Colors color = colors::ORANGE);
-        int32_t append_digits(int32_t, int32_t, Sprite&, int32_t, size_t, colors::Colors);
-        void update_fps(void);
+    ShaderProgramSource read_and_parse_shader(const std::string&);
+    void initialize_glfw_window(void);
+    void initialize_opengl(void);
+    void initialize_buffer_texture(void);
+    void initialize_shaders(void);
+    void compile_shader(GLenum, const char*);
+    void validate_shader(GLuint, const char*);
+    bool validate_program(GLuint);
+    bool y_is_in_bounds(const int32_t&);
+    bool x_is_in_bounds(const int32_t&);
+    bool pixel_is_in_bounds(const int32_t&, const int32_t&);
+    inline int32_t compute_sprite_yx_start_indx(const int32_t&, const int32_t&, const int32_t&);
+    inline int32_t compute_y_start_indx(const int32_t&);
+    void append_sprite(int32_t, int32_t, const uint8_t*, int32_t, int32_t, colors::Colors color = colors::ORANGE);
+    int32_t append_digits(int32_t, int32_t, Sprite&, int32_t, size_t, colors::Colors);
+    void update_fps(void);
 };
 
 #endif
