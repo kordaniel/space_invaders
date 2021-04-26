@@ -21,5 +21,15 @@ out vec3 outColor;
 
 void main(void)
 {
+    vec2 SunCoord;
+    SunCoord.x = 0.99;
+    SunCoord.y = 0.99;
+
     outColor = texture(buffer, TexCoord).rgb;
+    outColor.g *= TexCoord.y;
+
+    vec2 dis = TexCoord.xy - SunCoord.xy;
+    float distance = inversesqrt(dot(dis, dis)) / 2;
+    outColor.rgb *= distance;
+
 }
