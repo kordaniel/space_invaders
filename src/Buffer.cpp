@@ -338,7 +338,7 @@ void Buffer::initialize_opengl(void)
     io::print_to_stdout_varargs("Shading language: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
     #ifdef DEBUG
-    GLCall(glfwSwapInterval(0)); // vsync OFF
+    GLCall(glfwSwapInterval(1)); // vsync 1 = ON, 0 = OFF
     #else
     GLCall(glfwSwapInterval(1)); // vsync ON
     #endif
