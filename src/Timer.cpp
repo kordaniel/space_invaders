@@ -22,10 +22,14 @@ void Timer::processResult(const time_point<steady_clock>& endTimepoint, const ch
         time_point_cast<microseconds>(m_startTimepoint).time_since_epoch().count();
     int64_t endTime =
         time_point_cast<microseconds>(endTimepoint).time_since_epoch().count();
-    
+
     int64_t duration = endTime - startTime;
     double duration_ms = duration * 0.001;
-    io::print_to_stdout_varargs((message != nullptr ? message : ""), duration, "us (", duration_ms, "ms)");
+
+    if (duration_ms < 1000)
+        io::print_to_stdout_varargs((message != nullptr ? message : ""), duration, " us\t(", duration_ms, " ms)");
+    else
+       io::print_to_stdout_varargs((message != nullptr ? message : ""), duration, " us\t(", duration * 0.000001, " s)");
 }
 
 

@@ -10,6 +10,7 @@ class Timer
 {
 public:
     Timer(bool printTimingResults = true);
+    Timer(const Timer& other) = delete;
     ~Timer(void);
     void processResult(const std::chrono::time_point<std::chrono::steady_clock>& endTimepoint, const char* message);
 
@@ -23,6 +24,7 @@ class ScopeTimer
 {
 public:
     ScopeTimer(const char* scopeName);
+    ScopeTimer(const ScopeTimer& other) = delete;
     ~ScopeTimer(void);
 private:
     const char* m_scopeName;
