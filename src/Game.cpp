@@ -15,6 +15,7 @@ void Game::init_aliens(Sprites &sprites)
 {
     for (int32_t yi = 0; yi < alien_rows; ++yi) {
         const size_t alien_type = (alien_rows - yi) / 2 + 1;
+        assert(1 <= alien_type && alien_type <= 3);
         for (int32_t xi = 0; xi < alien_cols; ++xi) {
             Sprite& alien_sprite = sprites.alien_sprites[2 * alien_type - 1];
             //io::print_to_stdout_varargs("INIT: ", (2 * alien_type - 1));
@@ -32,7 +33,15 @@ void Game::create_player_bullet()
 
 void Game::create_bullet(int32_t x_pos, int32_t y_pos, Sprite& sprite)
 {
-    bullets.emplace_front(x_pos, y_pos, directions::STATIONARY, directions::UP, 3, 1, sprite);
+    bullets.emplace_front(x_pos, y_pos, directions::STATIONARY, directions::UP, 3, 1,
+                          sprite, SpaceobjectType::BULLET_PLAYER);
+}
+
+void Game::updateGame(void)
+{
+    update_player();
+    update_aliens();
+    update_bullets();
 }
 
 void Game::update_player(void)

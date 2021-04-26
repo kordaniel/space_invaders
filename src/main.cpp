@@ -19,7 +19,7 @@ int main(void)
 
     const int32_t buff_width = 224, buff_height = 256;
     Sprites sprites;
-    Buffer buffer(buff_width, buff_height);
+    Buffer buffer(buff_width, buff_height, sprites);
     Game game(buff_width, buff_height, sprites);
 
     glfwSetWindowUserPointer(buffer.get_glfw_window(), &game);
@@ -33,6 +33,7 @@ int main(void)
     // Ugly hack to limit the speed of the game in DEBUG mode for now..
     // **************
     #ifdef DEBUG
+    Timer timer;
     uint32_t updatesPerSecHack = 20;
     using std::chrono::time_point;
     using std::chrono::steady_clock;
@@ -46,9 +47,7 @@ int main(void)
         time_now = steady_clock::now();
         if ((time_now - time_prev_update) > std::chrono::milliseconds(1000 / updatesPerSecHack)) {
         #endif
-            game.update_player();
-            game.update_aliens();
-            game.update_bullets();
+            game.updateGame();
         #ifdef DEBUG
             time_prev_update = time_now;
         }
@@ -67,13 +66,17 @@ int main(void)
 
         buffer.append_text(4, 7, sprites.text_spritesheet, std::to_string(game.getPlayer().lives));
 
-        buffer.append_object(game.getPlayer());
+        //buffer.append_object(game.getPlayer());
+        buffer.drawObject(game.getPlayer());
+
         for (auto &alien : game.getAliens()) {
-            buffer.append_object(alien, colors::ORANGE);
+            //buffer.append_object(alien, colors::ORANGE);
+            buffer.drawObject(alien, colors::ORANGE);
         }
 
         for (auto &bullet : game.getBullets()) {
-            buffer.append_object(bullet, colors::RED);
+            //buffer.append_object(bullet, colors::RED);
+            buffer.drawObject(bullet, colors::RED);
         }
 
         buffer.append_horizontal_line(16);
@@ -96,5 +99,8 @@ int main(void)
     //s_Finished = true;
     //worker_thread.join();
 
+    #ifdef DEBUG
+    io::print_to_stdout("Exiting cleany. Ran for");
+    #endif
     return EXIT_SUCCESS;
 }

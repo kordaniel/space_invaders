@@ -13,6 +13,7 @@ class Game: public Size
 public:
     Game(int32_t, int32_t, Sprites &);
     Game(const Game& other) = delete;
+    void updateGame(void);
     void create_player_bullet();
     void update_player(void);
     void update_bullets(void);

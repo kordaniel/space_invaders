@@ -38,3 +38,35 @@ Sprites::Sprites(void):
 {
     //
 }
+
+const Sprite& Sprites::getSprite(const SpaceobjectType& spriteType,
+                                 SpaceobjectTypeSpriteSelector& spriteSelector) const
+{
+    switch (spriteType)
+    {
+        case ALIEN_DEAD:
+            return alien_death_sprite;
+        case ALIEN_A:
+            return alien_sprites[spriteSelector.getCurrentSpriteIdx(spriteType)];
+            break;
+        case ALIEN_B:
+            return alien_sprites[spriteSelector.getCurrentSpriteIdx(spriteType)];
+            break;
+        case ALIEN_C:
+            return alien_sprites[spriteSelector.getCurrentSpriteIdx(spriteType)];
+            break;
+        case PLAYER:
+            return player_sprite;
+            break;
+        case BULLET_ALIEN:
+            return alien_bullet_sprites[0];
+            break;
+        case BULLET_PLAYER:
+            return player_bullet_sprite;
+            break;
+        default:
+            throw "[ERROR]: Sprite not Found";
+            //return alien_death_sprite;
+            break;
+    }
+}

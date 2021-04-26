@@ -197,6 +197,13 @@ public:
 
     Sprites(void);
     Sprites(const Sprites& other) = delete;
+    const Sprite& getSprite(const SpaceobjectType& spriteType,
+                            SpaceobjectTypeSpriteSelector& spriteSelector) const;
+    /*
+    const Sprite& getSprite(SpaceobjectType spriteType) const {
+        assert(spriteType == spriteType);
+        return player_sprite;
+    }*/
 };
 
 #endif

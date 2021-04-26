@@ -4,6 +4,34 @@ Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
                          int32_t xDirection, int32_t yDirection,
                          int32_t moveSpeed,
                          int32_t lives,
+                         Sprite& objectSprite, SpaceobjectType objectType,
+                         SpaceobjectTypeSpriteSelector spriteSelector)
+    : Size(objectSprite.width, objectSprite.height)
+    , Position(xPosition, yPosition, xDirection, yDirection)
+    , obj_sprite(objectSprite)
+    , m_spriteType(objectType)
+    , m_spriteSelector(spriteSelector)
+    , lives(lives)
+    , _move_speed(moveSpeed)
+{
+    //
+}
+
+Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
+                         int32_t xDirection, int32_t yDirection,
+                         int32_t moveSpeed,
+                         int32_t lives,
+                         Sprite& objectSprite, SpaceobjectType objectType)
+    : Spaceobject(xPosition, yPosition, xDirection, yDirection, moveSpeed, lives,
+                  objectSprite, objectType, SpaceobjectTypeSpriteSelector())
+{
+    //
+}
+
+Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
+                         int32_t xDirection, int32_t yDirection,
+                         int32_t moveSpeed,
+                         int32_t lives,
                          Sprite& objectSprite)
     : Size(objectSprite.width, objectSprite.height)
     , Position(xPosition, yPosition, xDirection, yDirection)
@@ -11,24 +39,37 @@ Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
     , lives(lives)
     , _move_speed(moveSpeed)
 {
-    //
+    // Note: m_spriteType and m_spriteSelector not set!!!!
 }
+
+Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
+                         int32_t xDirection, int32_t yDirection,
+                         int32_t moveSpeed,
+                         int32_t lives,
+                         Sprite& objectSprite,
+                         SpaceobjectTypeSpriteSelector spriteSelector)
+        : Size(objectSprite.width, objectSprite.height)
+        , Position(xPosition, yPosition, xDirection, yDirection)
+        , obj_sprite(objectSprite)
+        , m_spriteSelector(spriteSelector)
+        , lives(lives)
+        , _move_speed(moveSpeed)
+{
+    // NOTE: m_spriteType not set!!!!!!
+}
+
 
 Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos,
                          int32_t move_speed,
-                         Sprite &obj_sprite):
-    Spaceobject(x_pos, y_pos, directions::STATIONARY, directions::STATIONARY, move_speed, 3, obj_sprite)
-    //Size(obj_sprite.width, obj_sprite.height),
-    //Position(x_pos, y_pos),
-    //_move_speed(move_speed),
-    //obj_sprite(obj_sprite),
-    //lives(3)
+                         Sprite &obj_sprite, SpaceobjectType objectType):
+    Spaceobject(x_pos, y_pos, directions::STATIONARY, directions::STATIONARY, move_speed, 3, obj_sprite, objectType,
+                { true, 30, 0, 1 })
 {
     //
 }
 
-Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos, Sprite &obj_sprite):
-    Spaceobject(x_pos, y_pos, 3, obj_sprite)
+Spaceobject::Spaceobject(int32_t x_pos, int32_t y_pos, Sprite &obj_sprite, SpaceobjectType objectType):
+    Spaceobject(x_pos, y_pos, 3, obj_sprite, objectType)
 {
     //
 }
@@ -136,7 +177,7 @@ bool Spaceobject::overlaps(Spaceobject& other)
 
 // ============ CLASS: Player  ============
 Player::Player(int32_t xpos, int32_t ypos, Sprite &obj_sprite):
-    Spaceobject(xpos, ypos, obj_sprite)
+    Spaceobject(xpos, ypos, obj_sprite, SpaceobjectType::PLAYER)
 {
     //
 }
@@ -156,21 +197,22 @@ void Player::SetDirectionDown(bool keyPressed)
 // ============ CLASS: Alien  =============
 Alien::Alien(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
              int32_t moveSpeed, int32_t lives, size_t alienType, Sprite& objectSprite)
-    : Spaceobject(xPosition, yPosition, xDirection, yDirection, moveSpeed, lives, objectSprite)
+    : Spaceobject(xPosition, yPosition, xDirection, yDirection, moveSpeed, lives, objectSprite, SpaceobjectTypeSpriteSelector(true, 30, 0, 1 ))
 {
     switch (alienType) {
         case 1:
-            m_type = Type::ALIEN_A;
+            m_spriteType = SpaceobjectType::ALIEN_A;
             break;
         case 2:
-            m_type = Type::ALIEN_B;
+            m_spriteType = SpaceobjectType::ALIEN_B;
             break;
         case 3:
-            m_type = Type::ALIEN_C;
+            m_spriteType = SpaceobjectType::ALIEN_C;
             break;
         default:
-            m_type = Type::ALIEN_A; // TODO: Refactor to ALIEN_DEAD for clearer visual feedback ?
+            m_spriteType = SpaceobjectType::ALIEN_DEAD;
             io::print_to_stderr("[ERROR]: Attempting to initialize an unsupported alien type, using ALIEN_A");
             break;
     }
+    //m_spriteSelector = { true, 30, 0, 1 };
 }

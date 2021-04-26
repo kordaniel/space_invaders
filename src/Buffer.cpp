@@ -100,12 +100,13 @@ void error_callback(int error, const char* description)
 }
 // ----------------------------------------------------------------------
 
-Buffer::Buffer(int32_t width, int32_t height):
-    Size(width, height),
-    window_title("Space Invaders! FPS:     "),
-    time_prev_update(std::chrono::steady_clock::now()),
-    n_frames(0),
-    fps_prev(0)
+Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight, Sprites& sprites)
+    : Size(bufferWidth, bufferHeight)
+    , m_sprites(sprites)
+    , window_title("Space Invaders! FPS:     ")
+    , time_prev_update(std::chrono::steady_clock::now())
+    , n_frames(0)
+    , fps_prev(0)
 {
     data = new uint32_t[width * height];
     clear();
@@ -137,13 +138,13 @@ void Buffer::clear(uint32_t color)
     }
 }
 
-void Buffer::append_object(Spaceobject& obj, colors::Colors color)
+void Buffer::drawObject(Spaceobject& obj, colors::Colors color)
 {
-    const int32_t &spr_x      = obj.x;
-    const int32_t &spr_y      = obj.y;
-    const int32_t &spr_width  = obj.obj_sprite.width;
-    const int32_t &spr_height = obj.obj_sprite.height;
-    const uint8_t* sprite     = obj.obj_sprite.data;
+    const int32_t& spr_x      = obj.x;
+    const int32_t& spr_y      = obj.y;
+    const Sprite& spriteObj   = m_sprites.getSprite(obj.m_spriteType, obj.m_spriteSelector);
+    const int32_t& spr_width  = spriteObj.width;
+    const int32_t& spr_height = spriteObj.height;
 
     int32_t y_startidx;
 
@@ -156,7 +157,7 @@ void Buffer::append_object(Spaceobject& obj, colors::Colors color)
         #endif
         y_startidx = compute_sprite_yx_start_indx(spr_x, (spr_y - yi), spr_height);
         for (int32_t xi = 0; xi < spr_width; ++xi) {
-            if (!sprite[yi * spr_width + xi]) {
+            if (!spriteObj.data[yi * spr_width + xi]) {
                 continue;
             }
             

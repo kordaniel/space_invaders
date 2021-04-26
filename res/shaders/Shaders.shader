@@ -29,7 +29,7 @@ void main(void)
     outColor.g *= TexCoord.y;
 
     vec2 dis = TexCoord.xy - SunCoord.xy;
-    float distance = inversesqrt(dot(dis, dis)) / 2;
+    float distance = 0.75*inversesqrt(dot(dis, dis));
     outColor.rgb *= distance;
 
 }
