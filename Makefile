@@ -16,14 +16,16 @@ TARGET    := $(TARGETDIR)/$(APPNAME)
 CXX       := g++
 CC        := gcc
 CXXFLAGS  := --std=c++11 -Wall -Wextra -Wshadow -fsanitize=undefined
-#CXXFLAGS  := $(CXXFLAGS) -Werror -pedantic
-#CXXFLAGS  := $(CXXFLAGS) -O3 -flto
-
+#CXXFLAGS  += $(CXXFLAGS) -Werror -pedantic
+#CXXFLAGS  += $(CXXFLAGS) -O3 -flto
 CXXFLAGS  += $(shell pkg-config --cflags glew glfw3)
-LDFLAGS   := $(shell pkg-config --libs glew glfw3)
 
+LDFLAGS   := $(shell pkg-config --libs glew glfw3)
 ifeq ($(OSTYPE),Darwin)
-	LDFLAGS   += -framework OpenGL
+	LDFLAGS += -framework OpenGL
+else
+	CXXFLAGS += $(shell pkg-config --cflags opengl)
+	LDFLAGS += $(shell pkg-config --libs opengl)
 endif
 
 RM        := rm -f
