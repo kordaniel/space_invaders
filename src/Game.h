@@ -11,10 +11,10 @@
 class Game: public Size
 {
 public:
-    Game(int32_t, int32_t, Sprites &);
+    Game(int32_t gamwWidth, int32_t gameHeight, const Sprites& sprites);
     Game(const Game& other) = delete;
     void updateGame(void);
-    void create_player_bullet();
+    void create_player_bullet(void);
     void update_player(void);
     void update_bullets(void);
     void update_aliens(void);
@@ -23,15 +23,15 @@ public:
     std::list<Spaceobject>& getBullets(void);
     
 private:
-    int32_t alien_rows;
-    int32_t alien_cols;
-    Player player;
-    Sprites & _sprites;
+    int32_t m_alien_rows;
+    int32_t m_alien_cols;
+    Player m_player;
+    const Sprites & m_sprites;
     bool m_aliensShouldTurn;
-    std::list<Alien> aliens;
-    std::list<Spaceobject> bullets;
-    void init_aliens(Sprites &);
-    void create_bullet(int32_t, int32_t, Sprite&);
+    std::list<Alien> m_aliens;
+    std::list<Spaceobject> m_bullets;
+    void init_aliens(const Sprites& sprites);
+    void create_bullet(int32_t, int32_t, const Sprite&);
 };
 
 #endif

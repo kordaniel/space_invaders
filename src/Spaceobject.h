@@ -21,26 +21,45 @@ namespace directions
     };
 } // end namespace directions;
 
+class SpaceobjectTypeSpriteSelector
+{
+public:
+    SpaceobjectTypeSpriteSelector(bool animated, size_t maxFrames, size_t min, size_t max, size_t startIdx);
+    SpaceobjectTypeSpriteSelector(const SpaceobjectTypeSpriteSelector& other) = delete;
+    size_t getCurrentSpriteIdx(SpaceobjectType spriteType);
+
+private:
+    bool m_animated;
+    size_t m_frameChangeFreq;
+    size_t m_frameCount;
+    size_t m_minIdx;
+    size_t m_maxIdx;
+    size_t m_currentIdx;
+};
+
 class Spaceobject: public Size, public Position
 {
 public:
     Spaceobject(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
-                int32_t moveSpeed, int32_t lives, Sprite& objectSprite, SpaceobjectType objectType,
-                SpaceobjectTypeSpriteSelector spriteSelector);
-    Spaceobject(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
-                int32_t moveSpeed, int32_t lives, Sprite& objectSprite);
-    Spaceobject(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
-                int32_t moveSpeed, int32_t lives, Sprite& objectSprite,
-                SpaceobjectTypeSpriteSelector spriteSelector);
-    Spaceobject(int32_t xPosition, int32_t yPosition,
-                int32_t xDirection, int32_t yDirection,
+                int32_t width, int32_t height,
                 int32_t moveSpeed, int32_t lives,
-                Sprite& objectSprite, SpaceobjectType objectType);
-    Spaceobject(int32_t xPosition, int32_t yPosition, int32_t moveSpeed, Sprite& objectSprite, SpaceobjectType objectType);
-    Spaceobject(int32_t, int32_t, Sprite &, SpaceobjectType objectType);
+                SpaceobjectType objectType,
+                bool animated, size_t animationSpritesNum);
+    // Used to create bullet
+    Spaceobject(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
+                int32_t width, int32_t height,
+                int32_t moveSpeed, int32_t lives,
+                SpaceobjectType objectType);
+    Spaceobject(int32_t xPosition, int32_t yPosition,
+                int32_t width, int32_t height,
+                int32_t moveSpeed,
+                SpaceobjectType objectType);
+    // Used to create player
+    Spaceobject(int32_t xPosition, int32_t yPosition,
+                int32_t width, int32_t height,
+                SpaceobjectType objectType);
     Spaceobject(const Spaceobject& other) = delete;
 //private:
-    Sprite &obj_sprite;
     SpaceobjectType m_spriteType;
     SpaceobjectTypeSpriteSelector m_spriteSelector;
     int32_t lives;
@@ -67,7 +86,7 @@ private:
 class Player: public Spaceobject
 {
 public:
-    Player(int32_t, int32_t, Sprite &);
+    Player(int32_t xPosition, int32_t yPosition, int32_t width, int32_t height);
     Player(const Player& other) = delete;
     void SetDirectionUp(bool keyPressed);
     void SetDirectionDown(bool keyPressed);
@@ -77,7 +96,8 @@ class Alien: public Spaceobject
 {
 public:
     Alien(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,
-          int32_t moveSpeed, int32_t lives, size_t alienType, Sprite& objectSprite);
+          int32_t width, int32_t height,
+          int32_t moveSpeed, int32_t lives, SpaceobjectType alienType);
 
 private:
     //

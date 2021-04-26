@@ -6,6 +6,9 @@
 #include "global.h"
 
 #include "Size.h"
+#include "Spaceobject.h"
+
+class SpaceobjectTypeSpriteSelector; // from Spaceobject.{h,cpp}, must be forward declared
 
 class Sprite: public Size
 {
