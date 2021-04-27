@@ -119,17 +119,17 @@ void Spaceobject::SetDirectionStationary(void)
     y_d = directions::STATIONARY;
 }
 
-int32_t Spaceobject::GetRightMostX(void)
+int32_t Spaceobject::GetRightMostX(void) const
 {
     return x + width;
 }
 
-int32_t Spaceobject::GetTopMostY(void)
+int32_t Spaceobject::GetTopMostY(void) const
 {
     return y + height;
 }
 
-int32_t Spaceobject::GetMiddleX(void)
+int32_t Spaceobject::GetMiddleX(void) const
 {
     return x + width / 2;
 }
@@ -162,7 +162,7 @@ void Spaceobject::setVerticalDirection(directions::Directions direction, bool se
 /// @param other The object to check if it overlaps with this one.
 /// @return true if the two objects overlap, false otherwise.
 ///
-bool Spaceobject::overlaps(Spaceobject& other)
+bool Spaceobject::overlaps(Spaceobject& other) const
 {
     if (GetTopMostY() < other.y + 1 || y + 1 > other.GetTopMostY()) {
         return false;

@@ -71,11 +71,11 @@ public:
     void SetDirectionLeft(bool);
     void SetDirectionRight(bool);
     void SetDirectionStationary(void);
-    int32_t GetRightMostX(void);
-    int32_t GetTopMostY(void);
-    int32_t GetMiddleX(void);
+    int32_t GetRightMostX(void) const;
+    int32_t GetTopMostY(void) const;
+    int32_t GetMiddleX(void) const;
     void ReverseDirection(void);
-    bool overlaps(Spaceobject& other);
+    bool overlaps(Spaceobject& other) const;
 
 private:
     void setHorizontalDirection(directions::Directions, bool);
