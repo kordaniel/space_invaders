@@ -13,10 +13,10 @@ SpaceobjectTypeSpriteSelector::SpaceobjectTypeSpriteSelector(
     //
 }
 
-size_t SpaceobjectTypeSpriteSelector::getCurrentSpriteIdx(SpaceobjectType spriteType)
+size_t SpaceobjectTypeSpriteSelector::getCurrentSpriteIdx(void)
 {
     if (!m_animated) {
-        return spriteType;
+        return 0;
     }
 
     if (m_frameCount > m_frameChangeFreq) {
@@ -28,7 +28,12 @@ size_t SpaceobjectTypeSpriteSelector::getCurrentSpriteIdx(SpaceobjectType sprite
     }
 
     ++m_frameCount;
-    return spriteType + m_currentIdx;
+    return m_currentIdx;
+}
+
+size_t SpaceobjectTypeSpriteSelector::getCurrentSpriteIdx(SpaceobjectType spriteType)
+{
+    return spriteType + getCurrentSpriteIdx();
 }
 
 Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection,

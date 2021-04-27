@@ -26,6 +26,7 @@ class SpaceobjectTypeSpriteSelector
 public:
     SpaceobjectTypeSpriteSelector(bool animated, size_t maxFrames, size_t min, size_t max, size_t startIdx);
     SpaceobjectTypeSpriteSelector(const SpaceobjectTypeSpriteSelector& other) = delete;
+    size_t getCurrentSpriteIdx(void);
     size_t getCurrentSpriteIdx(SpaceobjectType spriteType);
 
 private:
