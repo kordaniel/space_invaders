@@ -59,7 +59,7 @@ const Sprite& Sprites::getSprite(const SpaceobjectType& spriteType,
             return player_sprite;
             break;
         case BULLET_ALIEN:
-            return alien_bullet_sprites[0];
+            return alien_bullet_sprites[spriteSelector.getCurrentSpriteIdx()];
             break;
         case BULLET_PLAYER:
             return player_bullet_sprite;

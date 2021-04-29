@@ -1,7 +1,9 @@
 #include "main.h"
-/*#include <thread>
+#include <iostream>
+#include <cstdlib> // srand, rand
+#include <ctime>   // time_t
 
-static bool s_Finished = false;
+/*static bool s_Finished = false;
 
 void do_heavyCalculation()
 {
@@ -9,13 +11,11 @@ void do_heavyCalculation()
         io::print_to_stdout("Huhhuh, so heavy lifting going on");
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
-}
-*/
-#include <chrono>
+} */
 
 int main(void)
 {
-    //std::thread worker_thread(do_heavyCalculation);
+    srand(time(nullptr));
 
     const int32_t buff_width = 224, buff_height = 256;
     Sprites sprites;
@@ -74,8 +74,12 @@ int main(void)
             buffer.drawObject(alien, colors::ORANGE);
         }
 
-        for (auto &bullet : game.getBullets()) {
+        for (auto &bullet : game.getAlienBullets()) {
             //buffer.append_object(bullet, colors::RED);
+            buffer.drawObject(bullet, colors::RED);
+        }
+
+        for (auto &bullet : game.getPlayerBullets()) {
             buffer.drawObject(bullet, colors::RED);
         }
 
@@ -100,7 +104,7 @@ int main(void)
     //worker_thread.join();
 
     #ifdef DEBUG
-    io::print_to_stdout("Exiting cleany. Ran for");
+    io::print_to_stdout("Clean exit, Ran for:");
     #endif
     return EXIT_SUCCESS;
 }

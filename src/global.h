@@ -19,6 +19,7 @@
 #endif
 
 #include <cstdint>
+#include <cstddef>
 #include <cassert>
 
 enum SpaceobjectType: size_t {

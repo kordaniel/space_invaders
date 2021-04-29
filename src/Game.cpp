@@ -33,14 +33,29 @@ void Game::init_aliens(const Sprites& sprites)
 
 void Game::create_player_bullet(void)
 {
-    create_bullet(m_player.GetMiddleX(), m_player.GetTopMostY(), m_sprites.player_bullet_sprite);
+    create_bullet(
+        m_player.GetMiddleX(), m_player.GetTopMostY(),
+        m_sprites.player_bullet_sprite.width, m_sprites.player_bullet_sprite.height,
+        BULLET_PLAYER
+    );
 }
 
-void Game::create_bullet(int32_t xPosition, int32_t yPosition, const Sprite& sprite)
+void Game::create_alien_bullet(const Alien& alien)
 {
-    m_bullets.emplace_front(xPosition, yPosition, directions::STATIONARY, directions::UP,
-                          sprite.width, sprite.height, 9, 1, SpaceobjectType::BULLET_PLAYER
+    create_bullet(
+        alien.GetMiddleX() - m_sprites.alien_bullet_sprites[0].width / 2, alien.y,
+        m_sprites.alien_bullet_sprites[0].width, m_sprites.alien_bullet_sprites[0].height,
+        BULLET_ALIEN
     );
+}
+
+void Game::create_bullet(int32_t xPosition, int32_t yPosition, int32_t width, int32_t height, SpaceobjectType objectType)
+{
+    if (objectType == BULLET_ALIEN) {
+        m_alienBullets.emplace_front(xPosition, yPosition, directions::STATIONARY, directions::DOWN, width, height, 4, 1, objectType, true, 1);
+        return;
+    }
+    m_playerBullets.emplace_front(xPosition, yPosition, directions::STATIONARY, directions::UP, width, height, 7, 1, objectType, false, 0);
 }
 
 void Game::updateGame(void)
@@ -57,21 +72,68 @@ void Game::update_player(void)
 
 void Game::update_bullets(void)
 {
-    for (auto bulletptr = m_bullets.begin(); bulletptr != m_bullets.end(); ) {
+    //ScopeTimer t("Bullet updating took: ");
+    update_alien_bullets();
+    update_player_bullets();
+}
+
+void Game::update_player_bullets(void)
+{
+    for (auto bulletptr = m_playerBullets.begin(); bulletptr != m_playerBullets.end(); ) {
+        PLAYERBULLETLOOPSTART: // Return here from inner loop, if bullet is destroyed while iterating other objects.
         bulletptr->move(0, width, height, 0);
-        if (bulletptr->GetTopMostY() == height) {
-            bulletptr = m_bullets.erase(bulletptr);
-            continue;
+
+        for (auto alienBullerPtr = m_alienBullets.begin(); alienBullerPtr != m_alienBullets.end(); ) {
+            if (bulletptr->overlaps(*alienBullerPtr)) {
+                m_alienBullets.erase(alienBullerPtr);
+                bulletptr = m_playerBullets.erase(bulletptr);
+                goto PLAYERBULLETLOOPSTART;
+                throw "USE OF GOTO STATEMENTS ARE CONSIDERED BAD AND IS HIGHLY DISCOURAGED";
+                // Dont take it too seriously, this is a hobby project after all to learn C++...
+            } else ++alienBullerPtr;
         }
 
         for (auto alienptr = m_aliens.begin(); alienptr != m_aliens.end(); ) {
             if (bulletptr->overlaps(*alienptr)) {
                 m_aliens.erase(alienptr);
-                bulletptr = m_bullets.erase(bulletptr);
-                break;
+                bulletptr = m_playerBullets.erase(bulletptr);
+                goto PLAYERBULLETLOOPSTART;
+                throw "USE OF GOTO STATEMENTS ARE CONSIDERED BAD AND IS HIGHLY DISCOURAGED";
             } else ++alienptr;
         }
-        ++bulletptr;
+
+        if (bulletptr->GetTopMostY() == height) {
+            bulletptr = m_playerBullets.erase(bulletptr);
+        } else ++bulletptr;
+    }
+}
+
+void Game::update_alien_bullets(void)
+{
+    for (auto alienBulletPtr = m_alienBullets.begin(); alienBulletPtr != m_alienBullets.end(); ) {
+        ALIENBULLETLOOPSTART:
+        alienBulletPtr->move(0, width, height, 0);
+
+        for (auto playerBulletPtr = m_playerBullets.begin(); playerBulletPtr != m_playerBullets.end(); ) {
+            if (alienBulletPtr->overlaps(*playerBulletPtr)) {
+                m_playerBullets.erase(playerBulletPtr);
+                alienBulletPtr = m_alienBullets.erase(alienBulletPtr);
+                goto ALIENBULLETLOOPSTART;
+                throw "USE OF GOTO STATEMENTS ARE CONSIDERED BAD AND IS HIGHLY DISCOURAGED";
+                // Dont take it too seriously, this is a hobby project after all to learn C++...
+            } else ++playerBulletPtr;
+        }
+
+        if (alienBulletPtr->overlaps(m_player)) {
+            io::print_to_stdout("player DIED!!! OHNOOO");
+            alienBulletPtr = m_alienBullets.erase(alienBulletPtr);
+            goto ALIENBULLETLOOPSTART;
+            throw "USE OF GOTO STATEMENTS ARE CONSIDERED BAD AND IS HIGHLY DISCOURAGED";
+        }
+
+        if (alienBulletPtr->y == 0) {
+            alienBulletPtr = m_alienBullets.erase(alienBulletPtr);
+        } else ++alienBulletPtr;
     }
 }
 
@@ -86,8 +148,12 @@ void Game::update_aliens(void)
         m_aliensShouldTurn = false;
     } else {
         for (auto &alien : m_aliens) {
-            if (alien.move(0, width, height, 0))
+            if (alien.move(0, width, height, 0)) {
                 m_aliensShouldTurn = true;
+            }
+            if (rand() % 1000 < 10) {
+                create_alien_bullet(alien);
+            }
         }
     }
 }
@@ -103,8 +169,14 @@ std::list<Alien>& Game::getAliens(void)
     return m_aliens;
 }
 
-std::list<Spaceobject>& Game::getBullets(void)
+std::list<Spaceobject>& Game::getPlayerBullets(void)
 {
     // TODO: DELETE this method when possible
-    return m_bullets;
+    return m_playerBullets;
+}
+
+std::list<Spaceobject>& Game::getAlienBullets(void)
+{
+    // TODO: DELETE this method when possible
+    return m_alienBullets;
 }
