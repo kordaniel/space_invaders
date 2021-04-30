@@ -66,6 +66,9 @@ int main(void)
 
         buffer.append_text(4, 7, sprites.text_spritesheet, std::to_string(game.getPlayer().lives));
 
+
+        buffer.append_integer(220, 220, sprites.text_spritesheet, game.getAlienBullets().size(), colors::ORANGE);
+        //buffer.append_integer(120, 7, sprites.text_spritesheet, game.m_playerBulletsBonus, colors::ORANGE);
         //buffer.append_object(game.getPlayer());
         buffer.drawObject(game.getPlayer());
 
@@ -104,7 +107,7 @@ int main(void)
     //worker_thread.join();
 
     #ifdef DEBUG
-    io::print_to_stdout("Clean exit, Ran for:");
+    io::print_to_stdout("Clean exit. Game ran for:");
     #endif
     return EXIT_SUCCESS;
 }

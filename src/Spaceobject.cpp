@@ -79,6 +79,9 @@ Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
     //
 }
 
+///
+/// @return true if and only if the horizontal position of this object is equal to either limit.
+///
 bool Spaceobject::move(int32_t lim_west, int32_t lim_east, int32_t lim_north, int32_t lim_south)
 {
     if (x_d == directions::LEFT) {
@@ -167,16 +170,23 @@ void Spaceobject::setVerticalDirection(directions::Directions direction, bool se
 /// @param other The object to check if it overlaps with this one.
 /// @return true if the two objects overlap, false otherwise.
 ///
-bool Spaceobject::overlaps(Spaceobject& other) const
+bool Spaceobject::overlaps(const Spaceobject& other)
 {
     if (GetTopMostY() < other.y + 1 || y + 1 > other.GetTopMostY()) {
         return false;
     }
-    if (GetRightMostX() < other.x + 1 || x + 1 > other.GetRightMostX()) {
-        return false;
-    }
 
-    return true;
+    return verticalProjectionOverlaps(other);
+}
+
+bool Spaceobject::verticalProjectionOverlaps(const Spaceobject& other)
+{
+    return !(GetRightMostX() < other.x + 1 || x + 1 > other.GetRightMostX());
+}
+
+bool Spaceobject::isAlive(void)
+{
+    return lives > 0;
 }
 
 

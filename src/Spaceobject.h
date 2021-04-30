@@ -1,8 +1,6 @@
 #ifndef SPACEOBJECT_H
 #define SPACEOBJECT_H
 
-#include <algorithm>
-
 #include "global.h"
 
 #include "Size.h"
@@ -60,11 +58,12 @@ public:
                 int32_t width, int32_t height,
                 SpaceobjectType objectType);
     Spaceobject(const Spaceobject& other) = delete;
-//private:
+
     SpaceobjectType m_spriteType;
     SpaceobjectTypeSpriteSelector m_spriteSelector;
     int32_t lives;
     int32_t _move_speed;
+    int32_t m_timer = 3;  // TODO: TEMP TEMP, get rid of it. Counts the frames to draw the death sprite
 
     bool move(int32_t, int32_t, int32_t, int32_t);
     void SetDirectionUp(bool);
@@ -76,7 +75,9 @@ public:
     int32_t GetTopMostY(void) const;
     int32_t GetMiddleX(void) const;
     void ReverseDirection(void);
-    bool overlaps(Spaceobject& other) const;
+    bool overlaps(const Spaceobject& other);
+    bool verticalProjectionOverlaps(const Spaceobject& other);
+    bool isAlive(void);
 
 private:
     void setHorizontalDirection(directions::Directions, bool);
