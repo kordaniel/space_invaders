@@ -70,15 +70,15 @@ Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
     //
 }
 
-// Used to create player
-Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition,
-                         int32_t width, int32_t height,
-                         SpaceobjectType objectType):
-    Spaceobject(xPosition, yPosition, width, height, 3, objectType)
+const SpaceobjectType& Spaceobject::getSpriteType(void) const
 {
-    //
+    return m_spriteType;
 }
 
+SpaceobjectTypeSpriteSelector& Spaceobject::getSpaceObjectTypeSpriteSelector(void)
+{
+    return m_spriteSelector;
+}
 ///
 /// @return true if and only if the horizontal position of this object is equal to either limit.
 ///
@@ -192,7 +192,7 @@ bool Spaceobject::isAlive(void)
 
 // ============ CLASS: Player  ============
 Player::Player(int32_t xPosition, int32_t yPosition, int32_t width, int32_t height):
-    Spaceobject(xPosition, yPosition, width, height, SpaceobjectType::PLAYER)
+    Spaceobject(xPosition, yPosition, width, height, 4, SpaceobjectType::PLAYER)
 {
     //
 }

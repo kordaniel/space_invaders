@@ -53,10 +53,6 @@ public:
                 int32_t width, int32_t height,
                 int32_t moveSpeed,
                 SpaceobjectType objectType);
-    // Used to create player
-    Spaceobject(int32_t xPosition, int32_t yPosition,
-                int32_t width, int32_t height,
-                SpaceobjectType objectType);
     Spaceobject(const Spaceobject& other) = delete;
 
     SpaceobjectType m_spriteType;
@@ -65,6 +61,8 @@ public:
     int32_t _move_speed;
     int32_t m_timer = 3;  // TODO: TEMP TEMP, get rid of it. Counts the frames to draw the death sprite
 
+    const SpaceobjectType& getSpriteType(void) const;
+    SpaceobjectTypeSpriteSelector& getSpaceObjectTypeSpriteSelector(void);
     bool move(int32_t, int32_t, int32_t, int32_t);
     void SetDirectionUp(bool);
     void SetDirectionDown(bool);
