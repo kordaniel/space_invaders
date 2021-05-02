@@ -138,51 +138,45 @@ void Buffer::clear(uint32_t color)
     }
 }
 
-void Buffer::drawObject(Spaceobject& obj, colors::Colors color)
+void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colors color)
 {
-    const int32_t& spr_x      = obj.x;
-    const int32_t& spr_y      = obj.y;
-    const Sprite& spriteObj   = m_sprites.getSprite(obj.m_spriteType, obj.m_spriteSelector);
-    const int32_t& spr_width  = spriteObj.width;
-    const int32_t& spr_height = spriteObj.height;
+    int32_t yStartIdx;
+    for (int yi = 0; yi < sprite.height; ++yi) {
+        yStartIdx = compute_sprite_yx_start_indx(x, (y - yi), sprite.height);
+        if (!y_is_in_bounds(y + sprite.height - 1 - yi)) {
+#ifndef NDEBUG
+            io::print_to_stdout_varargs("[drawSprite()]: Outofbounds y: ", (y+ sprite.height - 1 - yi), " = ", yStartIdx);
+#endif
+            continue;
+        }
 
-    int32_t y_startidx;
-
-    for (int32_t yi = 0; yi < spr_height; ++yi) {
-        #ifdef DEBUG
-            if (!y_is_in_bounds(spr_height - 1 + spr_y - yi)) {
-                io::print_to_stdout_varargs("Trying to draw outofbounds Y!!", (spr_height - 1 + spr_y - yi));
+        for (int xi = 0; xi < sprite.width; ++xi) {
+            if (!x_is_in_bounds(x + xi)) {
+#ifndef NDEBUG
+                io::print_to_stdout_varargs("[drawSprite()]: Outofbounds x: ", (x+xi), " = ", (yStartIdx + xi));
+#endif
                 continue;
             }
-        #endif
-        y_startidx = compute_sprite_yx_start_indx(spr_x, (spr_y - yi), spr_height);
-        for (int32_t xi = 0; xi < spr_width; ++xi) {
-            if (!spriteObj.data[yi * spr_width + xi]) {
+
+            if (!sprite.data[yi * sprite.width + xi]) {
                 continue;
             }
-            
-            #ifdef DEBUG
-                else if (!x_is_in_bounds(spr_x + xi)) {
-                    io::print_to_stdout("Trying to draw outofbounds X!!");
-                    io::print_to_stdout_varargs(spr_x, ", ", xi, " = ", (spr_x + xi));
-                    continue;
-                }
-            #endif
-            
-            data[y_startidx + xi] = color;
+            data[yStartIdx + xi] = color;
         }
     }
 }
 
-void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
-    #ifdef DEBUG
-    if (!y_is_in_bounds(y)) {
-        return;
-    }
-    #endif
+void Buffer::drawObject(Spaceobject& spaceobj, colors::Colors color)
+{
+    // TODO: Refactor spaceobj to be const!
+    drawSprite(spaceobj.x, spaceobj.y, m_sprites.getSprite(spaceobj.getSpriteType(), spaceobj.getSpaceObjectTypeSpriteSelector()), color);
+}
 
+void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
+    assert(y_is_in_bounds(y));
     const int32_t y_start = compute_y_start_indx(y);
     for (int32_t x = 0; x < width; ++x) {
+        assertpair((y_start + x < getTotalSize()), (y_start + x), getTotalSize());
         data[y_start + x] = color;
     }
 }
@@ -440,24 +434,24 @@ bool Buffer::validate_program(GLuint program)
     return true;
 }
 
-bool Buffer::y_is_in_bounds(const int32_t& y)
+inline bool Buffer::y_is_in_bounds(int32_t y) const
 {
     return 0 <= y && y < height;
 }
 
-bool Buffer::x_is_in_bounds(const int32_t& x)
+inline bool Buffer::x_is_in_bounds(int32_t x) const
 {
     return 0 <= x && x < width;
 }
 
-bool Buffer::pixel_is_in_bounds(const int32_t& x, const int32_t& y)
+inline bool Buffer::pixel_is_in_bounds(int32_t x, int32_t y) const
 {
     return x_is_in_bounds(x) && y_is_in_bounds(y);
 }
 
-inline int32_t Buffer::compute_sprite_yx_start_indx(const int32_t& x, const int32_t& y, const int32_t& spr_height)
+inline int32_t Buffer::compute_sprite_yx_start_indx(int32_t x, int32_t y, int32_t spriteHeight) const
 {
-    return width * (spr_height - 1 + y) + x;
+    return width * (spriteHeight - 1 + y) + x;
 }
 
 inline int32_t Buffer::compute_y_start_indx(const int32_t &y)

@@ -107,6 +107,7 @@ public:
     ~Buffer(void);
     void clear(void);
     void clear(uint32_t);
+    void drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colors color);
     void drawObject(Spaceobject&, colors::Colors color = colors::ORANGE);
     void append_horizontal_line(int32_t, colors::Colors color = colors::ORANGE);
     void append_text(int32_t, int32_t, const Sprite&, const std::string&, colors::Colors = colors::ORANGE);
@@ -139,10 +140,10 @@ private:
     void compile_shader(GLenum, const char*);
     void validate_shader(GLuint, const char*);
     bool validate_program(GLuint);
-    bool y_is_in_bounds(const int32_t&);
-    bool x_is_in_bounds(const int32_t&);
-    bool pixel_is_in_bounds(const int32_t&, const int32_t&);
-    inline int32_t compute_sprite_yx_start_indx(const int32_t&, const int32_t&, const int32_t&);
+    inline bool y_is_in_bounds(int32_t x) const;
+    inline bool x_is_in_bounds(int32_t y) const;
+    inline bool pixel_is_in_bounds(int32_t x, int32_t y) const;
+    inline int32_t compute_sprite_yx_start_indx(int32_t x, int32_t y, int32_t spriteHeigh) const;
     inline int32_t compute_y_start_indx(const int32_t&);
     void append_sprite(int32_t, int32_t, const uint8_t*, int32_t, int32_t, colors::Colors color = colors::ORANGE);
     int32_t append_digits(int32_t, int32_t, Sprite&, int32_t, size_t, colors::Colors);

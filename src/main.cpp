@@ -32,26 +32,23 @@ int main(void)
 */
     // Ugly hack to limit the speed of the game in DEBUG mode for now..
     // **************
-    #ifdef DEBUG
+    #ifndef NDEBUG
     Timer timer;
-    uint32_t updatesPerSecHack = 20;
+    #endif
+    uint64_t microsecsInSec = 1 * 1000 * 1000;
+    uint64_t updatesPerSecHack = 20;
     using std::chrono::time_point;
     using std::chrono::steady_clock;
 
     time_point<steady_clock> time_prev_update = steady_clock::now();
     time_point<steady_clock> time_now = steady_clock::now();
-    #endif
 
     while (!glfwWindowShouldClose(buffer.get_glfw_window())) {
-        #ifdef DEBUG
         time_now = steady_clock::now();
-        if ((time_now - time_prev_update) > std::chrono::milliseconds(1000 / updatesPerSecHack)) {
-        #endif
+        if ((time_now - time_prev_update) > std::chrono::microseconds(microsecsInSec / updatesPerSecHack)) {
             game.updateGame();
-        #ifdef DEBUG
             time_prev_update = time_now;
         }
-        #endif
         // End ugly hack!
         // **************
 
@@ -65,7 +62,11 @@ int main(void)
         );
 
         buffer.append_text(4, 7, sprites.text_spritesheet, std::to_string(game.getPlayer().lives));
-
+        int32_t xpos = 13;
+        for (int32_t i = 1; i < game.getPlayer().lives; ++i) {
+            buffer.drawSprite(xpos, 7, sprites.player_sprite, colors::ORANGE);
+            xpos += sprites.player_sprite.width + 3;
+        }
 
         buffer.append_integer(220, 220, sprites.text_spritesheet, game.getAlienBullets().size(), colors::ORANGE);
         //buffer.append_integer(120, 7, sprites.text_spritesheet, game.m_playerBulletsBonus, colors::ORANGE);
