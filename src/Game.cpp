@@ -92,13 +92,22 @@ void Game::create_alien_bullet(const Alien& alien)
     );
 }
 
-void Game::create_bullet(int32_t xPosition, int32_t yPosition, int32_t width, int32_t height, SpaceobjectType objectType)
+void Game::create_bullet(int32_t xPosition, int32_t yPosition, int32_t width, int32_t height,
+                         SpaceobjectType objectType)
 {
     if (objectType == BULLET_ALIEN) {
-        m_alienBullets.emplace_front(xPosition, yPosition, directions::STATIONARY, directions::DOWN, width, height, 4, 1, objectType, true, 1);
+        m_alienBullets.emplace_front(
+            xPosition, yPosition, directions::STATIONARY, directions::DOWN,
+            width, height,
+            6, 1, objectType, true, 1
+        );
         return;
     }
-    m_playerBullets.emplace_front(xPosition, yPosition, directions::STATIONARY, directions::UP, width, height, 7, 1, objectType, false, 0);
+
+    m_playerBullets.emplace_front(
+        xPosition, yPosition, directions::STATIONARY, directions::UP,
+        width, height, 7, 1, objectType, false, 0
+    );
 }
 
 
@@ -151,8 +160,13 @@ void Game::update_player_bullets(void)
 
 void Game::update_alien_bullets(void)
 {
-    for (auto alienBulletPtr = m_alienBullets.begin(); alienBulletPtr != m_alienBullets.end(); ) {
+    auto alienBulletPtr = m_alienBullets.begin();
+    while (true) {
         ALIENBULLETLOOPSTART:
+        if (alienBulletPtr == m_alienBullets.end()) {
+            break;
+        }
+
         alienBulletPtr->move(0, width, height, 0);
 
         for (auto playerBulletPtr = m_playerBullets.begin(); playerBulletPtr != m_playerBullets.end(); ) {
@@ -165,7 +179,6 @@ void Game::update_alien_bullets(void)
         }
 
         if (alienBulletPtr->overlaps(m_player)) {
-            io::print_to_stdout("player DIED!!! OHNOOO");
             --m_player.lives;
             alienBulletPtr = m_alienBullets.erase(alienBulletPtr);
             goto ALIENBULLETLOOPSTART;
