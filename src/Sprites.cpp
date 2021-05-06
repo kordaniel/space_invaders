@@ -1,42 +1,95 @@
 #include "Sprites.h"
 
-Sprite::Sprite(int32_t width, int32_t height, const uint8_t* sprite_data):
-    Size(width, height),
-    data(sprite_data)
+Sprite::Sprite(const std::string& name)
+    : Size(0, 0)
+    , m_name(name)
 {
-    //
+    init();
 }
 
-const uint8_t* Sprite::getSpritePtr(int32_t offset) const
+void Sprite::init()
 {
-    const uint8_t* copy = data + offset;
-    return copy;
+    std::vector<uint8_t> rawData;
+    const std::string filepath = SPRITES_PATH + m_name;
+
+    bool readSuccess = io::readBinaryFile(filepath, rawData);
+    if (!readSuccess) {
+        io::print_to_stdout_varargs("[Sprite]: Error reading file: ", filepath);
+        throw "TODO: Something clever, fallback to default sprite instead of throw";
+    }
+
+    deserialize(rawData);
+}
+
+void Sprite::serialize(void)
+{
+    std::vector<uint8_t> compressed;
+    const std::string filepath = SPRITES_PATH + m_name;
+
+    Compression::CompressSpriteData(data, (uint16_t) width, (uint16_t) height, (uint16_t) m_count, compressed);
+    io::writeBinaryFile(filepath, compressed);
+}
+
+void Sprite::deserialize(const std::vector<uint8_t>& spriteDataBitmap)
+{
+    std::vector<uint8_t> decompressed;
+    Compression::DecompressSpriteData(spriteDataBitmap, decompressed);
+    if (decompressed.size() < 7) {
+        // First 6 bytes is the values of width, height, m_count as uint16_t
+        io::print_to_stdout_varargs("[Sprite]: Error decompressing sprite data.");
+        throw "TODO: Something clever, fallback to default sprite instead of throw";
+    }
+
+    auto constructUint16_tFromUint8_t = [&decompressed](size_t i) -> uint16_t {
+        return (uint16_t) decompressed[i] | (uint16_t) decompressed[i+1] << 8;
+    };
+
+    width   = constructUint16_tFromUint8_t(0);
+    height  = constructUint16_tFromUint8_t(2);
+    m_count = constructUint16_tFromUint8_t(4);
+
+    if (width * height * m_count != decompressed.size() - 6) {
+        io::print_to_stdout_varargs("[Sprite]: Error decompressing sprite data.");
+        throw "TODO: Something clever, fallback to default sprite instead of throw";
+    }
+
+    NEWoper(data, new uint8_t[m_count * width * height]);
+    for (size_t i = 0; i < m_count * width * height; ++i) {
+        data[i] = decompressed[6+i];
+    }
+}
+
+Sprite::~Sprite(void)
+{
+    delete[] data;
+}
+
+const uint8_t* Sprite::getSpritePtr(size_t offset) const
+{
+    // This method should only be used on the textSpritsheet.
+    // TODO: Create own class for Spritesheets.
+    return data + offset;
 }
 
 const uint8_t* Sprite::getNumberSpritePtr(int32_t number) const
 {
+    // This method should only be used on the textSpritsheet.
+    // TODO: Create own class for Spritesheets. For now we just assert
+    //       that the size of the Sprite is the one that the Spritsheet has.
+    assertpair(getTotalSize() == 35, getTotalSize(), 35);
+    assert(0 <= number &&  number < 10);
     return getSpritePtr(16 * getTotalSize() + number * getTotalSize());
 }
 
-Sprites::Sprites(void):
-    player_sprite(11, 7, _PLAYER_SPRITE),
-    player_bullet_sprite(1, 3, _PLAYER_BULLET_SPRITE),
-    alien_death_sprite(13, 7, _ALIEN_DEATH_SPRITE),
-    alien_sprites{{
-        {8, 8, _ALIEN_SPRITE_0},
-        {8, 8, _ALIEN_SPRITE_1},
-        {11, 8, _ALIEN_SPRITE_2},
-        {11, 8, _ALIEN_SPRITE_3},
-        {12, 8, _ALIEN_SPRITE_4},
-        {12, 8, _ALIEN_SPRITE_5}
-    }},
-    alien_bullet_sprites{{
-        { 3, 7, _ALIEN_BULLET_SPRITE_0 }, // alien_bullet_sprites[0]
-        { 3, 7, _ALIEN_BULLET_SPRITE_1 }  // alien_bullet_sprites[1]
-    }},
-    text_spritesheet(5, 7, _TEXT_SPRITESHEET)
+bool Sprite::operator[](size_t i) const
 {
-    //
+    return data[i] != 0;
+}
+
+Sprites& Sprites::GetInstance(void)
+{
+    static Sprites instance;
+    return instance;
 }
 
 const Sprite& Sprites::getSprite(const SpaceobjectType& spriteType,
@@ -69,4 +122,25 @@ const Sprite& Sprites::getSprite(const SpaceobjectType& spriteType,
             //return alien_death_sprite;
             break;
     }
+}
+
+Sprites::Sprites(void)
+    : player_sprite("player")
+    , player_bullet_sprite("player_bullet")
+    , alien_death_sprite("alien_death")
+    , alien_sprites{{
+        {"alien0"},
+        {"alien1"},
+        {"alien2"},
+        {"alien3"},
+        {"alien4"},
+        {"alien5"},
+      }}
+    , alien_bullet_sprites{{
+        {"alien_bullet0"},
+        {"alien_bullet1"}
+    }}
+    , text_spritesheet("spritesheet_text")
+{
+    //
 }

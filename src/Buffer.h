@@ -102,7 +102,7 @@ namespace colors
 class Buffer: public Size
 {
 public:
-    Buffer(int32_t bufferWidth, int32_t bufferHeight, Sprites& sprites);
+    Buffer(int32_t bufferWidth, int32_t bufferHeight);
     Buffer(const Buffer& other) = delete;
     ~Buffer(void);
     void clear(void);

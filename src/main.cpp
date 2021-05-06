@@ -18,9 +18,9 @@ int main(void)
     srand(time(nullptr));
 
     const int32_t buff_width = 224, buff_height = 256;
-    Sprites sprites;
-    Buffer buffer(buff_width, buff_height, sprites);
-    Game game(buff_width, buff_height, sprites);
+    //Sprites sprites;
+    Buffer buffer(buff_width, buff_height);
+    Game game(buff_width, buff_height);
 
     glfwSetWindowUserPointer(buffer.get_glfw_window(), &game);
 /*
@@ -52,23 +52,23 @@ int main(void)
         // End ugly hack!
         // **************
 
-        buffer.append_text(164, 7, sprites.text_spritesheet, "CREDIT 00");
+        buffer.append_text(164, 7, Sprites::GetInstance().text_spritesheet, "CREDIT 00");
 
-        buffer.append_text(4, buff_height - sprites.text_spritesheet.height - 7, sprites.text_spritesheet, "SCORE");
+        buffer.append_text(4, buff_height - Sprites::GetInstance().text_spritesheet.height - 7, Sprites::GetInstance().text_spritesheet, "SCORE");
         // Actual score
-        buffer.append_text(4 + 2 * sprites.text_spritesheet.width,
-                           buff_height - 2 * sprites.text_spritesheet.height - 12,
-                           sprites.text_spritesheet, "1234506789"
+        buffer.append_text(4 + 2 * Sprites::GetInstance().text_spritesheet.width,
+                           buff_height - 2 * Sprites::GetInstance().text_spritesheet.height - 12,
+                           Sprites::GetInstance().text_spritesheet, "1234506789"
         );
 
-        buffer.append_text(4, 7, sprites.text_spritesheet, std::to_string(game.getPlayer().lives));
+        buffer.append_text(4, 7, Sprites::GetInstance().text_spritesheet, std::to_string(game.getPlayer().lives));
         int32_t xpos = 13;
         for (int32_t i = 1; i < game.getPlayer().lives; ++i) {
-            buffer.drawSprite(xpos, 7, sprites.player_sprite, colors::ORANGE);
-            xpos += sprites.player_sprite.width + 3;
+            buffer.drawSprite(xpos, 7, Sprites::GetInstance().player_sprite, colors::ORANGE);
+            xpos += Sprites::GetInstance().player_sprite.width + 3;
         }
 
-        buffer.append_integer(220, 220, sprites.text_spritesheet, game.getAlienBullets().size(), colors::ORANGE);
+        buffer.append_integer(220, 220, Sprites::GetInstance().text_spritesheet, game.getAlienBullets().size(), colors::ORANGE);
         //buffer.append_integer(120, 7, sprites.text_spritesheet, game.m_playerBulletsBonus, colors::ORANGE);
         //buffer.append_object(game.getPlayer());
         buffer.drawObject(game.getPlayer());
@@ -107,8 +107,8 @@ int main(void)
     //s_Finished = true;
     //worker_thread.join();
 
-    #ifdef DEBUG
+#ifndef NDEBUG
     io::print_to_stdout("Clean exit. Game ran for:");
-    #endif
+#endif
     return EXIT_SUCCESS;
 }

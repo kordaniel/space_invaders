@@ -11,7 +11,7 @@
 class Game: public Size
 {
 public:
-    Game(int32_t gamewWidth, int32_t gameHeight, const Sprites& sprites);
+    Game(int32_t gamewWidth, int32_t gameHeight);
     Game(const Game& other) = delete;
     void updateGame(void);
     void create_player_bullet(void); // This is called from glfwwindow callback (for now)

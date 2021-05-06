@@ -79,6 +79,7 @@ SpaceobjectTypeSpriteSelector& Spaceobject::getSpaceObjectTypeSpriteSelector(voi
 {
     return m_spriteSelector;
 }
+
 ///
 /// @return true if and only if the horizontal position of this object is equal to either limit.
 ///

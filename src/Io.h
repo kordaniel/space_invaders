@@ -1,12 +1,15 @@
 #ifndef IO_H
 #define IO_H
 
-#include <iostream>
 #include <string>
+#include <iostream>
 #include <fstream>
 #include <vector>
 
 #include "global.h"
+//#include "Sprites.h"
+
+//struct RLESprite; // forward declare
 
 namespace io
 {
@@ -37,10 +40,17 @@ inline void print_to_stderr_varargs(T t, Args... args) {
 void print_to_stdout(const std::string &);
 void print_to_stderr(const std::string &);
 
-bool readTextFileIntoVector(const std::string&,
-                            std::vector<std::string>&,
+bool readTextFileIntoVector(const std::string& filepath,
+                            std::vector<std::string>& buffer,
                             bool includeEmptylines = true);
 
-} // End namespace io
+bool readBinaryFile(const std::string& filepath, std::vector<uint8_t>& buffer);
+bool writeBinaryFile(const std::string& filepath, const std::vector<uint8_t>& buffer);
+
+bool readBinary(const std::string& filepath, const char* buffer);
+
+//private:
+//    io(void); // Should be used as a static class => private constructor.
+}
 
 #endif

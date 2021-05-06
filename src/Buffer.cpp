@@ -100,9 +100,9 @@ void error_callback(int error, const char* description)
 }
 // ----------------------------------------------------------------------
 
-Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight, Sprites& sprites)
+Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight)
     : Size(bufferWidth, bufferHeight)
-    , m_sprites(sprites)
+    , m_sprites(Sprites::GetInstance())
     , window_title("Space Invaders! FPS:     ")
     , time_prev_update(std::chrono::steady_clock::now())
     , n_frames(0)
@@ -158,7 +158,7 @@ void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colo
                 continue;
             }
 
-            if (!sprite.data[yi * sprite.width + xi]) {
+            if (!sprite[yi * sprite.width + xi]) {
                 continue;
             }
             data[yStartIdx + xi] = color;

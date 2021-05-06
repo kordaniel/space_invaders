@@ -21,6 +21,7 @@
 
 #include <cstdint>
 #include <cstddef>
+#include <string>
 
 #include <cassert>
 
@@ -44,6 +45,10 @@
     #define assertpair(exp, arg1, arg2) (void)0
     #define NEWoper(variable, command) variable = command
 #endif
+
+// ASSETS
+const std::string SPRITES_PATH = "res/spr/";
+const std::string SHADERS_PATH = "res/shaders";
 
 enum SpaceobjectType: size_t {
     ALIEN_A       = 0,

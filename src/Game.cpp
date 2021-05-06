@@ -1,16 +1,16 @@
 #include "Game.h"
 
-Game::Game(int32_t gameWidth, int32_t gameHeight, const Sprites& sprites)
+Game::Game(int32_t gameWidth, int32_t gameHeight)
         : Size(gameWidth, gameHeight)
         , m_alien_rows(5)
         , m_alien_cols(11)
         , m_aliensShouldTurn(false)
         , m_playerBulletsMax(3)
         , m_playerBulletsBonus(0)
-        , m_sprites(sprites)
-        , m_player((width / 2) - (sprites.player_sprite.width / 2), 30, sprites.player_sprite.width, sprites.player_sprite.height)
+        , m_sprites(Sprites::GetInstance())
+        , m_player((width / 2) - (Sprites::GetInstance().player_sprite.width / 2), 30, Sprites::GetInstance().player_sprite.width, Sprites::GetInstance().player_sprite.height)
 {
-    init_aliens(sprites);
+    init_aliens(Sprites::GetInstance());
 }
 
 void Game::updateGame(void)
