@@ -99,12 +99,12 @@ void error_callback(int error __attribute__((unused)), const char* description)
 Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight)
     : Size(bufferWidth, bufferHeight)
     , m_sprites(Sprites::GetInstance())
-    , window_title("Space Invaders! FPS:     ")
-    , time_prev_update(std::chrono::steady_clock::now())
-    , n_frames(0)
-    , fps_prev(0)
+    , m_window_title("Space Invaders! FPS:     ")
+    , m_time_prev_update(std::chrono::steady_clock::now())
+    , m_n_frames(0)
+    , m_fps_prev(0)
 {
-    data = new uint32_t[width * height];
+    m_data = new uint32_t[getTotalSize()];
     clear();
 
     initialize_glfw_window();
@@ -115,11 +115,11 @@ Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight)
 
 Buffer::~Buffer(void)
 {
-    GLCall(glfwDestroyWindow(glfw_window));
+    GLCall(glfwDestroyWindow(m_glfw_window));
     GLCall(glfwTerminate());
-    GLCall(glDeleteProgram(shader_id));
-    GLCall(glDeleteVertexArrays(1, &fullscreen_triangle_vao));
-    delete[] data;
+    GLCall(glDeleteProgram(m_shader_id));
+    GLCall(glDeleteVertexArrays(1, &m_fullscreen_triangle_vao));
+    delete[] m_data;
 }
 
 void Buffer::clear(void)
@@ -130,23 +130,23 @@ void Buffer::clear(void)
 void Buffer::clear(uint32_t color)
 {
     for (int32_t i = 0; i < getTotalSize(); ++i) {
-        data[i] = color;
+        m_data[i] = color;
     }
 }
 
 void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colors color)
 {
     int32_t yStartIdx;
-    for (int yi = 0; yi < sprite.height; ++yi) {
-        yStartIdx = compute_sprite_yx_start_indx(x, (y - yi), sprite.height);
-        if (!y_is_in_bounds(y + sprite.height - 1 - yi)) {
+    for (int yi = 0; yi < sprite.m_height; ++yi) {
+        yStartIdx = compute_sprite_yx_start_indx(x, (y - yi), sprite.m_height);
+        if (!y_is_in_bounds(y + sprite.m_height - 1 - yi)) {
 #ifndef NDEBUG
-            io::print_to_stdout_varargs("[drawSprite()]: Outofbounds y: ", (y+ sprite.height - 1 - yi), " = ", yStartIdx);
+            io::print_to_stdout_varargs("[drawSprite()]: Outofbounds y: ", (y + sprite.m_height - 1 - yi), " = ", yStartIdx);
 #endif
             continue;
         }
 
-        for (int xi = 0; xi < sprite.width; ++xi) {
+        for (int xi = 0; xi < sprite.m_width; ++xi) {
             if (!x_is_in_bounds(x + xi)) {
 #ifndef NDEBUG
                 io::print_to_stdout_varargs("[drawSprite()]: Outofbounds x: ", (x+xi), " = ", (yStartIdx + xi));
@@ -154,10 +154,10 @@ void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colo
                 continue;
             }
 
-            if (!sprite[yi * sprite.width + xi]) {
+            if (!sprite[yi * sprite.m_width + xi]) {
                 continue;
             }
-            data[yStartIdx + xi] = color;
+            m_data[yStartIdx + xi] = color;
         }
     }
 }
@@ -165,15 +165,15 @@ void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colo
 void Buffer::drawObject(Spaceobject& spaceobj, colors::Colors color)
 {
     // TODO: Refactor spaceobj to be const!
-    drawSprite(spaceobj.x, spaceobj.y, m_sprites.getSprite(spaceobj.getSpriteType(), spaceobj.getSpaceObjectTypeSpriteSelector()), color);
+    drawSprite(spaceobj.m_x, spaceobj.m_y, m_sprites.getSprite(spaceobj.getSpriteType(), spaceobj.getSpaceObjectTypeSpriteSelector()), color);
 }
 
 void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
     assert(y_is_in_bounds(y));
     const int32_t y_start = compute_y_start_indx(y);
-    for (int32_t x = 0; x < width; ++x) {
+    for (int32_t x = 0; x < m_width; ++x) {
         assertpair((y_start + x < getTotalSize()), (y_start + x), getTotalSize());
-        data[y_start + x] = color;
+        m_data[y_start + x] = color;
     }
 }
 
@@ -183,10 +183,10 @@ void Buffer::append_text(int32_t x, int32_t y,
                          colors::Colors color)
 {
     const int32_t stride       = text_spritesheet.getTotalSize();
-    const int32_t str_width    = text.length() * (text_spritesheet.width + character_gap) - character_gap;
-    const uint8_t* sprite_char = text_spritesheet.data;
+    const int32_t str_width    = text.length() * (text_spritesheet.m_width + m_character_gap) - m_character_gap;
+    const uint8_t* sprite_char = text_spritesheet.m_data;
     char currChar              = 0;
-    int32_t xpos               = x + str_width < width ? x : width - str_width;
+    int32_t xpos               = x + str_width < m_width ? x : m_width - str_width;
 
     for (auto &ch : text) {
         currChar = ch - 32;
@@ -197,9 +197,9 @@ void Buffer::append_text(int32_t x, int32_t y,
             continue;
         }
 #endif
-        sprite_char = text_spritesheet.data + currChar * stride;
-        append_sprite(xpos, y, sprite_char, text_spritesheet.width, text_spritesheet.height, color);
-        xpos += text_spritesheet.width + character_gap;
+        sprite_char = text_spritesheet.m_data + currChar * stride;
+        append_sprite(xpos, y, sprite_char, text_spritesheet.m_width, text_spritesheet.m_height, color);
+        xpos += text_spritesheet.m_width + m_character_gap;
     }
 }
 
@@ -208,11 +208,11 @@ void Buffer::append_integer(int32_t x, int32_t y, Sprite& text_spritesheet, int3
     assert(number >= 0);
 
     if (number == 0) {
-        if (width < x + text_spritesheet.width) {
-            x = width - text_spritesheet.width;
+        if (m_width < x + text_spritesheet.m_width) {
+            x = m_width - text_spritesheet.m_width;
         }
         append_sprite(x, y, text_spritesheet.getNumberSpritePtr(0),
-                      text_spritesheet.width, text_spritesheet.height,
+                      text_spritesheet.m_width, text_spritesheet.m_height,
                       colors::Colors::ORANGE
         );
         return;
@@ -225,18 +225,18 @@ void Buffer::draw(void)
 {
     GLCall(glTexSubImage2D(
         GL_TEXTURE_2D, 0, 0, 0,
-        width, height,
+        m_width, m_height,
         GL_RGBA, GL_UNSIGNED_INT_8_8_8_8,
-        data
+        m_data
     ));
     GLCall(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-    GLCall(glfwSwapBuffers(glfw_window));
+    GLCall(glfwSwapBuffers(m_glfw_window));
     update_fps();
 }
 
 GLFWwindow* Buffer::get_glfw_window(void)
 {
-    return glfw_window;
+    return m_glfw_window;
 }
 
 // ----------------------------- PRIVATE METHODS -----------------------------
@@ -283,7 +283,7 @@ void Buffer::initialize_glfw_window(void)
     glfwSetErrorCallback(error_callback);
     if (!glfwInit()) {
         io::print_to_stderr("[ERROR]: when trying to initialize glfw.");
-        delete[] data;
+        delete[] m_data;
         exit(EXIT_FAILURE);
     }
 
@@ -293,23 +293,23 @@ void Buffer::initialize_glfw_window(void)
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 
-    glfw_window = glfwCreateWindow(width, height, window_title, nullptr, nullptr);
-    if (!glfw_window) {
+    m_glfw_window = glfwCreateWindow(m_width, m_height, m_window_title, nullptr, nullptr);
+    if (!m_glfw_window) {
         io::print_to_stderr("[ERROR]: when trying to create glfw window.");
-        delete[] data;
+        delete[] m_data;
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
 
-    glfwSetWindowCloseCallback(glfw_window, window_close_callback);
-    glfwSetFramebufferSizeCallback(glfw_window, framebuffer_size_callback);
-    glfwSetKeyCallback(glfw_window, key_callback);
-    glfwMakeContextCurrent(glfw_window);
-    err = glewInit();
-    if (err != GLEW_OK) {
+    glfwSetWindowCloseCallback(m_glfw_window, window_close_callback);
+    glfwSetFramebufferSizeCallback(m_glfw_window, framebuffer_size_callback);
+    glfwSetKeyCallback(m_glfw_window, key_callback);
+    glfwMakeContextCurrent(m_glfw_window);
+    m_err = glewInit();
+    if (m_err != GLEW_OK) {
         io::print_to_stderr("[ERROR]: initializing GLEW.");
-        io::print_to_stderr_varargs(glewGetErrorString(err));
-        delete[] data;
+        io::print_to_stderr_varargs(glewGetErrorString(m_err));
+        delete[] m_data;
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
@@ -338,10 +338,10 @@ void Buffer::initialize_opengl(void)
 
 void Buffer::initialize_buffer_texture(void)
 {
-    GLCall(glGenTextures(1, &buffer_texture));
-    GLCall(glBindTexture(GL_TEXTURE_2D, buffer_texture));
-    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0,
-                GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, data
+    GLCall(glGenTextures(1, &m_buffer_texture));
+    GLCall(glBindTexture(GL_TEXTURE_2D, m_buffer_texture));
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, m_width, m_height, 0,
+                GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, m_data
     ));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
@@ -352,32 +352,32 @@ void Buffer::initialize_buffer_texture(void)
 void Buffer::initialize_shaders(void)
 {
     ShaderProgramSource shaderSource = read_and_parse_shader("res/shaders/Shaders.shader");
-    GLCall(glGenVertexArrays(1, &fullscreen_triangle_vao));
+    GLCall(glGenVertexArrays(1, &m_fullscreen_triangle_vao));
 
-    shader_id = glCreateProgram();
+    m_shader_id = glCreateProgram();
 
     compile_shader(GL_VERTEX_SHADER, shaderSource.VertexSource.c_str());
     compile_shader(GL_FRAGMENT_SHADER, shaderSource.FragmentSource.c_str());
 
-    GLCall(glLinkProgram(shader_id));
+    GLCall(glLinkProgram(m_shader_id));
 
-    if (!validate_program(shader_id)) {
+    if (!validate_program(m_shader_id)) {
         io::print_to_stderr("[ERROR]: Validating shader.");
         glfwTerminate();
-        glDeleteVertexArrays(1, &fullscreen_triangle_vao);
-        delete[] data;
+        glDeleteVertexArrays(1, &m_fullscreen_triangle_vao);
+        delete[] m_data;
         exit(EXIT_FAILURE);
     }
 
-    GLCall(glUseProgram(shader_id));
+    GLCall(glUseProgram(m_shader_id));
 
-    location = glGetUniformLocation(shader_id, "buffer");
-    GLCall(glUniform1i(location, 0));
+    m_location = glGetUniformLocation(m_shader_id, "buffer");
+    GLCall(glUniform1i(m_location, 0));
 
     GLCall(glDisable(GL_DEPTH_TEST));
     GLCall(glActiveTexture(GL_TEXTURE0));
 
-    GLCall(glBindVertexArray(fullscreen_triangle_vao));
+    GLCall(glBindVertexArray(m_fullscreen_triangle_vao));
 }
 
 void Buffer::compile_shader(GLenum type, const char *shader_sourcecode)
@@ -387,7 +387,7 @@ void Buffer::compile_shader(GLenum type, const char *shader_sourcecode)
     GLCall(glShaderSource(shader, 1, &shader_sourcecode, nullptr));
     GLCall(glCompileShader(shader));
     GLCall(validate_shader(shader, shader_sourcecode));
-    GLCall(glAttachShader(shader_id, shader));
+    GLCall(glAttachShader(m_shader_id, shader));
 
     GLCall(glDeleteShader(shader));
 }
@@ -432,12 +432,12 @@ bool Buffer::validate_program(GLuint program)
 
 inline bool Buffer::y_is_in_bounds(int32_t y) const
 {
-    return 0 <= y && y < height;
+    return 0 <= y && y < m_height;
 }
 
 inline bool Buffer::x_is_in_bounds(int32_t x) const
 {
-    return 0 <= x && x < width;
+    return 0 <= x && x < m_width;
 }
 
 inline bool Buffer::pixel_is_in_bounds(int32_t x, int32_t y) const
@@ -447,12 +447,12 @@ inline bool Buffer::pixel_is_in_bounds(int32_t x, int32_t y) const
 
 inline int32_t Buffer::compute_sprite_yx_start_indx(int32_t x, int32_t y, int32_t spriteHeight) const
 {
-    return width * (spriteHeight - 1 + y) + x;
+    return m_width * (spriteHeight - 1 + y) + x;
 }
 
 inline int32_t Buffer::compute_y_start_indx(const int32_t &y)
 {
-    return width * y;
+    return m_width * y;
 }
 
 void Buffer::append_sprite(int32_t x, int32_t y, const uint8_t* sprite,
@@ -463,7 +463,7 @@ void Buffer::append_sprite(int32_t x, int32_t y, const uint8_t* sprite,
         y_startidx = compute_sprite_yx_start_indx(0, (y - yi), spr_height);
         for (int32_t xi = 0; xi < spr_width; ++xi) {
             if (sprite[yi * spr_width + xi])
-                data[y_startidx + x + xi] = color;
+                m_data[y_startidx + x + xi] = color;
         }
     }
 }
@@ -475,14 +475,14 @@ int32_t Buffer::append_digits(int32_t x, int32_t y,
     if (number > 0) {
         x = append_digits(x, y, text_spritesheet, number / 10, ++digits, color);
     } else if (number == 0) {
-        const int32_t num_width = digits * (text_spritesheet.width + character_gap) - character_gap;
-        return x + num_width < width ? x : width - num_width;
+        const int32_t num_width = digits * (text_spritesheet.m_width + m_character_gap) - m_character_gap;
+        return x + num_width < m_width ? x : m_width - num_width;
     }
 
     append_sprite(x, y, text_spritesheet.getNumberSpritePtr(number % 10),
-                  text_spritesheet.width, text_spritesheet.height, color
+                  text_spritesheet.m_width, text_spritesheet.m_height, color
     );
-    return x + text_spritesheet.width + character_gap;
+    return x + text_spritesheet.m_width + m_character_gap;
 }
 
 
@@ -490,29 +490,29 @@ int32_t Buffer::append_digits(int32_t x, int32_t y,
 void Buffer::update_fps(void)
 {
     using namespace std::chrono;
-    ++n_frames;
+    ++m_n_frames;
     time_point<steady_clock> time_now = steady_clock::now();
-    duration<double> time_delta = time_now - time_prev_update;
+    duration<double> time_delta = time_now - m_time_prev_update;
     if (time_delta < seconds(1)) {
         return;
     }
 
-    time_prev_update = time_now;
+    m_time_prev_update = time_now;
 
-    if (n_frames == fps_prev) {
-        n_frames = 0;
+    if (m_n_frames == m_fps_prev) {
+        m_n_frames = 0;
         return;
     }
 
-    fps_prev = n_frames;
+    m_fps_prev = m_n_frames;
 
-    io::print_to_stdout_varargs("FPS: ", (n_frames / time_delta.count()));
+    io::print_to_stdout_varargs("FPS: ", (m_n_frames / time_delta.count()));
 
     for (size_t i = 24; i > 20; --i) {
-        window_title[i] = (char) (n_frames % 10 + 48);
-        n_frames /= 10;
+        m_window_title[i] = (char) (m_n_frames % 10 + 48);
+        m_n_frames /= 10;
     }
 
-    assert(n_frames == 0);
-    GLCall(glfwSetWindowTitle(glfw_window, window_title));
+    assert(m_n_frames == 0);
+    GLCall(glfwSetWindowTitle(m_glfw_window, m_window_title));
 }

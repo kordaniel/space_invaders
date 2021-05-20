@@ -57,8 +57,8 @@ public:
 
     SpaceobjectType m_spriteType;
     SpaceobjectTypeSpriteSelector m_spriteSelector;
-    int32_t lives;
-    int32_t _move_speed;
+    int32_t m_lives;
+    int32_t m_move_speed;
     int32_t m_timer = 3;  // TODO: TEMP TEMP, get rid of it. Counts the frames to draw the death sprite
 
     const SpaceobjectType& getSpriteType(void) const;

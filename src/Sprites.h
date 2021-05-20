@@ -15,7 +15,7 @@ class SpaceobjectTypeSpriteSelector; // from Spaceobject.{h,cpp}, must be forwar
 class Sprite: public Size
 {
 public:
-    uint8_t* data;
+    uint8_t* m_data;
     Sprite(const std::string& name);
     Sprite(const Sprite& other) = delete;
     ~Sprite(void);

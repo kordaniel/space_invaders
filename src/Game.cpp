@@ -8,7 +8,7 @@ Game::Game(int32_t gameWidth, int32_t gameHeight)
         , m_playerBulletsMax(3)
         , m_playerBulletsBonus(0)
         , m_sprites(Sprites::GetInstance())
-        , m_player((width / 2) - (Sprites::GetInstance().player_sprite.width / 2), 30, Sprites::GetInstance().player_sprite.width, Sprites::GetInstance().player_sprite.height)
+        , m_player((gameWidth / 2) - (Sprites::GetInstance().player_sprite.m_width / 2), 30, Sprites::GetInstance().player_sprite.m_width, Sprites::GetInstance().player_sprite.m_height)
 {
     init_aliens(Sprites::GetInstance());
 }
@@ -25,7 +25,7 @@ void Game::create_player_bullet(void)
     if (m_playerBullets.size() < playerMaxAllowedBullets()) {
         create_bullet(
             m_player.GetMiddleX(), m_player.GetTopMostY(),
-            m_sprites.player_bullet_sprite.width, m_sprites.player_bullet_sprite.height,
+            m_sprites.player_bullet_sprite.m_width, m_sprites.player_bullet_sprite.m_height,
             BULLET_PLAYER
         );
     }
@@ -68,8 +68,8 @@ void Game::init_aliens(const Sprites& sprites)
     for (int32_t yi = 0; yi < m_alien_rows; ++yi) {
         const size_t alien_type   = (m_alien_rows - yi) / 2;
         assert(0 <= alien_type && alien_type <= 2);
-        const int32_t alienWidth  = sprites.alien_sprites[2 * alien_type].width;
-        const int32_t alienHeight = sprites.alien_sprites[2 * alien_type].height;
+        const int32_t alienWidth  = sprites.alien_sprites[2 * alien_type].m_width;
+        const int32_t alienHeight = sprites.alien_sprites[2 * alien_type].m_height;
         for (int32_t xi = 0; xi < m_alien_cols; ++xi) {
             const size_t xpos = 24 + 16 * xi + (13 - alienWidth) / 2;
             const size_t ypos = 128 + 17 * yi;
@@ -86,8 +86,8 @@ void Game::init_aliens(const Sprites& sprites)
 void Game::create_alien_bullet(const Alien& alien)
 {
     create_bullet(
-        alien.GetMiddleX() - m_sprites.alien_bullet_sprites[0].width / 2, alien.y,
-        m_sprites.alien_bullet_sprites[0].width, m_sprites.alien_bullet_sprites[0].height,
+        alien.GetMiddleX() - m_sprites.alien_bullet_sprites[0].m_width / 2, alien.m_y,
+        m_sprites.alien_bullet_sprites[0].m_width, m_sprites.alien_bullet_sprites[0].m_height,
         BULLET_ALIEN
     );
 }
@@ -114,7 +114,7 @@ void Game::create_bullet(int32_t xPosition, int32_t yPosition, int32_t width, in
 
 void Game::update_player(void)
 {
-    m_player.move(0, width, height, 0);
+    m_player.move(0, m_width, m_height, 0);
     m_playerBulletsBonus = 0;
 }
 
@@ -129,7 +129,7 @@ void Game::update_player_bullets(void)
 {
     for (auto bulletptr = m_playerBullets.begin(); bulletptr != m_playerBullets.end(); ) {
         PLAYERBULLETLOOPSTART: // Return here from inner loop, if bullet is destroyed while iterating other objects.
-        bulletptr->move(0, width, height, 0);
+        bulletptr->move(0, m_width, m_height, 0);
 
         for (auto alienBulletPtr = m_alienBullets.begin(); alienBulletPtr != m_alienBullets.end(); ) {
             if (bulletptr->overlaps(*alienBulletPtr)) {
@@ -145,14 +145,14 @@ void Game::update_player_bullets(void)
         for (auto alienptr = m_aliens.begin(); alienptr != m_aliens.end(); ) {
             if (bulletptr->overlaps(*alienptr) && alienptr->isAlive()) {
                 alienptr->m_spriteType = ALIEN_DEAD;
-                alienptr->lives = 0;
+                alienptr->m_lives = 0;
                 bulletptr = m_playerBullets.erase(bulletptr);
                 goto PLAYERBULLETLOOPSTART;
                 throw "USE OF GOTO STATEMENTS ARE CONSIDERED BAD AND IS HIGHLY DISCOURAGED";
             } else ++alienptr;
         }
 
-        if (bulletptr->GetTopMostY() == height) {
+        if (bulletptr->GetTopMostY() == m_height) {
             bulletptr = m_playerBullets.erase(bulletptr);
         } else ++bulletptr;
     }
@@ -167,7 +167,7 @@ void Game::update_alien_bullets(void)
             break;
         }
 
-        alienBulletPtr->move(0, width, height, 0);
+        alienBulletPtr->move(0, m_width, m_height, 0);
 
         for (auto playerBulletPtr = m_playerBullets.begin(); playerBulletPtr != m_playerBullets.end(); ) {
             if (alienBulletPtr->overlaps(*playerBulletPtr)) {
@@ -179,7 +179,7 @@ void Game::update_alien_bullets(void)
         }
 
         if (alienBulletPtr->overlaps(m_player)) {
-            --m_player.lives;
+            --m_player.m_lives;
             alienBulletPtr = m_alienBullets.erase(alienBulletPtr);
             goto ALIENBULLETLOOPSTART;
             throw "USE OF GOTO STATEMENTS ARE CONSIDERED BAD AND IS HIGHLY DISCOURAGED";
@@ -189,7 +189,7 @@ void Game::update_alien_bullets(void)
             ++m_playerBulletsBonus;
         }
 
-        if (alienBulletPtr->y == 0) {
+        if (alienBulletPtr->m_y == 0) {
             alienBulletPtr = m_alienBullets.erase(alienBulletPtr);
         } else ++alienBulletPtr;
     }
@@ -207,10 +207,10 @@ void Game::update_aliens(void)
 
         if (alienPtr->isAlive()) {
             if (m_aliensShouldTurn) {
-                alienPtr->y -= alienPtr->height;
+                alienPtr->m_y -= alienPtr->m_height;
                 alienPtr->ReverseDirection();
             }
-            if (alienPtr->move(0, width, height, 0)) {
+            if (alienPtr->move(0, m_width, m_height, 0)) {
                 alienSwarmHitWall = true;
             }
             if (rand() % 5000 < ((aN * 10000) / (aN*aN*10))) {

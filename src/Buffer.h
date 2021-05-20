@@ -115,21 +115,21 @@ public:
     void draw(void);
     GLFWwindow* get_glfw_window(void);
 private:
-    uint32_t* data; // 8 bits each for R,G,B,Alpha values
+    uint32_t* m_data; // 8 bits each for R,G,B,Alpha values
     Sprites& m_sprites;
-    char window_title[26];
-    GLFWwindow *glfw_window;
-    GLenum err;
-    GLuint buffer_texture;
-    GLuint fullscreen_triangle_vao;
-    GLuint shader_id;
-    GLint location;
-    const static int32_t character_gap = 2;// amount of space between chars
+    char m_window_title[26];
+    GLFWwindow* m_glfw_window;
+    GLenum m_err;
+    GLuint m_buffer_texture;
+    GLuint m_fullscreen_triangle_vao;
+    GLuint m_shader_id;
+    GLint m_location;
+    const static int32_t m_character_gap = 2;// amount of space between chars
 
     // Used for computing FPS
-    std::chrono::time_point<std::chrono::steady_clock> time_prev_update;
-    uint16_t n_frames;
-    uint16_t fps_prev;
+    std::chrono::time_point<std::chrono::steady_clock> m_time_prev_update;
+    uint16_t m_n_frames;
+    uint16_t m_fps_prev;
     // --------- | | ---------
 
     ShaderProgramSource read_and_parse_shader(const std::string&);

@@ -26,7 +26,7 @@ void Sprite::serialize(void)
     std::vector<uint8_t> compressed;
     const std::string filepath = SPRITES_PATH + m_name;
 
-    Compression::CompressSpriteData(data, (uint16_t) width, (uint16_t) height, (uint16_t) m_count, compressed);
+    Compression::CompressSpriteData(m_data, (uint16_t) m_width, (uint16_t) m_height, (uint16_t) m_count, compressed);
     io::writeBinaryFile(filepath, compressed);
 }
 
@@ -44,31 +44,31 @@ void Sprite::deserialize(const std::vector<uint8_t>& spriteDataBitmap)
         return (uint16_t) decompressed[i] | (uint16_t) decompressed[i+1] << 8;
     };
 
-    width   = constructUint16_tFromUint8_t(0);
-    height  = constructUint16_tFromUint8_t(2);
+    m_width   = constructUint16_tFromUint8_t(0);
+    m_height  = constructUint16_tFromUint8_t(2);
     m_count = constructUint16_tFromUint8_t(4);
 
-    if (width * height * m_count != decompressed.size() - 6) {
+    if (m_count * getTotalSize() != decompressed.size() - 6) {
         io::print_to_stdout_varargs("[Sprite]: Error decompressing sprite data.");
         throw "TODO: Something clever, fallback to default sprite instead of throw";
     }
 
-    NEWoper(data, new uint8_t[m_count * width * height]);
-    for (size_t i = 0; i < m_count * width * height; ++i) {
-        data[i] = decompressed[6+i];
+    NEWoper(m_data, new uint8_t[m_count * getTotalSize()]);
+    for (size_t i = 0; i < m_count * getTotalSize(); ++i) {
+        m_data[i] = decompressed[6+i];
     }
 }
 
 Sprite::~Sprite(void)
 {
-    delete[] data;
+    delete[] m_data;
 }
 
 const uint8_t* Sprite::getSpritePtr(size_t offset) const
 {
     // This method should only be used on the textSpritsheet.
     // TODO: Create own class for Spritesheets.
-    return data + offset;
+    return m_data + offset;
 }
 
 const uint8_t* Sprite::getNumberSpritePtr(int32_t number) const
@@ -83,7 +83,7 @@ const uint8_t* Sprite::getNumberSpritePtr(int32_t number) const
 
 bool Sprite::operator[](size_t i) const
 {
-    return data[i] != 0;
+    return m_data[i] != 0;
 }
 
 Sprites& Sprites::GetInstance(void)

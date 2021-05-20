@@ -45,8 +45,8 @@ Spaceobject::Spaceobject(int32_t xPosition, int32_t yPosition, int32_t xDirectio
     , Position(xPosition, yPosition, xDirection, yDirection)
     , m_spriteType(objectType)
     , m_spriteSelector(animated, 15, 0, animationSpritesNum, 0)
-    , lives(lives)
-    , _move_speed(moveSpeed)
+    , m_lives(lives)
+    , m_move_speed(moveSpeed)
 {
     //
 }
@@ -85,21 +85,21 @@ SpaceobjectTypeSpriteSelector& Spaceobject::getSpaceObjectTypeSpriteSelector(voi
 ///
 bool Spaceobject::move(int32_t lim_west, int32_t lim_east, int32_t lim_north, int32_t lim_south)
 {
-    if (x_d == directions::LEFT) {
-        x = std::max(x - _move_speed, 0);
-    } else if (x_d == directions::RIGHT) {
-        x = std::min(x + _move_speed, lim_east - width);
+    if (m_xD == directions::LEFT) {
+        m_x = std::max(m_x - m_move_speed, 0);
+    } else if (m_xD == directions::RIGHT) {
+        m_x = std::min(m_x + m_move_speed, lim_east - m_width);
     }
 
-    if (y_d == directions::STATIONARY) {
-        return x == lim_west || GetRightMostX() == lim_east;
-    } else if (y_d == directions::DOWN) {
-        y = std::max(y - _move_speed, lim_south);
-    } else if (y_d == directions::UP) {
-        y = std::min(y + _move_speed, lim_north - height);
+    if (m_yD == directions::STATIONARY) {
+        return m_x == lim_west || GetRightMostX() == lim_east;
+    } else if (m_yD == directions::DOWN) {
+        m_y = std::max(m_y - m_move_speed, lim_south);
+    } else if (m_yD == directions::UP) {
+        m_y = std::min(m_y + m_move_speed, lim_north - m_height);
     }
 
-    return x == lim_west || GetRightMostX() == lim_east;
+    return m_x == lim_west || GetRightMostX() == lim_east;
 }
 
 void Spaceobject::SetDirectionUp(bool keyPressed)
@@ -124,40 +124,40 @@ void Spaceobject::SetDirectionRight(bool keyPressed)
 
 void Spaceobject::SetDirectionStationary(void)
 {
-    x_d = directions::STATIONARY;
-    y_d = directions::STATIONARY;
+    m_xD = directions::STATIONARY;
+    m_yD = directions::STATIONARY;
 }
 
 int32_t Spaceobject::GetRightMostX(void) const
 {
-    return x + width;
+    return m_x + m_width;
 }
 
 int32_t Spaceobject::GetTopMostY(void) const
 {
-    return y + height;
+    return m_y + m_height;
 }
 
 int32_t Spaceobject::GetMiddleX(void) const
 {
-    return x + width / 2;
+    return m_x + m_width / 2;
 }
 
 void Spaceobject::ReverseDirection(void)
 {
-    x_d *= -1;
-    y_d *= -1;
+    m_xD *= -1;
+    m_yD *= -1;
 }
 // Private methods
 
 void Spaceobject::setHorizontalDirection(directions::Directions direction, bool setOrUnset)
 {
-    x_d += setOrUnset ? direction : -direction;
+    m_xD += setOrUnset ? direction : -direction;
 }
 
 void Spaceobject::setVerticalDirection(directions::Directions direction, bool setOrUnset)
 {
-    y_d += setOrUnset ? direction : -direction;
+    m_yD += setOrUnset ? direction : -direction;
 }
 
 ///
@@ -173,7 +173,7 @@ void Spaceobject::setVerticalDirection(directions::Directions direction, bool se
 ///
 bool Spaceobject::overlaps(const Spaceobject& other)
 {
-    if (GetTopMostY() < other.y + 1 || y + 1 > other.GetTopMostY()) {
+    if (GetTopMostY() < other.m_y + 1 || m_y + 1 > other.GetTopMostY()) {
         return false;
     }
 
@@ -182,12 +182,12 @@ bool Spaceobject::overlaps(const Spaceobject& other)
 
 bool Spaceobject::verticalProjectionOverlaps(const Spaceobject& other)
 {
-    return !(GetRightMostX() < other.x + 1 || x + 1 > other.GetRightMostX());
+    return !(GetRightMostX() < other.m_x + 1 || m_x + 1 > other.GetRightMostX());
 }
 
 bool Spaceobject::isAlive(void)
 {
-    return lives > 0;
+    return m_lives > 0;
 }
 
 

@@ -54,18 +54,18 @@ int main(void)
 
         buffer.append_text(164, 7, Sprites::GetInstance().text_spritesheet, "CREDIT 00");
 
-        buffer.append_text(4, buff_height - Sprites::GetInstance().text_spritesheet.height - 7, Sprites::GetInstance().text_spritesheet, "SCORE");
+        buffer.append_text(4, buff_height - Sprites::GetInstance().text_spritesheet.m_height - 7, Sprites::GetInstance().text_spritesheet, "SCORE");
         // Actual score
-        buffer.append_text(4 + 2 * Sprites::GetInstance().text_spritesheet.width,
-                           buff_height - 2 * Sprites::GetInstance().text_spritesheet.height - 12,
+        buffer.append_text(4 + 2 * Sprites::GetInstance().text_spritesheet.m_width,
+                           buff_height - 2 * Sprites::GetInstance().text_spritesheet.m_height - 12,
                            Sprites::GetInstance().text_spritesheet, "1234506789"
         );
 
-        buffer.append_text(4, 7, Sprites::GetInstance().text_spritesheet, std::to_string(game.getPlayer().lives));
+        buffer.append_text(4, 7, Sprites::GetInstance().text_spritesheet, std::to_string(game.getPlayer().m_lives));
         int32_t xpos = 13;
-        for (int32_t i = 1; i < game.getPlayer().lives; ++i) {
+        for (int32_t i = 1; i < game.getPlayer().m_lives; ++i) {
             buffer.drawSprite(xpos, 7, Sprites::GetInstance().player_sprite, colors::ORANGE);
-            xpos += Sprites::GetInstance().player_sprite.width + 3;
+            xpos += Sprites::GetInstance().player_sprite.m_width + 3;
         }
 #ifndef NDEBUG
         buffer.append_integer(220, 220, Sprites::GetInstance().text_spritesheet, game.getAlienBullets().size(), colors::ORANGE);

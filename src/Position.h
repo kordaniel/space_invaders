@@ -9,10 +9,11 @@ public:
     Position(int32_t xPosition, int32_t yPosition);
     Position(int32_t xPosition, int32_t yPosition, int32_t xDirection, int32_t yDirection);
     Position(const Position& other) = delete;
-    int32_t x;
-    int32_t y;
-    int32_t x_d;
-    int32_t y_d;
+    // TODO: Refactor these member vars to be protected
+    int32_t m_x;
+    int32_t m_y;
+    int32_t m_xD;
+    int32_t m_yD;
 };
 
 #endif
