@@ -1,23 +1,7 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-/* **************************************************
- * TODO: !!! Refactor all code to use only NDEBUG !!!
- *
- * Define DEBUG to compile the project with included
- * error printing and assertions. Define NDEBUG to
- * disable the same for production builds.
- * NOTE: Define only one of these. Also note that
- * your compiler might (un)define these!!!
- */
-
-#define DEBUG
 //#define NDEBUG
-/* *********************************************** */
-
-#ifdef DEBUG
-#include "Timer.h"
-#endif
 
 #include <cstdint>
 #include <cstddef>
@@ -28,6 +12,7 @@
 #ifndef NDEBUG
 // NOTE: We havent included "Io.h" here, so if the code wont compile this must be handled.
 //       This is because then we would have different includes for DEBUG/RELEASE modes.
+    #include "Timer.h"
     #define assertpair(exp, arg1, arg2)\
         do {\
             if (!(exp))\

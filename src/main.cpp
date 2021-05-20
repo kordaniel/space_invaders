@@ -67,19 +67,16 @@ int main(void)
             buffer.drawSprite(xpos, 7, Sprites::GetInstance().player_sprite, colors::ORANGE);
             xpos += Sprites::GetInstance().player_sprite.width + 3;
         }
-
+#ifndef NDEBUG
         buffer.append_integer(220, 220, Sprites::GetInstance().text_spritesheet, game.getAlienBullets().size(), colors::ORANGE);
-        //buffer.append_integer(120, 7, sprites.text_spritesheet, game.m_playerBulletsBonus, colors::ORANGE);
-        //buffer.append_object(game.getPlayer());
+#endif
         buffer.drawObject(game.getPlayer());
 
         for (auto &alien : game.getAliens()) {
-            //buffer.append_object(alien, colors::ORANGE);
             buffer.drawObject(alien, colors::ORANGE);
         }
 
         for (auto &bullet : game.getAlienBullets()) {
-            //buffer.append_object(bullet, colors::RED);
             buffer.drawObject(bullet, colors::RED);
         }
 

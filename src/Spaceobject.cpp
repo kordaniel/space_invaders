@@ -198,15 +198,15 @@ Player::Player(int32_t xPosition, int32_t yPosition, int32_t width, int32_t heig
     //
 }
 
-void Player::SetDirectionUp(bool keyPressed)
+void Player::SetDirectionUp(bool keyPressed __attribute__((unused)))
 {
-    assert(keyPressed == keyPressed);
+    // TODO: override this function to get rid of the unused attribute
     return; // Player moves only along the horizontal axis
 }
 
-void Player::SetDirectionDown(bool keyPressed)
+void Player::SetDirectionDown(bool keyPressed __attribute__((unused)))
 {
-    assert(keyPressed == keyPressed);
+    // TODO: override this function to get rid of the unused attribute
     return; // Player moves only along the horizontal axis
 }
 

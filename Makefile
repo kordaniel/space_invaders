@@ -15,9 +15,9 @@ TARGET    := $(TARGETDIR)/$(APPNAME)
 
 CXX       := g++
 CC        := gcc
-CXXFLAGS  := --std=c++11 -Wall -Wextra -Wshadow -fsanitize=undefined
-#CXXFLAGS  += $(CXXFLAGS) -Werror -pedantic
-#CXXFLAGS  += $(CXXFLAGS) -O3 -flto
+CXXFLAGS  := --std=c++11 -Wall -Wextra # -Wshadow -Wshadow-field-in-constructor -fsanitize=undefined
+CXXFLAGS  += -Werror -pedantic
+#CXXFLAGS  += -O3 -flto
 CXXFLAGS  += $(shell pkg-config --cflags glew glfw3)
 LDFLAGS   := $(shell pkg-config --libs glew glfw3)
 ifeq ($(OSTYPE),Darwin)

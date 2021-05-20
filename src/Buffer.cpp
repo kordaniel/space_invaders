@@ -1,6 +1,6 @@
 #include "Buffer.h"
 
-#ifdef DEBUG
+#ifndef NDEBUG
 // First 2 functions will integrate with the IDE to set breakpoints to help debugging.
 // MSVC: __debugbreak()
 // Xcode: __builtin_debugtrap() or __builtin_trap()
@@ -28,9 +28,8 @@
 
 // Section with 4 functions that should not be used outside this module
 // ----------------------------------------------------------------------
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+static void key_callback(GLFWwindow* window, int key, int scancode __attribute__((unused)), int action, int mods __attribute__((unused)))
 {
-    assert(scancode == scancode && mods == mods);
     Game *game = reinterpret_cast<Game *>(glfwGetWindowUserPointer(window));
 
     switch (key) {
@@ -81,21 +80,18 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
-void window_close_callback(GLFWwindow* window)
+void window_close_callback(GLFWwindow* window __attribute__((unused)))
 {
-    assert(window == window);
     io::print_to_stdout("Window close callback called!");
 }
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+void framebuffer_size_callback(GLFWwindow* window __attribute__((unused)), int width, int height)
 {
-    assert(window == window);
     io::print_to_stdout_varargs("Framebuffer size: ", width, ", ", height);
 }
 
-void error_callback(int error, const char* description)
+void error_callback(int error __attribute__((unused)), const char* description)
 {
-    assert(error == error);
     io::print_to_stderr_varargs("[ERROR]: ", description);
 }
 // ----------------------------------------------------------------------
@@ -195,12 +191,12 @@ void Buffer::append_text(int32_t x, int32_t y,
     for (auto &ch : text) {
         currChar = ch - 32;
 
-        #ifdef DEBUG
+#ifndef NDEBUG
         if (currChar < 0 || currChar > 65) {
             io::print_to_stdout_varargs("[ERROR]: Unable to draw character: ", currChar);
             continue;
         }
-        #endif
+#endif
         sprite_char = text_spritesheet.data + currChar * stride;
         append_sprite(xpos, y, sprite_char, text_spritesheet.width, text_spritesheet.height, color);
         xpos += text_spritesheet.width + character_gap;
@@ -331,11 +327,11 @@ void Buffer::initialize_opengl(void)
     io::print_to_stdout_varargs("Renderer used: ", glGetString(GL_RENDERER));
     io::print_to_stdout_varargs("Shading language: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
-    #ifdef DEBUG
+#ifndef NDEBUG
     GLCall(glfwSwapInterval(1)); // vsync 1 = ON, 0 = OFF
-    #else
+#else
     GLCall(glfwSwapInterval(1)); // vsync ON
-    #endif
+#endif
 
     GLCall(glClearColor(1.0, 0.0, 0.0, 1.0));
 }

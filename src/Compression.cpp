@@ -1,5 +1,6 @@
 #include "Compression.h"
 
+#include "Io.h"
 
 ///
 /// Decompresses the bytes from the array [current => last] and stores
