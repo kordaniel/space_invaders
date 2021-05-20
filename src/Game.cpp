@@ -67,7 +67,7 @@ void Game::init_aliens(const Sprites& sprites)
     const int32_t initalSpeed = 1;
     for (int32_t yi = 0; yi < m_alien_rows; ++yi) {
         const size_t alien_type   = (m_alien_rows - yi) / 2;
-        assert(0 <= alien_type && alien_type <= 2);
+        assert(alien_type <= 2);
         const int32_t alienWidth  = sprites.alien_sprites[2 * alien_type].m_width;
         const int32_t alienHeight = sprites.alien_sprites[2 * alien_type].m_height;
         for (int32_t xi = 0; xi < m_alien_cols; ++xi) {
@@ -213,7 +213,7 @@ void Game::update_aliens(void)
             if (alienPtr->move(0, m_width, m_height, 0)) {
                 alienSwarmHitWall = true;
             }
-            if (rand() % 5000 < ((aN * 10000) / (aN*aN*10))) {
+            if ((size_t) rand() % 5000 < ((aN * 10000) / (aN*aN*10))) {
                 create_alien_bullet(*alienPtr);
             }
         } else {

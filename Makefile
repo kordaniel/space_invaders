@@ -20,9 +20,8 @@ CXXFLAGS  += -Werror -pedantic
 #CXXFLAGS  += -O3 -flto
 
 # Check if the compiler is clang (macos symlinks gcc to clang) and set clang-only flags.
-# gcc default behaviour checks for constructor shadowing of member variables..
 ifneq (, $(findstring clang, $(shell $(CXX) --version)))
-	CXXFLAGS += -Wshadow-field-in-constructor
+	CXXFLAGS += -Wshadow-field-in-constructor -Wsign-compare# -Wsign-conversion
 endif
 
 CXXFLAGS  += $(shell pkg-config --cflags glew glfw3)
