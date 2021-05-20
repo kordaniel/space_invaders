@@ -15,11 +15,19 @@ TARGET    := $(TARGETDIR)/$(APPNAME)
 
 CXX       := g++
 CC        := gcc
-CXXFLAGS  := --std=c++11 -Wall -Wextra # -Wshadow -Wshadow-field-in-constructor -fsanitize=undefined
+CXXFLAGS  := --std=c++11 -Wall -Wextra -Wshadow -fsanitize=undefined
 CXXFLAGS  += -Werror -pedantic
 #CXXFLAGS  += -O3 -flto
+
+# Check if the compiler is clang (macos symlinks gcc to clang) and set clang-only flags.
+# gcc default behaviour checks for constructor shadowing of member variables..
+ifneq (, $(findstring clang, $(shell $(CXX) --version)))
+	CXXFLAGS += -Wshadow-field-in-constructor
+endif
+
 CXXFLAGS  += $(shell pkg-config --cflags glew glfw3)
 LDFLAGS   := $(shell pkg-config --libs glew glfw3)
+
 ifeq ($(OSTYPE),Darwin)
 	LDFLAGS += -framework OpenGL
 else
