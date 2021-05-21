@@ -48,13 +48,13 @@ void Sprite::deserialize(const std::vector<uint8_t>& spriteDataBitmap)
     m_height  = constructUint16_tFromUint8_t(2);
     m_count = constructUint16_tFromUint8_t(4);
 
-    if (m_count * getTotalSize() != decompressed.size() - 6) {
+    if (m_count * GetTotalSize() != decompressed.size() - 6) {
         io::print_to_stdout_varargs("[Sprite]: Error decompressing sprite data.");
         throw "TODO: Something clever, fallback to default sprite instead of throw";
     }
 
-    NEWoper(m_data, new uint8_t[m_count * getTotalSize()]);
-    for (size_t i = 0; i < m_count * getTotalSize(); ++i) {
+    NEWoper(m_data, new uint8_t[m_count * GetTotalSize()]);
+    for (size_t i = 0; i < m_count * GetTotalSize(); ++i) {
         m_data[i] = decompressed[6+i];
     }
 }
@@ -76,9 +76,9 @@ const uint8_t* Sprite::getNumberSpritePtr(int32_t number) const
     // This method should only be used on the textSpritsheet.
     // TODO: Create own class for Spritesheets. For now we just assert
     //       that the size of the Sprite is the one that the Spritsheet has.
-    assertpair(getTotalSize() == 35, getTotalSize(), 35);
+    assertpair(GetTotalSize() == 35, GetTotalSize(), 35);
     assert(0 <= number &&  number < 10);
-    return getSpritePtr(16 * getTotalSize() + number * getTotalSize());
+    return getSpritePtr(16 * GetTotalSize() + number * GetTotalSize());
 }
 
 bool Sprite::operator[](size_t i) const

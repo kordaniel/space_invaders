@@ -104,7 +104,7 @@ Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight)
     , m_n_frames(0)
     , m_fps_prev(0)
 {
-    m_data = new uint32_t[getTotalSize()];
+    m_data = new uint32_t[GetTotalSize()];
     clear();
 
     initialize_glfw_window();
@@ -129,7 +129,7 @@ void Buffer::clear(void)
 
 void Buffer::clear(uint32_t color)
 {
-    for (int32_t i = 0; i < getTotalSize(); ++i) {
+    for (int32_t i = 0; i < GetTotalSize(); ++i) {
         m_data[i] = color;
     }
 }
@@ -137,16 +137,16 @@ void Buffer::clear(uint32_t color)
 void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colors color)
 {
     int32_t yStartIdx;
-    for (int yi = 0; yi < sprite.m_height; ++yi) {
-        yStartIdx = compute_sprite_yx_start_indx(x, (y - yi), sprite.m_height);
-        if (!y_is_in_bounds(y + sprite.m_height - 1 - yi)) {
+    for (int yi = 0; yi < sprite.GetHeight(); ++yi) {
+        yStartIdx = compute_sprite_yx_start_indx(x, (y - yi), sprite.GetHeight());
+        if (!y_is_in_bounds(y + sprite.GetHeight() - 1 - yi)) {
 #ifndef NDEBUG
-            io::print_to_stdout_varargs("[drawSprite()]: Outofbounds y: ", (y + sprite.m_height - 1 - yi), " = ", yStartIdx);
+            io::print_to_stdout_varargs("[drawSprite()]: Outofbounds y: ", (y + sprite.GetHeight() - 1 - yi), " = ", yStartIdx);
 #endif
             continue;
         }
 
-        for (int xi = 0; xi < sprite.m_width; ++xi) {
+        for (int xi = 0; xi < sprite.GetWidth(); ++xi) {
             if (!x_is_in_bounds(x + xi)) {
 #ifndef NDEBUG
                 io::print_to_stdout_varargs("[drawSprite()]: Outofbounds x: ", (x+xi), " = ", (yStartIdx + xi));
@@ -154,7 +154,7 @@ void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colo
                 continue;
             }
 
-            if (!sprite[yi * sprite.m_width + xi]) {
+            if (!sprite[yi * sprite.GetWidth() + xi]) {
                 continue;
             }
             m_data[yStartIdx + xi] = color;
@@ -165,14 +165,14 @@ void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colo
 void Buffer::drawObject(Spaceobject& spaceobj, colors::Colors color)
 {
     // TODO: Refactor spaceobj to be const!
-    drawSprite(spaceobj.m_x, spaceobj.m_y, m_sprites.getSprite(spaceobj.getSpriteType(), spaceobj.getSpaceObjectTypeSpriteSelector()), color);
+    drawSprite(spaceobj.GetX(), spaceobj.GetY(), m_sprites.getSprite(spaceobj.getSpriteType(), spaceobj.getSpaceObjectTypeSpriteSelector()), color);
 }
 
 void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
     assert(y_is_in_bounds(y));
     const int32_t y_start = compute_y_start_indx(y);
     for (int32_t x = 0; x < m_width; ++x) {
-        assertpair((y_start + x < getTotalSize()), (y_start + x), getTotalSize());
+        assertpair((y_start + x < GetTotalSize()), (y_start + x), GetTotalSize());
         m_data[y_start + x] = color;
     }
 }
@@ -182,8 +182,8 @@ void Buffer::append_text(int32_t x, int32_t y,
                          const std::string& text,
                          colors::Colors color)
 {
-    const int32_t stride       = text_spritesheet.getTotalSize();
-    const int32_t str_width    = text.length() * (text_spritesheet.m_width + m_character_gap) - m_character_gap;
+    const int32_t stride       = text_spritesheet.GetTotalSize();
+    const int32_t str_width    = text.length() * (text_spritesheet.GetWidth() + m_character_gap) - m_character_gap;
     const uint8_t* sprite_char = text_spritesheet.m_data;
     char currChar              = 0;
     int32_t xpos               = x + str_width < m_width ? x : m_width - str_width;
@@ -198,8 +198,8 @@ void Buffer::append_text(int32_t x, int32_t y,
         }
 #endif
         sprite_char = text_spritesheet.m_data + currChar * stride;
-        append_sprite(xpos, y, sprite_char, text_spritesheet.m_width, text_spritesheet.m_height, color);
-        xpos += text_spritesheet.m_width + m_character_gap;
+        append_sprite(xpos, y, sprite_char, text_spritesheet.GetWidth(), text_spritesheet.GetHeight(), color);
+        xpos += text_spritesheet.GetWidth() + m_character_gap;
     }
 }
 
@@ -208,11 +208,11 @@ void Buffer::append_integer(int32_t x, int32_t y, Sprite& text_spritesheet, int3
     assert(number >= 0);
 
     if (number == 0) {
-        if (m_width < x + text_spritesheet.m_width) {
-            x = m_width - text_spritesheet.m_width;
+        if (m_width < x + text_spritesheet.GetWidth()) {
+            x = m_width - text_spritesheet.GetWidth();
         }
         append_sprite(x, y, text_spritesheet.getNumberSpritePtr(0),
-                      text_spritesheet.m_width, text_spritesheet.m_height,
+                      text_spritesheet.GetWidth(), text_spritesheet.GetHeight(),
                       colors::Colors::ORANGE
         );
         return;
@@ -475,14 +475,14 @@ int32_t Buffer::append_digits(int32_t x, int32_t y,
     if (number > 0) {
         x = append_digits(x, y, text_spritesheet, number / 10, ++digits, color);
     } else if (number == 0) {
-        const int32_t num_width = digits * (text_spritesheet.m_width + m_character_gap) - m_character_gap;
+        const int32_t num_width = digits * (text_spritesheet.GetWidth() + m_character_gap) - m_character_gap;
         return x + num_width < m_width ? x : m_width - num_width;
     }
 
     append_sprite(x, y, text_spritesheet.getNumberSpritePtr(number % 10),
-                  text_spritesheet.m_width, text_spritesheet.m_height, color
+                  text_spritesheet.GetWidth(), text_spritesheet.GetHeight(), color
     );
-    return x + text_spritesheet.m_width + m_character_gap;
+    return x + text_spritesheet.GetWidth() + m_character_gap;
 }
 
 

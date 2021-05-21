@@ -8,7 +8,7 @@ Game::Game(int32_t gameWidth, int32_t gameHeight)
         , m_playerBulletsMax(3)
         , m_playerBulletsBonus(0)
         , m_sprites(Sprites::GetInstance())
-        , m_player((gameWidth / 2) - (Sprites::GetInstance().player_sprite.m_width / 2), 30, Sprites::GetInstance().player_sprite.m_width, Sprites::GetInstance().player_sprite.m_height)
+        , m_player((gameWidth / 2) - (Sprites::GetInstance().player_sprite.GetWidth() / 2), 30, Sprites::GetInstance().player_sprite.GetWidth(), Sprites::GetInstance().player_sprite.GetHeight())
 {
     init_aliens(Sprites::GetInstance());
 }
@@ -25,7 +25,7 @@ void Game::create_player_bullet(void)
     if (m_playerBullets.size() < playerMaxAllowedBullets()) {
         create_bullet(
             m_player.GetMiddleX(), m_player.GetTopMostY(),
-            m_sprites.player_bullet_sprite.m_width, m_sprites.player_bullet_sprite.m_height,
+            m_sprites.player_bullet_sprite.GetWidth(), m_sprites.player_bullet_sprite.GetHeight(),
             BULLET_PLAYER
         );
     }
@@ -68,8 +68,8 @@ void Game::init_aliens(const Sprites& sprites)
     for (int32_t yi = 0; yi < m_alien_rows; ++yi) {
         const size_t alien_type   = (m_alien_rows - yi) / 2;
         assert(alien_type <= 2);
-        const int32_t alienWidth  = sprites.alien_sprites[2 * alien_type].m_width;
-        const int32_t alienHeight = sprites.alien_sprites[2 * alien_type].m_height;
+        const int32_t alienWidth  = sprites.alien_sprites[2 * alien_type].GetWidth();
+        const int32_t alienHeight = sprites.alien_sprites[2 * alien_type].GetHeight();
         for (int32_t xi = 0; xi < m_alien_cols; ++xi) {
             const size_t xpos = 24 + 16 * xi + (13 - alienWidth) / 2;
             const size_t ypos = 128 + 17 * yi;
@@ -86,8 +86,8 @@ void Game::init_aliens(const Sprites& sprites)
 void Game::create_alien_bullet(const Alien& alien)
 {
     create_bullet(
-        alien.GetMiddleX() - m_sprites.alien_bullet_sprites[0].m_width / 2, alien.m_y,
-        m_sprites.alien_bullet_sprites[0].m_width, m_sprites.alien_bullet_sprites[0].m_height,
+        alien.GetMiddleX() - m_sprites.alien_bullet_sprites[0].GetWidth() / 2, alien.GetY(),
+        m_sprites.alien_bullet_sprites[0].GetWidth(), m_sprites.alien_bullet_sprites[0].GetHeight(),
         BULLET_ALIEN
     );
 }
@@ -189,7 +189,7 @@ void Game::update_alien_bullets(void)
             ++m_playerBulletsBonus;
         }
 
-        if (alienBulletPtr->m_y == 0) {
+        if (alienBulletPtr->GetY() == 0) {
             alienBulletPtr = m_alienBullets.erase(alienBulletPtr);
         } else ++alienBulletPtr;
     }
@@ -207,7 +207,7 @@ void Game::update_aliens(void)
 
         if (alienPtr->isAlive()) {
             if (m_aliensShouldTurn) {
-                alienPtr->m_y -= alienPtr->m_height;
+                alienPtr->UpdateY(-alienPtr->GetHeight());
                 alienPtr->ReverseDirection();
             }
             if (alienPtr->move(0, m_width, m_height, 0)) {

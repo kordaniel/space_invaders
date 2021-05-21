@@ -13,28 +13,26 @@ void do_heavyCalculation()
     }
 } */
 
+void initialize(void) {
+    srand(time(nullptr));
+}
+
 int main(void)
 {
-    srand(time(nullptr));
+#ifndef NDEBUG
+    Timer timer("Total runtime: ");
+#endif
 
+    initialize();
     const int32_t buff_width = 224, buff_height = 256;
-    //Sprites sprites;
+
     Buffer buffer(buff_width, buff_height);
     Game game(buff_width, buff_height);
 
     glfwSetWindowUserPointer(buffer.get_glfw_window(), &game);
-/*
-    uint8_t r = (uint8_t) 0;
-    uint8_t g = (uint8_t) 0;
-    uint8_t b = (uint8_t) 0;
-    uint8_t a = (uint8_t) 255;
-    //uint32_t clear_color = 0;
-*/
+
     // Ugly hack to limit the speed of the game in DEBUG mode for now..
     // **************
-    #ifndef NDEBUG
-    Timer timer;
-    #endif
     uint64_t microsecsInSec = 1 * 1000 * 1000;
     uint64_t updatesPerSecHack = 20;
     using std::chrono::time_point;
@@ -42,6 +40,7 @@ int main(void)
 
     time_point<steady_clock> time_prev_update = steady_clock::now();
     time_point<steady_clock> time_now = steady_clock::now();
+    //size_t count = 0;
 
     while (!glfwWindowShouldClose(buffer.get_glfw_window())) {
         time_now = steady_clock::now();
@@ -52,12 +51,22 @@ int main(void)
         // End ugly hack!
         // **************
 
+        /*
+        if (++count % 180 == 0) {
+            //timer.reset();
+            io::print_to_stdout_varargs("TIME: ", timer.elapsed<std::chrono::nanoseconds>(), "ns");
+            io::print_to_stdout_varargs("TIME: ", timer.elapsed<std::chrono::seconds>(), "s");
+            io::print_to_stdout_varargs("TIME: ", timer.elapsed<std::chrono::milliseconds>(), "ms");
+            io::print_to_stdout_varargs("TIME: ", timer.elapsed<std::chrono::microseconds>(), "us");
+            io::print_to_stdout("");
+        }
+        */
         buffer.append_text(164, 7, Sprites::GetInstance().text_spritesheet, "CREDIT 00");
 
-        buffer.append_text(4, buff_height - Sprites::GetInstance().text_spritesheet.m_height - 7, Sprites::GetInstance().text_spritesheet, "SCORE");
+        buffer.append_text(4, buff_height - Sprites::GetInstance().text_spritesheet.GetHeight() - 7, Sprites::GetInstance().text_spritesheet, "SCORE");
         // Actual score
-        buffer.append_text(4 + 2 * Sprites::GetInstance().text_spritesheet.m_width,
-                           buff_height - 2 * Sprites::GetInstance().text_spritesheet.m_height - 12,
+        buffer.append_text(4 + 2 * Sprites::GetInstance().text_spritesheet.GetWidth(),
+                           buff_height - 2 * Sprites::GetInstance().text_spritesheet.GetHeight() - 12,
                            Sprites::GetInstance().text_spritesheet, "1234506789"
         );
 
@@ -65,7 +74,7 @@ int main(void)
         int32_t xpos = 13;
         for (int32_t i = 1; i < game.getPlayer().m_lives; ++i) {
             buffer.drawSprite(xpos, 7, Sprites::GetInstance().player_sprite, colors::ORANGE);
-            xpos += Sprites::GetInstance().player_sprite.m_width + 3;
+            xpos += Sprites::GetInstance().player_sprite.GetWidth() + 3;
         }
 #ifndef NDEBUG
         buffer.append_integer(220, 220, Sprites::GetInstance().text_spritesheet, game.getAlienBullets().size(), colors::ORANGE);
@@ -105,7 +114,8 @@ int main(void)
     //worker_thread.join();
 
 #ifndef NDEBUG
-    io::print_to_stdout("Clean exit. Game ran for:");
+    io::print_to_stdout("Clean exit!");
 #endif
+
     return EXIT_SUCCESS;
 }
