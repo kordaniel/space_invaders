@@ -1,47 +1,54 @@
 #include "Timer.h"
+#include "Io.h"
 
 using namespace std::chrono;
 
-Timer::Timer(bool printTimingResults)
-    : m_printTimingRes(printTimingResults)
-{
-    m_startTimepoint = steady_clock::now();
-}
-
-Timer::~Timer(void)
-{
-    if (m_printTimingRes) {
-        time_point<steady_clock> endTimepoint = steady_clock::now();
-        processResult(endTimepoint, nullptr);
-    }
-}
-
-void Timer::processResult(const time_point<steady_clock>& endTimepoint, const char* message)
-{
-    int64_t startTime =
-        time_point_cast<microseconds>(m_startTimepoint).time_since_epoch().count();
-    int64_t endTime =
-        time_point_cast<microseconds>(endTimepoint).time_since_epoch().count();
-
-    int64_t duration = endTime - startTime;
-    double duration_ms = duration * 0.001;
-
-    if (duration_ms < 1000)
-        io::print_to_stdout_varargs((message != nullptr ? message : ""), duration, " us\t(", duration_ms, " ms)");
-    else
-       io::print_to_stdout_varargs((message != nullptr ? message : ""), duration, " us\t(", duration * 0.000001, " s)");
-}
-
-
-ScopeTimer::ScopeTimer(const char* scopeName)
-    : m_scopeName(scopeName)
-    , m_Timer(false)
+Timer::Timer(const char* message)
+    : m_message(message)
+    , m_startTimepoint(steady_clock::now())
 {
     //
 }
 
-ScopeTimer::~ScopeTimer(void)
+Timer::Timer()
+    : Timer(nullptr)
+{
+    //
+}
+
+Timer::~Timer(void)
 {
     time_point<steady_clock> endTimepoint = steady_clock::now();
-    m_Timer.processResult(endTimepoint, m_scopeName);
+    processResult(endTimepoint);
 }
+
+void Timer::reset(void)
+{
+    m_startTimepoint = steady_clock::now();
+}
+
+void Timer::processResult(const time_point<steady_clock>& endTimepoint) const
+{
+    int64_t duration = duration_cast<nanoseconds>(endTimepoint - m_startTimepoint).count();
+    const char* message = m_message ? m_message : "";
+
+    if (duration < 1000) {
+        io::print_to_stdout_varargs(message, duration, "ns.");
+    } else if (duration < 1e6) {
+        io::print_to_stdout_varargs(message, duration * 0.001, "us.");
+    } else if (duration < 1e9) {
+        io::print_to_stdout_varargs(message, duration * 0.000001, "ms.");
+    } else {
+        io::print_to_stdout_varargs(message, duration * 0.000000001, "s.");
+    }
+}
+
+template<typename D>
+int64_t Timer::elapsed(void) const
+{
+    return duration_cast<D>(steady_clock::now() - m_startTimepoint).count();
+}
+template int64_t Timer::elapsed<nanoseconds> (void) const;
+template int64_t Timer::elapsed<microseconds>(void) const;
+template int64_t Timer::elapsed<milliseconds>(void) const;
+template int64_t Timer::elapsed<seconds>     (void) const;
