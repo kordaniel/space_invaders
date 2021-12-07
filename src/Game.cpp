@@ -7,6 +7,7 @@ Game::Game(int32_t gameWidth, int32_t gameHeight)
         , m_aliensShouldTurn(false)
         , m_playerBulletsMax(3)
         , m_playerBulletsBonus(0)
+        , m_playerScore(0)
         , m_sprites(Sprites::GetInstance())
         , m_player((gameWidth / 2) - (Sprites::GetInstance().player_sprite.GetWidth() / 2), 30, Sprites::GetInstance().player_sprite.GetWidth(), Sprites::GetInstance().player_sprite.GetHeight())
 {
@@ -52,6 +53,11 @@ std::list<Spaceobject>& Game::getAlienBullets(void) const
 {
     // TODO: DELETE this method when possible
     return m_alienBullets;
+}
+
+int32_t Game::GetPlayerScore(void) const
+{
+    return m_playerScore;
 }
 
 
@@ -133,6 +139,7 @@ void Game::update_player_bullets(void)
 
         for (auto alienBulletPtr = m_alienBullets.begin(); alienBulletPtr != m_alienBullets.end(); ) {
             if (bulletptr->overlaps(*alienBulletPtr)) {
+                m_playerScore += SCORE_BASE_VAL / 2;
                 m_alienBullets.erase(alienBulletPtr);
                 bulletptr = m_playerBullets.erase(bulletptr);
                 goto PLAYERBULLETLOOPSTART;
@@ -144,6 +151,7 @@ void Game::update_player_bullets(void)
 
         for (auto alienptr = m_aliens.begin(); alienptr != m_aliens.end(); ) {
             if (bulletptr->overlaps(*alienptr) && alienptr->isAlive()) {
+                m_playerScore += (3 - alienptr->getSpriteType() / 2) * SCORE_BASE_VAL;
                 alienptr->m_spriteType = ALIEN_DEAD;
                 alienptr->m_lives = 0;
                 bulletptr = m_playerBullets.erase(bulletptr);
@@ -171,6 +179,7 @@ void Game::update_alien_bullets(void)
 
         for (auto playerBulletPtr = m_playerBullets.begin(); playerBulletPtr != m_playerBullets.end(); ) {
             if (alienBulletPtr->overlaps(*playerBulletPtr)) {
+                m_playerScore += SCORE_BASE_VAL / 2;
                 m_playerBullets.erase(playerBulletPtr);
                 alienBulletPtr = m_alienBullets.erase(alienBulletPtr);
                 goto ALIENBULLETLOOPSTART;

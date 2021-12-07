@@ -19,13 +19,17 @@ public:
     std::list<Alien>& getAliens(void) const;
     std::list<Spaceobject>& getPlayerBullets(void) const;
     std::list<Spaceobject>& getAlienBullets(void) const;
+    int32_t GetPlayerScore(void) const;
 
 private:
+    const int32_t SCORE_BASE_VAL = 10;
+
     int32_t m_alien_rows;
     int32_t m_alien_cols;
     bool m_aliensShouldTurn;
     size_t m_playerBulletsMax;
     size_t m_playerBulletsBonus;
+    int32_t m_playerScore;
     const Sprites & m_sprites;
     mutable Player m_player;
     mutable std::list<Alien> m_aliens;
