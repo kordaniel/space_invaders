@@ -10,7 +10,7 @@ Sprite::Sprite(const std::string& name)
 void Sprite::init()
 {
     std::vector<uint8_t> rawData;
-    const std::string filepath = SPRITES_PATH + m_name;
+    const std::string filepath = SI::FILEPATHS::PATH_SPRITES + m_name;
 
     bool readSuccess = io::readBinaryFile(filepath, rawData);
     if (!readSuccess) {
@@ -24,7 +24,7 @@ void Sprite::init()
 void Sprite::serialize(void)
 {
     std::vector<uint8_t> compressed;
-    const std::string filepath = SPRITES_PATH + m_name;
+    const std::string filepath = SI::FILEPATHS::PATH_SPRITES + m_name;
 
     Compression::CompressSpriteData(m_data, (uint16_t) m_width, (uint16_t) m_height, (uint16_t) m_count, compressed);
     io::writeBinaryFile(filepath, compressed);

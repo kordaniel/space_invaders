@@ -15,7 +15,7 @@ TARGET    := $(TARGETDIR)/$(APPNAME)
 
 CXX       := g++
 CC        := gcc
-CXXFLAGS  := --std=c++14 -Wall -Wextra -Wshadow -fsanitize=undefined
+CXXFLAGS  := --std=c++17 -Wall -Wextra -Wshadow -fsanitize=undefined
 CXXFLAGS  += -Werror -pedantic
 #CXXFLAGS  += -O3 -flto
 

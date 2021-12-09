@@ -1,7 +1,9 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-//#define NDEBUG
+#define NDEBUG
+
+#include "Logger.h"
 
 #include <cstdint>
 #include <cstddef>
@@ -10,20 +12,17 @@
 #include <cassert>
 
 #ifndef NDEBUG
-// NOTE: We havent included "Io.h" here, so if the code wont compile this must be handled.
-//       This is because then we would have different includes for DEBUG/RELEASE modes.
-    #include "Timer.h"
     #define assertpair(exp, arg1, arg2)\
         do {\
-            if (!(exp))\
-                io::print_to_stderr_varargs("ASSERTION failed: (", arg1, " <=> ", #exp, " <=> ", arg2, "):");\
-            else (void)0;\
+            if (!(exp)) {\
+                Logger::Debug("ASSERTION failed: (%d <=> %s <=> %d):", arg1, #exp, arg2);\
+            } else (void)0;\
             assert(exp);\
         } while (false)
 
     #define NEWoper(variable, command) \
         do {\
-            io::print_to_stdout_varargs(__FILE__, ", ", __LINE__, ": Allocating heap mem.");\
+            Logger::Debug("%s:%d: Allocating heap mem.", __FILE__, __LINE__);\
             variable = command;\
         } while (false)
 #else
@@ -31,9 +30,23 @@
     #define NEWoper(variable, command) variable = command
 #endif
 
-// ASSETS
-const std::string SPRITES_PATH = "res/spr/";
-const std::string SHADERS_PATH = "res/shaders";
+namespace SI {
+    namespace GLOBAL {
+        // Global variables
+        const double VERSION = 0.5;
+
+    } // end namespace GLOBAL
+    namespace FILEPATHS {
+        const std::string FILE_LOG = "log.txt";
+
+        // ASSETS
+        const std::string PATH_SPRITES = "res/spr/";
+        const std::string PATH_SHADERS = "res/shaders";
+    } // end namespace FILEPATHS
+} // end namespace SI
+
+
+
 
 enum SpaceobjectType: size_t {
     ALIEN_A       = 0,

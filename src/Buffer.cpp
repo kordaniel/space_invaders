@@ -323,9 +323,9 @@ void Buffer::initialize_opengl(void)
 
     GLCall(gl_debug(__FILE__, __LINE__));
 
-    io::print_to_stdout_varargs("Using OpenGL: ", glVersion[0], ".", glVersion[1]);
-    io::print_to_stdout_varargs("Renderer used: ", glGetString(GL_RENDERER));
-    io::print_to_stdout_varargs("Shading language: ", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    Logger::Debug("Using OpenGL: %d.%d", glVersion[0], glVersion[1]);
+    Logger::Debug("Renderer used: %s", glGetString(GL_RENDERER));
+    Logger::Debug("Shading language: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
 #ifndef NDEBUG
     GLCall(glfwSwapInterval(1)); // vsync 1 = ON, 0 = OFF
