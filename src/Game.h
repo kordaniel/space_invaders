@@ -2,11 +2,13 @@
 #define GAME_H
 
 #include "global.h"
+#include "Size.h"
+#include "Sprites.h"
+#include "Spaceobject.h"
+
 #include <vector>
 #include <list>
 
-#include "Size.h"
-#include "Spaceobject.h"
 
 class Game: public Size
 {

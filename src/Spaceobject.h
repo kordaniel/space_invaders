@@ -5,12 +5,31 @@
 
 #include "Size.h"
 #include "Position.h"
-#include "Sprites.h"
 #include "Io.h"
+
+enum SpaceobjectType {
+    ALIEN_A       = 0,
+    ALIEN_B       = 2,
+    ALIEN_C       = 4,
+    BULLET_ALIEN  = 6,
+    ALIEN_DEAD    = 8,
+    PLAYER        = 9,
+    BULLET_PLAYER = 10
+};
+
+const SpaceobjectType SpaceobjectTypesMap[] = {
+    ALIEN_A, ALIEN_A,
+    ALIEN_B, ALIEN_B,
+    ALIEN_C, ALIEN_C,
+    BULLET_ALIEN, BULLET_ALIEN,
+    ALIEN_DEAD,
+    PLAYER,
+    BULLET_PLAYER
+};
 
 namespace directions
 {
-    enum Directions: int32_t {
+    enum Directions {
         STATIONARY =  0,
         UP         =  1,
         DOWN       = -1,

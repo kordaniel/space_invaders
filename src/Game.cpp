@@ -64,24 +64,20 @@ int32_t Game::GetPlayerScore(void) const
 // PRIVATE METHODS
 void Game::init_aliens(const Sprites& sprites)
 {
-    // TODO: Move alienTypesMap somewehere "where it belongs"..
-    const SpaceobjectType alienTypesMap[] = {
-        ALIEN_A, ALIEN_B, ALIEN_C
-    };
     directions::Directions initialDirection = rand() % 2 == 0
                                             ? directions::LEFT : directions::RIGHT;
     const int32_t initalSpeed = 1;
     for (int32_t yi = 0; yi < m_alien_rows; ++yi) {
-        const size_t alien_type   = (m_alien_rows - yi) / 2;
-        assert(alien_type <= 2);
-        const int32_t alienWidth  = sprites.alien_sprites[2 * alien_type].GetWidth();
-        const int32_t alienHeight = sprites.alien_sprites[2 * alien_type].GetHeight();
+        const SpaceobjectType alien_type = SpaceobjectTypesMap[m_alien_rows - yi];
+        assert(alien_type <= 5);
+        const int32_t alienWidth  = sprites.alien_sprites[alien_type].GetWidth();
+        const int32_t alienHeight = sprites.alien_sprites[alien_type].GetHeight();
         for (int32_t xi = 0; xi < m_alien_cols; ++xi) {
             const size_t xpos = 24 + 16 * xi + (13 - alienWidth) / 2;
             const size_t ypos = 128 + 17 * yi;
             m_aliens.emplace_front(
                 xpos, ypos, initialDirection, directions::STATIONARY,
-                alienWidth, alienHeight, initalSpeed, 1, alienTypesMap[alien_type]
+                alienWidth, alienHeight, initalSpeed, 1, alien_type
             );
         }
     }

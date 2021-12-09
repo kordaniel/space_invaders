@@ -1,7 +1,7 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-#define NDEBUG
+//#define NDEBUG
 
 #include "Logger.h"
 
@@ -44,18 +44,5 @@ namespace SI {
         const std::string PATH_SHADERS = "res/shaders";
     } // end namespace FILEPATHS
 } // end namespace SI
-
-
-
-
-enum SpaceobjectType: size_t {
-    ALIEN_A       = 0,
-    ALIEN_B       = 2,
-    ALIEN_C       = 4,
-    ALIEN_DEAD    = 5,
-    PLAYER        = 6,
-    BULLET_ALIEN  = 7,
-    BULLET_PLAYER = 8
-};
 
 #endif
