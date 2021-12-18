@@ -1,8 +1,6 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
-//#define NDEBUG
-
 #include <cstdint>
 #include <cstddef>
 #include <string>

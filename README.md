@@ -31,9 +31,22 @@ Build using make:
 ```console
 foo@bar:space_invaders$ make
 ```
-This will place the executable inside the bin-directory. Then simply run with:
+This is equivalent as to building the debug target with `make debug`. It will build and link one executable `bin/space_inv-dbg` with all the debug flags and symbols turned on.
+```console
+foo@bar:space_invaders$ make release
+```
+Can be used to build an optimized binary `bin/space_inv` without any debugging symbols.
+```console
+foo@bar:space_invaders$ make clean
+foo@bar:space_invaders$ make cleandebug
+foo@bar:space_invaders$ make cleanrelease
+```
+Can be used to cleanup build- and binary-files.  
+
+To run the various versions simply run the binary:
 ```console
 foo@bar:space_invaders$ ./bin/space_inv
+foo@bar:space_invaders$ ./bin/space_inv-dbg
 ```
 Do note that the game will load assets and other resources from the relative directory `./res` from where the game is executed.  
 
