@@ -41,4 +41,3 @@ That's it. Play and enjoy the beauty of what is Space Invaders! Also please repo
 
 ## Notes on Linux
 This project has **not** been tested in any linux based environment. With that beeing said, it should however work, probably.. Feel free to open a new issue, if you run into any troubles building or running the project!
-
