@@ -1,30 +1,69 @@
-APPNAME  := space_inv
-SRCDIR   := src
-BUILDDIR := build
+OSTYPE   :=
+ifneq ($(OS), Windows_NT)
+	OSTYPE := $(shell uname -s)
+endif
 
-CC       := gcc
-CXX      := g++
-CXXFLAGS := --std=c++11 -Wall -Werror -Wshadow -fsanitize=undefined
-LDFLAGS  := -framework OpenGL
-LDLIBS   := -lglfw -lglew
+APPNAME   := space_inv
 
-RM    := rm -f
-MKDIR := mkdir -p
+SRCDIR    := src
+BUILDDIR  := build
+TARGETDIR := bin
+SRCEXT    := cpp
+HDREXT    := h
 
-srcfiles := main.cpp
-objects  :=
+TARGET    := $(TARGETDIR)/$(APPNAME)
+
+CXX       := g++
+CC        := gcc
+CXXFLAGS  := --std=c++17 -Wall -Wextra -Wshadow -fsanitize=undefined
+CXXFLAGS  += -Werror -pedantic
+#CXXFLAGS  += -O3 -flto
+
+# Check if the compiler is clang (macos symlinks gcc to clang) and set clang-only flags.
+ifneq (, $(findstring clang, $(shell $(CXX) --version)))
+	CXXFLAGS += -Wshadow-field-in-constructor -Wsign-compare# -Wsign-conversion
+endif
+
+CXXFLAGS  += $(shell pkg-config --cflags glew glfw3)
+LDFLAGS   := $(shell pkg-config --libs glew glfw3)
+
+ifeq ($(OSTYPE),Darwin)
+	LDFLAGS += -framework OpenGL
+else
+	CXXFLAGS += $(shell pkg-config --cflags opengl)
+	LDFLAGS += $(shell pkg-config --libs opengl)
+endif
+
+# Debug flags
+CXXFLAGS  += -g
+LDFLAGS   += -rdynamic
+
+RM        := rm -f
+MKDIR     := mkdir -p
+
+SRCFILES  := $(shell find $(SRCDIR) -type f -name *.$(SRCEXT))
+OBJECTS   := $(patsubst $(SRCDIR)/%,$(BUILDDIR)/%,$(SRCFILES:.$(SRCEXT)=.o))
 
 .PHONY: directories
 
 all: directories $(APPNAME)
 
 $(APPNAME): $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(LDLIBS) $(LDFLAGS) -o $(BUILDDIR)/$(APPNAME) $(SRCDIR)/main.cpp
+	@echo " Linking binary: $@..."
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) $^ -o $(TARGETDIR)/$(APPNAME) -v
 
-directories: $(BUILDDIR)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT) $(SRCDIR)/global.h $(SRCDIR)/%.$(HDREXT)
+	@echo " Compiling object: $@.."
+	$(CXX) $(CXXFLAGS) -c -o $@ $<
+
+directories: $(BUILDDIR) $(TARGETDIR)
 
 $(BUILDDIR):
 	$(MKDIR) $(BUILDDIR)
 
+$(TARGETDIR):
+	$(MKDIR) $(TARGETDIR)
+
 clean:
-	$(RM) $(BUILDDIR)/$(APPNAME)
+	$(RM) $(BUILDDIR)/* $(TARGETDIR)/$(APPNAME)
+

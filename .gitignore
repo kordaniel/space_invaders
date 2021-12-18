@@ -1,0 +1,9 @@
+.vscode
+
+log.txt
+build/*
+bin/*
+doc/*
+# YES, ignore all docs
+
+.DS_Store
