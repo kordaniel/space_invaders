@@ -2,19 +2,17 @@
 #define BUFFER_H
 
 #include "global.h"
+#include "Size.h"
+
 #include <cstdlib>
 #include <cstdio>
 #include <chrono>
-#include <string>
 #include <sstream>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#include "Io.h"
-#include "Size.h"
-#include "Spaceobject.h"
-#include "Game.h"
+class Sprite;
 
 
 #define GL_ERROR_CASE(glerror)\
@@ -48,14 +46,14 @@ struct ShaderProgramSource
     std::string VertexSource;
     std::string FragmentSource;
 
-    ShaderProgramSource(std::string vertex_src, std::string fragment_src):
-        VertexSource(vertex_src),
-        FragmentSource(fragment_src)
+    ShaderProgramSource(std::string vertex_src, std::string fragment_src)
+        : VertexSource(vertex_src)
+        , FragmentSource(fragment_src)
     {
         //
     }
-    ShaderProgramSource(void):
-        VertexSource(
+    ShaderProgramSource(void)
+        : VertexSource(
 R"(
 #version 330
 
@@ -68,8 +66,8 @@ void main(void) {
 
     gl_Position = vec4(2.0 * TexCoord - 1.0, 0.0, 1.0);
 })"
-        ),
-        FragmentSource(
+        )
+        , FragmentSource(
 R"(
 #version 330
 
@@ -93,8 +91,8 @@ namespace colors
 {
     enum Colors: uint32_t {
         RED      = (uint32_t) (128 << 24) |                          255,
-        ORANGE   = (uint32_t) (160 << 24) | (96 << 16)             | 255,
-        BG_GREEN = (uint32_t) (50  << 24) | (80 << 16) | (75 << 8) | 255
+        ORANGE   = (uint32_t) (160 << 24) | (58 << 16)             | 255,
+        BG_GREEN = (uint32_t) (50  << 24) | (48 << 16) | (68 << 8) | 255
     };
 } // end namespace colors
 
@@ -108,15 +106,14 @@ public:
     void clear(void);
     void clear(uint32_t);
     void drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colors color);
-    void drawObject(Spaceobject&, colors::Colors color = colors::ORANGE);
     void append_horizontal_line(int32_t, colors::Colors color = colors::ORANGE);
     void append_text(int32_t, int32_t, const Sprite&, const std::string&, colors::Colors = colors::ORANGE);
     void append_integer(int32_t, int32_t, Sprite&, int32_t, colors::Colors color = colors::ORANGE);
     void draw(void);
     GLFWwindow* get_glfw_window(void);
+
 private:
     uint32_t* m_data; // 8 bits each for R,G,B,Alpha values
-    Sprites& m_sprites;
     char m_window_title[26];
     GLFWwindow* m_glfw_window;
     GLenum m_err;

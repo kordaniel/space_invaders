@@ -1,5 +1,10 @@
 #include "Sprites.h"
 
+#include "GameObject.h"
+#include "Io.h"
+#include "Compression.h"
+
+
 Sprite::Sprite(const std::string& name)
     : Size(0, 0)
     , m_name(name)
@@ -14,7 +19,7 @@ void Sprite::init()
 
     bool readSuccess = io::readBinaryFile(filepath, rawData);
     if (!readSuccess) {
-        io::print_to_stdout_varargs("[Sprite]: Error reading file: ", filepath);
+        Logger::Critical("[Sprite]: Error reading file: %s", filepath.c_str());
         throw "TODO: Something clever, fallback to default sprite instead of throw";
     }
 
@@ -36,7 +41,7 @@ void Sprite::deserialize(const std::vector<uint8_t>& spriteDataBitmap)
     Compression::DecompressSpriteData(spriteDataBitmap, decompressed);
     if (decompressed.size() < 7) {
         // First 6 bytes is the values of width, height, m_count as uint16_t
-        io::print_to_stdout_varargs("[Sprite]: Error decompressing sprite data.");
+        Logger::Critical("[Sprite]: Error decompressing sprite %s data", m_name.c_str());
         throw "TODO: Something clever, fallback to default sprite instead of throw";
     }
 
@@ -49,7 +54,7 @@ void Sprite::deserialize(const std::vector<uint8_t>& spriteDataBitmap)
     m_count = constructUint16_tFromUint8_t(4);
 
     if (m_count * GetTotalSize() != decompressed.size() - 6) {
-        io::print_to_stdout_varargs("[Sprite]: Error decompressing sprite data.");
+        Logger::Critical("[Sprite]: Error decompressing sprite %s data: size missmatch", m_name.c_str());
         throw "TODO: Something clever, fallback to default sprite instead of throw";
     }
 
@@ -92,47 +97,84 @@ Sprites& Sprites::GetInstance(void)
     return instance;
 }
 
-const Sprite& Sprites::getSprite(const SpaceobjectType& spriteType,
-                                 SpaceobjectTypeSpriteSelector& spriteSelector) const
+const std::vector<Sprite *> * Sprites::GetSpriteAlive(const GameObjectType objectType) const
 {
-    switch (spriteType)
+    switch (objectType)
+        {
+            case GameObjectType::ALIEN_A:       return &m_sprites_aliens[0];
+            case GameObjectType::ALIEN_B:       return &m_sprites_aliens[1];
+            case GameObjectType::ALIEN_C:       return &m_sprites_aliens[2];
+            case GameObjectType::BULLET_ALIEN:  return &m_sprites_alien_bullets;
+            case GameObjectType::ALIEN_DEAD:    return &m_sprites_alien_deaths;
+            case GameObjectType::PLAYER:        return &m_sprites_player;
+            case GameObjectType::BULLET_PLAYER: return &m_sprites_player_bullets;
+            default:
+                Logger::Debug("Requested spriteType not found: %d", objectType);
+                assert(false && "Invalid sprite requested!");
+                throw "[ERROR]: Invalid sprite requested!"; // for release-modes
+                break;
+        }
+    return nullptr;
+}
+
+const std::vector<Sprite *> * Sprites::GetSpriteDead(const GameObjectType objectType) const
+{
+    switch (objectType)
     {
-        case ALIEN_A:
-            return alien_sprites[spriteSelector.getCurrentSpriteIdx(spriteType)];
-        case ALIEN_B:
-            return alien_sprites[spriteSelector.getCurrentSpriteIdx(spriteType)];
-        case ALIEN_C:
-            return alien_sprites[spriteSelector.getCurrentSpriteIdx(spriteType)];
-        case BULLET_ALIEN:
-            return alien_bullet_sprites[spriteSelector.getCurrentSpriteIdx()];
-        case ALIEN_DEAD:    return alien_death_sprite;
-        case PLAYER:        return player_sprite;
-        case BULLET_PLAYER: return player_bullet_sprite;
-        default: // Should never branch here!
-            Logger::Debug("Requested spriteType not found: %d", spriteType);
-            assert(false && "Invalid sprite requested!");
-            throw "[ERROR]: Invalid sprite requested!"; // for release-modes
-            break;
+        case GameObjectType::ALIEN_A: return &m_sprites_alien_deaths;
+        case GameObjectType::ALIEN_B: return &m_sprites_alien_deaths;
+        case GameObjectType::ALIEN_C: return &m_sprites_alien_deaths;
+        default:                      return nullptr;
+    }
+}
+
+const std::vector<Sprite *> & Sprites::GetSprite(const GameObjectType objectType) const
+{
+    switch (objectType)
+    {
+    case GameObjectType::ALIEN_A:       return m_sprites_aliens[0];
+    case GameObjectType::ALIEN_B:       return m_sprites_aliens[1];
+    case GameObjectType::ALIEN_C:       return m_sprites_aliens[2];
+    case GameObjectType::BULLET_ALIEN:  return m_sprites_alien_bullets;
+    case GameObjectType::ALIEN_DEAD:    return m_sprites_alien_deaths;
+    case GameObjectType::PLAYER:        return m_sprites_player;
+    case GameObjectType::BULLET_PLAYER: return m_sprites_player_bullets;
+    default: // Should never branch here. => Bug
+        Logger::Debug("Requested spriteType not found: %d", objectType);
+        assert(false && "Invalid sprite requested!");
+        throw "[ERROR]: Invalid sprite requested!"; // for release-modes
+        break;
     }
 }
 
 Sprites::Sprites(void)
-    : player_sprite("player")
-    , player_bullet_sprite("player_bullet")
-    , alien_death_sprite("alien_death")
-    , alien_sprites{{
-        {"alien0"},
-        {"alien1"},
-        {"alien2"},
-        {"alien3"},
-        {"alien4"},
-        {"alien5"},
-      }}
-    , alien_bullet_sprites{{
-        {"alien_bullet0"},
-        {"alien_bullet1"}
-    }}
+    : m_sprites_player({ new Sprite("player") })
+    , m_sprites_player_bullets({ new Sprite("player_bullet") })
+    , m_sprites_alien_deaths({ new Sprite("alien_death") })
+    , m_sprites_alien_bullets({ new Sprite("alien_bullet0"), new Sprite("alien_bullet1") })
+    , m_sprites_aliens({
+        {new Sprite("alien0"), new Sprite("alien1")},
+        {new Sprite("alien2"), new Sprite("alien3")},
+        {new Sprite("alien4"), new Sprite("alien5")}
+    })
     , text_spritesheet("spritesheet_text")
 {
     //
+}
+
+Sprites::~Sprites(void)
+{
+    for (const std::vector<Sprite *> & alien : m_sprites_aliens) {
+        for (Sprite * ptr : alien) {
+            delete ptr;
+        }
+    }
+    for (Sprite * ptr : m_sprites_alien_bullets)
+        delete ptr;
+    for (Sprite * ptr : m_sprites_alien_deaths)
+        delete ptr;
+    for (Sprite * ptr : m_sprites_player_bullets)
+        delete ptr;
+    for (Sprite * ptr : m_sprites_player)
+        delete ptr;
 }

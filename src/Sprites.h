@@ -2,22 +2,19 @@
 #define SPRITES_H
 
 #include "global.h"
-
 #include "Size.h"
-#include "Spaceobject.h"
-#include "Compression.h"
-#include "Io.h"
 
-#include <array>
+#include <vector>
 
-class SpaceobjectTypeSpriteSelector; // from Spaceobject.{h,cpp}, must be forward declared
+
+enum class GameObjectType;
 
 class Sprite: public Size
 {
 public:
     uint8_t* m_data;
     Sprite(const std::string& name);
-    Sprite(const Sprite& other) = delete;
+    Sprite(const Sprite & other) = delete; // Should never be called!
     ~Sprite(void);
     const uint8_t* getSpritePtr(size_t offset) const;
     const uint8_t* getNumberSpritePtr(int32_t number) const;
@@ -33,21 +30,22 @@ private:
 class Sprites
 {
 public:
-    Sprite player_sprite;
-    Sprite player_bullet_sprite;
-
-    Sprite alien_death_sprite;
-    std::array<Sprite, 6> alien_sprites;        // TODO: Move num of alien_sprites &
-    std::array<Sprite, 2> alien_bullet_sprites; //       alien_bullet_sprites ..SOMEWHERE..? !!!
+    const std::vector<Sprite *> m_sprites_player;
+    const std::vector<Sprite *> m_sprites_player_bullets;
+    const std::vector<Sprite *> m_sprites_alien_deaths;
+    const std::vector<Sprite *> m_sprites_alien_bullets;
+    const std::vector<std::vector<Sprite *>> m_sprites_aliens;
 
     Sprite text_spritesheet;
 
     Sprites(const Sprites& other) = delete;
+    ~Sprites(void);
     void operator=(const Sprites&) = delete;
 
     static Sprites& GetInstance(void);
-    const Sprite& getSprite(const SpaceobjectType& spriteType,
-                            SpaceobjectTypeSpriteSelector& spriteSelector) const;
+    const std::vector<Sprite *> * GetSpriteAlive(const GameObjectType objectType) const;
+    const std::vector<Sprite *> * GetSpriteDead(const GameObjectType objectType) const;
+    const std::vector<Sprite *> & GetSprite(const GameObjectType objectType) const;
 
 private:
     Sprites(void);

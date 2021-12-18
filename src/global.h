@@ -3,13 +3,12 @@
 
 //#define NDEBUG
 
-#include "Logger.h"
-
 #include <cstdint>
 #include <cstddef>
 #include <string>
-
 #include <cassert>
+
+#include "Logger.h"
 
 #ifndef NDEBUG
     #define assertpair(exp, arg1, arg2)\
@@ -33,7 +32,7 @@
 namespace SI {
     namespace GLOBAL {
         // Global variables
-        const double VERSION = 0.5;
+        const double VERSION = 0.6;
 
     } // end namespace GLOBAL
     namespace FILEPATHS {

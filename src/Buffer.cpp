@@ -1,5 +1,10 @@
 #include "Buffer.h"
 
+#include "Sprites.h"
+#include "Io.h"
+#include "Input.h"
+
+
 #ifndef NDEBUG
 // First 2 functions will integrate with the IDE to set breakpoints to help debugging.
 // MSVC: __debugbreak()
@@ -26,59 +31,8 @@
     #define GLCall(x) x
 #endif
 
-// Section with 4 functions that should not be used outside this module
+// Section with 3 functions that should not be used outside this module
 // ----------------------------------------------------------------------
-static void key_callback(GLFWwindow* window, int key, int scancode __attribute__((unused)), int action, int mods __attribute__((unused)))
-{
-    Game *game = reinterpret_cast<Game *>(glfwGetWindowUserPointer(window));
-
-    switch (key) {
-        case GLFW_KEY_RIGHT:
-            if (action == GLFW_PRESS) {
-                game->getPlayer().SetDirectionRight(true);
-            } else if (action == GLFW_RELEASE) {
-                game->getPlayer().SetDirectionRight(false);
-            }
-            break;
-        case GLFW_KEY_LEFT:
-            if (action == GLFW_PRESS) {
-                game->getPlayer().SetDirectionLeft(true);
-            } else if (action == GLFW_RELEASE) {
-                game->getPlayer().SetDirectionLeft(false);
-            }
-            break;
-        case GLFW_KEY_UP:
-            if (action == GLFW_PRESS) {
-                game->getPlayer().SetDirectionUp(true);
-            } else if (action == GLFW_RELEASE) {
-                game->getPlayer().SetDirectionUp(false);
-            }
-            break;
-        case GLFW_KEY_DOWN:
-            if (action == GLFW_PRESS) {
-                game->getPlayer().SetDirectionDown(true);
-            } else if (action == GLFW_RELEASE) {
-                game->getPlayer().SetDirectionDown(false);
-            }
-            break;
-        case GLFW_KEY_SPACE:
-            if (action == GLFW_RELEASE) {
-                game->create_player_bullet();
-            }
-            break;
-        case GLFW_KEY_ESCAPE:
-            glfwSetWindowShouldClose(window, true);
-            break;
-        case GLFW_KEY_F:
-            glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 2560, 1440, 60);
-            break;
-        case GLFW_KEY_G:
-            glfwSetWindowMonitor(window, nullptr, 0, 0, 224, 256, 60);
-            break;
-        default:
-            break;
-    }
-}
 
 void window_close_callback(GLFWwindow* window __attribute__((unused)))
 {
@@ -98,7 +52,6 @@ void error_callback(int error __attribute__((unused)), const char* description)
 
 Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight)
     : Size(bufferWidth, bufferHeight)
-    , m_sprites(Sprites::GetInstance())
     , m_window_title("Space Invaders! FPS:     ")
     , m_time_prev_update(std::chrono::steady_clock::now())
     , m_n_frames(0)
@@ -160,12 +113,6 @@ void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colo
             m_data[yStartIdx + xi] = color;
         }
     }
-}
-
-void Buffer::drawObject(Spaceobject& spaceobj, colors::Colors color)
-{
-    // TODO: Refactor spaceobj to be const!
-    drawSprite(spaceobj.GetX(), spaceobj.GetY(), m_sprites.getSprite(spaceobj.getSpriteType(), spaceobj.getSpaceObjectTypeSpriteSelector()), color);
 }
 
 void Buffer::append_horizontal_line(int32_t y, colors::Colors color) {
@@ -303,7 +250,7 @@ void Buffer::initialize_glfw_window(void)
 
     glfwSetWindowCloseCallback(m_glfw_window, window_close_callback);
     glfwSetFramebufferSizeCallback(m_glfw_window, framebuffer_size_callback);
-    glfwSetKeyCallback(m_glfw_window, key_callback);
+    glfwSetKeyCallback(m_glfw_window, KeyInput::MainKeyCallback);
     glfwMakeContextCurrent(m_glfw_window);
     m_err = glewInit();
     if (m_err != GLEW_OK) {
