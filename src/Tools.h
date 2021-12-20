@@ -53,6 +53,17 @@ namespace SI {
         void PreciseSleep(SI::Timetools::Timestep seconds, SI::Timetools::TimeEstimate & estimate);
 
     } // end namespace thread
+
+    namespace math {
+
+        // Returns a random 0 or 1
+        int32_t RandomBinary(void);
+
+        // Returns a random double between 0 and 1
+        double RandomNormalized(void);
+
+    } // end namespace math
+
 } // end namespace SI
 
 

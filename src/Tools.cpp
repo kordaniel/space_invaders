@@ -1,6 +1,7 @@
 #include "Tools.h"
 
 #include <cmath>
+#include <cstdlib> // rand
 #include <chrono>
 #include <thread>
 
@@ -66,5 +67,12 @@ namespace SI {
         }
 
     } // end namespace thread
+
+    namespace math {
+
+        int32_t RandomBinary(void)     { return rand() % 2; }
+        double  RandomNormalized(void) { return static_cast<double>(rand()) / RAND_MAX; }
+
+    } // end namespace math
 
 } // end namespace SI
