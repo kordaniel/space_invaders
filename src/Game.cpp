@@ -1,8 +1,11 @@
 #include "Game.h"
 
 #include "Input.h"
+#include "Timer.h"
 
 #include <functional>   // std::bind
+#include <type_traits>
+#include <chrono>
 #include <GLFW/glfw3.h>
 
 
@@ -14,7 +17,7 @@ Game::Game(int32_t gameWidth, int32_t gameHeight)
         , m_playerBulletsBonus(0)
         , m_playerScore(0)
         , m_aliensShouldTurn(false)
-        , m_player(GameObject::CreatePlayer(3, gameWidth / 2, 30, 4))
+        , m_player(GameObject::CreatePlayer(3, gameWidth / 2, 30, 70))
 {
     KeyInput::RegisterCallback(
         GLFW_KEY_SPACE,
@@ -24,15 +27,90 @@ Game::Game(int32_t gameWidth, int32_t gameHeight)
     init_aliens();
 }
 
-void Game::Update(const Buffer & buffer)
+void Game::Run(Buffer & buffer)
 {
-    update_player(buffer);
-    update_aliens(buffer);
-    update_bullets(buffer);
+    // Note: All times are in seconds.
+
+    using namespace std::literals::chrono_literals;
+
+    using Clock      = std::chrono::steady_clock;
+    using duration   = std::chrono::duration<double>;
+    using time_point = std::chrono::time_point<Clock, duration>;
+    using SI::Timetools::Timestep;
+    using SI::Timetools::TimeEstimate;
+
+    int32_t targetFPS       = 60;
+    int32_t targetUPS       = 2 * targetFPS;    // Game state updates per sec
+    auto deltaTimeUpdate    = 1.0s / targetUPS; // Gametime length to update game state
+    auto loopIterTargetTime = 1.0s / targetFPS; // Total time for one iteration of the loop
+
+    TimeEstimate oneMsSleepActualTime(0.003, 0.003);
+    time_point timeCurrent  = Clock::now();
+    time_point timePrevious = Clock::now();
+    duration accumulatedLag = 0s;
+
+    Timestep timeToSleep    = 0.0;
+    bool drawFrame          = true;
+    int32_t framesLagCount  = 0;
+
+    while (!glfwWindowShouldClose(buffer.get_glfw_window()))
+    {
+        //Timer gameLoopTimer("Game loop: ");
+
+        timeCurrent = Clock::now();
+        accumulatedLag += timeCurrent - timePrevious;
+        timePrevious = timeCurrent;
+
+        glfwPollEvents();
+
+        while (accumulatedLag >= deltaTimeUpdate)
+        {
+            Update(buffer, deltaTimeUpdate.count());
+            accumulatedLag -= deltaTimeUpdate;
+        }
+
+        if (drawFrame) {
+            Draw(buffer);
+        } else {
+#ifndef NDEBUG
+            Logger::Debug("Dropping frame! Framelag: %d", framesLagCount);
+#else
+            Logger::Info("Dropping frame");
+#endif
+        }
+
+        timeToSleep = (loopIterTargetTime - (time_point{Clock::now()} - timeCurrent)).count();
+        if (timeToSleep > 0)
+        {
+            if (framesLagCount > 0) {
+                --framesLagCount;
+            }
+            drawFrame = true;
+            SI::thread::PreciseSleep(timeToSleep, oneMsSleepActualTime);
+        }
+        else
+        {   // TODO: If framesLagCount grows too large or keeps rising
+            //       => improve rendering and/or game state update speed,
+            //          increase deltaTimeUpdate
+            drawFrame = ++framesLagCount % targetFPS == 0
+                      ? true : false;
+        }
+    }
+}
+
+void Game::Update(const Buffer & buffer, SI::Timetools::Timestep ts)
+{
+    update_player(buffer, ts);
+    update_aliens(buffer, ts);
+    update_bullets(buffer, ts);
+    update_ups();
 }
 
 void Game::Draw(Buffer & buffer) const
 {
+#ifndef NDEBUG
+    buffer.append_text(GetWidth(), GetHeight() - Sprites::GetInstance().text_spritesheet.GetHeight() - 7, Sprites::GetInstance().text_spritesheet, "ALIEN BULLETS: " + std::to_string(m_alienBullets.size()));
+#endif
     buffer.append_text(164, 7, Sprites::GetInstance().text_spritesheet, "CREDIT " + std::to_string(SI::GLOBAL::VERSION));
     buffer.append_text(4, buffer.GetHeight() - Sprites::GetInstance().text_spritesheet.GetHeight() - 7, Sprites::GetInstance().text_spritesheet, "SCORE");
     buffer.append_integer(4 + 2 * Sprites::GetInstance().text_spritesheet.GetWidth(),
@@ -60,6 +138,9 @@ void Game::Draw(Buffer & buffer) const
     }
 
     buffer.append_horizontal_line(16);
+
+    buffer.draw();
+    buffer.clear();
 }
 
 int32_t Game::GetPlayerScore(void) const { return m_playerScore; }
@@ -67,15 +148,15 @@ int32_t Game::GetPlayerScore(void) const { return m_playerScore; }
 // PRIVATE METHODS
 void Game::init_aliens(void)
 {
-    const int32_t initialVelocity = 1;
+    const int32_t initialVelocity = 15;
     const GameObject::DirectionHorizontal initialDirection
-            = rand() % 2 == 0
+            = SI::math::RandomBinary() == 0
             ? GameObject::DirectionHorizontal::LEFT
             : GameObject::DirectionHorizontal::RIGHT;
     for (int32_t yi = 0; yi < m_alien_rows; ++yi)
     {
         const GameObjectType alienType = GameObject::TypesMap[m_alien_rows - yi];
-        assert((int)alienType <= 5);
+        assert(static_cast<std::underlying_type_t<GameObjectType>>(alienType) <= 5);
         for (int32_t xi = 0; xi < m_alien_cols; ++xi)
         {
             const int32_t xpos = 32  + 16 * xi;
@@ -99,7 +180,7 @@ void Game::create_player_bullet(void)
     if (m_playerBullets.size() < playerMaxAllowedBullets())
     {
         m_playerBullets.emplace_front(
-            GameObject::CreatePlayerBullet(1, m_player.get()->GetMiddleX(), m_player.get()->GetTopMostY(), 7)
+            GameObject::CreatePlayerBullet(1, m_player.get()->GetMiddleX(), m_player.get()->GetTopMostY(), 200)
         );
     }
 
@@ -107,30 +188,30 @@ void Game::create_player_bullet(void)
 
 void Game::create_alien_bullet(const GameObject & alien)
 {
-    m_alienBullets.emplace_back( GameObject::CreateAlienBullet(1, alien.GetMiddleX(), alien.GetY(), 6));
+    m_alienBullets.emplace_back( GameObject::CreateAlienBullet(1, alien.GetMiddleX(), alien.GetY(), 100));
 }
 
-void Game::update_player(const Buffer & buffer)
+void Game::update_player(const Buffer & buffer, SI::Timetools::Timestep ts)
 {
     if (!m_player) {
         return;
     }
-    m_player.get()->Update(buffer);
+    m_player.get()->Update(buffer, ts);
     m_playerBulletsBonus = 0; // TODO: Refactor!
 }
 
-void Game::update_bullets(const Buffer & buffer)
+void Game::update_bullets(const Buffer & buffer, SI::Timetools::Timestep ts)
 {
-    update_alien_bullets(buffer);
-    update_player_bullets(buffer);
+    update_alien_bullets(buffer, ts);
+    update_player_bullets(buffer, ts);
 }
 
-void Game::update_player_bullets(const Buffer & buffer)
+void Game::update_player_bullets(const Buffer & buffer, SI::Timetools::Timestep ts)
 {
     for (auto bulletPtr = m_playerBullets.begin(); bulletPtr != m_playerBullets.end(); )
     {
         GameObject & bullet = *bulletPtr->get();
-        bullet.Update(buffer);
+        bullet.Update(buffer, ts);
 
         check_handle_collissions(bullet, m_alienBullets, true);
         check_handle_collissions(bullet, m_aliens, false);
@@ -143,12 +224,12 @@ void Game::update_player_bullets(const Buffer & buffer)
     }
 }
 
-void Game::update_alien_bullets(const Buffer & buffer)
+void Game::update_alien_bullets(const Buffer & buffer, SI::Timetools::Timestep ts)
 {
     for (auto alienBulletPtr = m_alienBullets.begin(); alienBulletPtr != m_alienBullets.end(); )
     {
         GameObject & alienBullet = *alienBulletPtr->get();
-        alienBullet.Update(buffer);
+        alienBullet.Update(buffer, ts);
 
         check_handle_collissions(alienBullet, m_playerBullets, true);
 
@@ -201,9 +282,10 @@ void Game::check_handle_collissions(GameObject & object, std::list<std::unique_p
     }
 }
 
-void Game::update_aliens(const Buffer & buffer)
+void Game::update_aliens(const Buffer & buffer, SI::Timetools::Timestep ts)
 {
-    const size_t aN = m_aliens.size();
+    const double aN = static_cast<double>(m_aliens.size());
+    const double targetBulletsPerSec = 5.0; // Spawned
     bool alienSwarmHitWall = false;
 
     for (auto alienPtr = m_aliens.begin(); alienPtr != m_aliens.end(); )
@@ -216,10 +298,10 @@ void Game::update_aliens(const Buffer & buffer)
                 alien.ReverseHorizontalDirection();
                 alien.MoveDownBySpriteHeight();
             }
-            if (alien.Update(buffer)) {
+            if (alien.Update(buffer, ts)) {
                 alienSwarmHitWall = true;
             }
-            if ((size_t) rand() % 5000 < ((aN * 10000) / (aN*aN*10))) {
+            if (SI::math::RandomNormalized() < (targetBulletsPerSec * ts / aN)) {
                 create_alien_bullet(alien);
             }
         }
@@ -229,12 +311,32 @@ void Game::update_aliens(const Buffer & buffer)
                 alienPtr = m_aliens.erase(alienPtr);
                 continue;
             } else {
-                alien.Update(buffer);
+                alien.Update(buffer, ts);
             }
         }
         ++alienPtr;
     }
     m_aliensShouldTurn = alienSwarmHitWall;
+}
+
+void Game::update_ups(void)
+{
+    using namespace std::chrono;
+    static size_t updates = 0;
+    static time_point<steady_clock> time_prev = steady_clock::now();
+
+    ++updates;
+    time_point<steady_clock> time_now = steady_clock::now();
+    duration<double> time_delta = time_now - time_prev;
+
+    if (time_delta < seconds(1)) {
+        return;
+    }
+
+    Logger::Debug("Game   UPS: %.3f", (updates / time_delta.count()));
+
+    time_prev = time_now;
+    updates = 0;
 }
 
 size_t Game::playerMaxAllowedBullets(void) const {

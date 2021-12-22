@@ -2,6 +2,8 @@
 #define GAME_H
 
 #include "global.h"
+
+#include "Tools.h"
 #include "Size.h"
 #include "Buffer.h"
 #include "GameObject.h"
@@ -9,18 +11,17 @@
 #include <list>
 #include <memory>
 
+
 class Game: public Size
 {
 public:
     Game(int32_t gamewWidth, int32_t gameHeight);
     Game(const Game& other) = delete;
 
-    void    Update(const Buffer & buffer);
-
-    void    Draw(Buffer & buffer)          const;
-    int32_t GetPlayerScore(void)           const;
-
-    void create_player_bullet(void);
+    void    Run(Buffer & buffer);
+    void    Update(const Buffer & buffer, SI::Timetools::Timestep ts);
+    void    Draw(Buffer & buffer) const;
+    int32_t GetPlayerScore(void)  const;
 
 private:
     const int32_t SCORE_BASE_VAL = 10;
@@ -39,15 +40,17 @@ private:
 
 private:
     void init_aliens(void);
+    void create_player_bullet(void);
     void create_alien_bullet(const GameObject & alien);
-    void update_player(const Buffer & buffer);
-    void update_bullets(const Buffer & buffer);
-    void update_player_bullets(const Buffer & buffer);
-    void update_alien_bullets(const Buffer & buffer);
-    void update_aliens(const Buffer & buffer);
+    void update_player(const Buffer & buffer, SI::Timetools::Timestep ts);
+    void update_bullets(const Buffer & buffer, SI::Timetools::Timestep ts);
+    void update_player_bullets(const Buffer & buffer, SI::Timetools::Timestep ts);
+    void update_alien_bullets(const Buffer & buffer, SI::Timetools::Timestep ts);
+    void update_aliens(const Buffer & buffer, SI::Timetools::Timestep ts);
     void check_handle_collissions(GameObject & object, std::list<std::unique_ptr<GameObject>> & collection,
                                   bool eraseFromCollection);
 
+    void update_ups(void);
     size_t playerMaxAllowedBullets(void) const;
 };
 

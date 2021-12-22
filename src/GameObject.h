@@ -2,10 +2,12 @@
 #define GAMEOBJECT_H
 
 #include "global.h"
+#include "Tools.h"
 #include "Sprites.h"
 
 #include <memory>
 #include <vector>
+
 
 class Buffer;
 class GameObject;
@@ -67,6 +69,7 @@ class GameObject
 {
 public:
     friend class PlayerInputComponent;
+
     static GameObjectType constexpr TypesMap[] = {
         // NOTE: Hardcoded mapping from integer => GameObjectType !
         // This must be kept in synchronization with the enum
@@ -113,26 +116,35 @@ public:
     bool    Overlaps(const GameObject & other)                   const;
     bool    VerticalProjectionOverlaps(const GameObject & other) const;
     bool    HandleHit(void);
-    bool    Update(const Buffer & buffer);
+    bool    Update(const Buffer & buffer, SI::Timetools::Timestep ts);
     void    ReverseHorizontalDirection(void);
     void    MoveDownBySpriteHeight(void);
 
 private:
     void SetDirectionHorizontal(DirectionHorizontal direction);
     void SetDirectionVertical(DirectionVertical direction);
-    void move(int32_t xBound, int32_t yBound);
 
 private:
+    class Transform
+    {
+    private:
+        double m_xPos, m_yPos, m_vel;
+    public:
+        Transform(int32_t xPos, int32_t yPos, int32_t velocity);
+        void Update(GameObject & componentOwner, SI::Timetools::Timestep ts, int32_t xBound, int32_t yBound);
+        void MoveDown(int32_t yDelta);
+        int32_t GetX(void) const;
+        int32_t GetY(void) const;
+        bool IsInsideHorizontalBounds(const GameObject & componentOwner, SI::Timetools::Timestep ts, int32_t xBound) const;
+    };
+
     const GameObjectType      m_type;
     mutable GraphicsComponent m_graphicsComponent;
-        // GameObject::Draw is const. GraphicsComponent::Draw mutates it's internal state
+    Transform                 m_position;
 
     InputComponent *          m_inputComponentPtr;
     int32_t                   m_lives;
     int32_t                   m_deathCounter;
-    int32_t                   m_xPos;
-    int32_t                   m_yPos;
-    int32_t                   m_vel;
     int32_t                   m_xDir;
     int32_t                   m_yDir;
 };

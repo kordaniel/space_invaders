@@ -445,17 +445,11 @@ void Buffer::update_fps(void)
     }
 
     m_time_prev_update = time_now;
-
-    if (m_n_frames == m_fps_prev) {
-        m_n_frames = 0;
-        return;
-    }
-
     m_fps_prev = m_n_frames;
 
-    io::print_to_stdout_varargs("FPS: ", (m_n_frames / time_delta.count()));
+    Logger::Debug("Buffer FPS: %.3f", (m_n_frames / time_delta.count()));
 
-    for (size_t i = 24; i > 20; --i) {
+    for (size_t i = 24; m_n_frames && i > 20; --i) {
         m_window_title[i] = (char) (m_n_frames % 10 + 48);
         m_n_frames /= 10;
     }

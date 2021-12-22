@@ -4,6 +4,7 @@
 #include "Input.h"
 
 #include <type_traits>
+#include <cmath> // std::abs
 
 
 // GRAPHICSCOMPONENT
@@ -71,13 +72,14 @@ InputComponent::~InputComponent(void)
 // --------------------
 void PlayerInputComponent::Update(GameObject & componentOwner)
 {
-    GameObject::DirectionHorizontal newHorDir = GameObject::DirectionHorizontal::STATIONARY;
+    using DirectionHorizontal = GameObject::DirectionHorizontal;
+    DirectionHorizontal newHorDir = DirectionHorizontal::STATIONARY;
 
     if (KeyInput::GetInstance().IsPressed(GLFW_KEY_LEFT)) {
-        newHorDir = newHorDir + GameObject::DirectionHorizontal::LEFT;
+        newHorDir = newHorDir + DirectionHorizontal::LEFT;
     }
     if (KeyInput::GetInstance().IsPressed(GLFW_KEY_RIGHT)) {
-        newHorDir = newHorDir + GameObject::DirectionHorizontal::RIGHT;
+        newHorDir = newHorDir + DirectionHorizontal::RIGHT;
     }
 
     componentOwner.SetDirectionHorizontal(newHorDir);
@@ -94,13 +96,14 @@ std::unique_ptr<GameObject> GameObject::CreatePlayer(int32_t lives, int32_t xPos
     );
 }
 
-std::unique_ptr<GameObject> GameObject::CreateAlien(GameObjectType type, int32_t lives, int32_t xPos, int32_t yPos, DirectionHorizontal xDir, int32_t velocity)
+std::unique_ptr<GameObject> GameObject::CreateAlien(GameObjectType type, int32_t lives, int32_t xPos, int32_t yPos,
+                                                    DirectionHorizontal xDir, int32_t velocity)
 {
 #ifndef NDEBUG
     using T = std::underlying_type_t<GameObjectType>;
     assert(0 <= static_cast<T>(type) && static_cast<T>(type) <= 5);
 #endif
-    return std::make_unique<GameObject>(type, lives, 3, xPos, yPos, velocity, xDir, DirectionVertical::STATIONARY);
+    return std::make_unique<GameObject>(type, lives, 15, xPos, yPos, velocity, xDir, DirectionVertical::STATIONARY);
 }
 
 std::unique_ptr<GameObject> GameObject::CreatePlayerBullet(int32_t lives, int32_t xPos, int32_t yPos, int32_t velocity)
@@ -119,22 +122,22 @@ std::unique_ptr<GameObject> GameObject::CreateAlienBullet(int32_t lives, int32_t
     );
 }
 
-GameObject::GameObject(GameObjectType type, int32_t lives, int32_t deathCounter, int32_t xPos, int32_t yPos, int32_t velocity, DirectionHorizontal xDir, DirectionVertical yDir, InputComponent* inputCmpPtr, bool spawnUnderY)
+GameObject::GameObject(GameObjectType type, int32_t lives, int32_t deathCounter, int32_t xPos, int32_t yPos, int32_t velocity,
+                       DirectionHorizontal xDir, DirectionVertical yDir, InputComponent* inputCmpPtr, bool spawnUnderY)
     : m_type(type)
     , m_graphicsComponent(type)
+    , m_position(xPos - (GetWidth() / 2), (spawnUnderY ? yPos - GetHeight() : yPos), velocity)
     , m_inputComponentPtr(inputCmpPtr)
     , m_lives(lives)
     , m_deathCounter(deathCounter)
-    , m_xPos(xPos - (GetWidth() / 2))
-    , m_yPos(spawnUnderY ? yPos - GetHeight() : yPos)
-    , m_vel(velocity)
     , m_xDir(static_cast<int32_t>(xDir))
     , m_yDir(static_cast<int32_t>(yDir))
 {
     //
 }
 
-GameObject::GameObject(GameObjectType type, int32_t lives, int32_t deathCounter, int32_t xPos, int32_t yPos, int32_t velocity, DirectionHorizontal xDir, DirectionVertical yDir, bool spawnUnderY)
+GameObject::GameObject(GameObjectType type, int32_t lives, int32_t deathCounter, int32_t xPos, int32_t yPos, int32_t velocity,
+                       DirectionHorizontal xDir, DirectionVertical yDir, bool spawnUnderY)
     : GameObject(type, lives, deathCounter, xPos, yPos, velocity, xDir, yDir, nullptr, spawnUnderY)
 {
     //
@@ -150,9 +153,9 @@ GameObject::~GameObject(void)
 void    GameObject::Draw(Buffer & buffer) const { m_graphicsComponent.Draw(*this, buffer); }
 int32_t GameObject::GetWidth(void)        const { return m_graphicsComponent.GetSpriteWidth(); };
 int32_t GameObject::GetHeight(void)       const { return m_graphicsComponent.GetSpriteHeight(); };
-int32_t GameObject::GetX(void)            const { return m_xPos; }
+int32_t GameObject::GetX(void)            const { return m_position.GetX(); }
 int32_t GameObject::GetRightMostX(void)   const { return GetX() + GetWidth(); }
-int32_t GameObject::GetY(void)            const { return m_yPos; }
+int32_t GameObject::GetY(void)            const { return m_position.GetY(); }
 int32_t GameObject::GetTopMostY(void)     const { return GetY() + GetHeight(); }
 int32_t GameObject::GetMiddleX(void)      const { return GetX() + (GetWidth() / 2); };
 int32_t GameObject::GetLivesAmount(void)  const { return m_lives; }
@@ -202,7 +205,7 @@ bool GameObject::HandleHit(void)
 
 ///
 /// @return true iff this object is alive and the horizontal position of this object is equal to buffer bounds.
-bool GameObject::Update(const Buffer & buffer)
+bool GameObject::Update(const Buffer & buffer, SI::Timetools::Timestep ts)
 {
     if (!IsAlive()) {
         --m_deathCounter;
@@ -213,12 +216,13 @@ bool GameObject::Update(const Buffer & buffer)
         m_inputComponentPtr->Update(*this);
     }
 
-    move(buffer.GetWidth(), buffer.GetHeight());
-    return GetX() <= 0 || GetRightMostX() >= buffer.GetWidth();
+    m_position.Update(*this, ts, buffer.GetWidth(), buffer.GetHeight());
+
+    return m_position.IsInsideHorizontalBounds(*this, ts, buffer.GetWidth());
 }
 
 void GameObject::ReverseHorizontalDirection(void) { m_xDir *= -1; }
-void GameObject::MoveDownBySpriteHeight(void)     { m_yPos = std::max(0, m_yPos - GetHeight()); }
+void GameObject::MoveDownBySpriteHeight(void)     { m_position.MoveDown(-GetHeight()); }
 
 // GameObject PRIVATE METHODS
 void GameObject::SetDirectionHorizontal(DirectionHorizontal direction)
@@ -231,11 +235,46 @@ void GameObject::SetDirectionVertical(DirectionVertical direction)
     m_yDir = static_cast<int32_t>(direction);
 }
 
-void GameObject::move(int32_t xBound, int32_t yBound)
+// GameObject private class ::Transform
+GameObject::Transform::Transform(int32_t xPos, int32_t yPos, int32_t velocity)
+    : m_xPos(static_cast<int32_t>(xPos))
+    , m_yPos(static_cast<int32_t>(yPos))
+    , m_vel(static_cast<int32_t>(velocity))
 {
-    m_xPos = std::min(xBound - GetWidth() , std::max(0, m_xPos + (m_xDir * m_vel)));
-    m_yPos = std::min(yBound - GetHeight(), std::max(0, m_yPos + (m_yDir * m_vel)));
+    //
 }
+
+void GameObject::Transform::Update(GameObject & componentOwner, SI::Timetools::Timestep ts, int32_t xBound, int32_t yBound)
+{
+    const double delta = ts * m_vel;
+    m_xPos += delta * static_cast<double>(componentOwner.m_xDir);
+    m_yPos += delta * static_cast<double>(componentOwner.m_yDir);
+    if (m_xPos < 0.0) m_xPos = 0.0;
+    if (m_yPos < 0.0) m_yPos = 0.0;
+    if (m_xPos > xBound - componentOwner.GetWidth())  m_xPos = xBound - componentOwner.GetWidth();
+    if (m_yPos > yBound - componentOwner.GetHeight()) m_yPos = yBound - componentOwner.GetHeight();
+}
+
+void GameObject::Transform::MoveDown(int32_t yDelta)
+{
+    assert(yDelta <= 0);
+    m_yPos += static_cast<double>(yDelta);
+    if (m_yPos < 0.0) m_yPos = 0.0;
+}
+
+int32_t GameObject::Transform::GetX(void) const { return static_cast<int32_t>(m_xPos + 0.5); }
+int32_t GameObject::Transform::GetY(void) const { return static_cast<int32_t>(m_yPos + 0.5); }
+
+bool GameObject::Transform::IsInsideHorizontalBounds(const GameObject & componentOwner, SI::Timetools::Timestep ts, int32_t xBound) const
+{
+    assert(componentOwner.m_xDir == 0 || std::abs(componentOwner.m_xDir) == 1);
+        // NOTE: If the possible values of this variable is allowed to
+        //       be any val that is not included in the set {-1, 0, 1}
+        //       this must be accounted for in the value for delta!
+    const double delta = ts * m_vel;
+    return m_xPos < delta || xBound - componentOwner.GetWidth() - m_xPos < delta;
+}
+
 
 GameObject::DirectionHorizontal operator+(const GameObject::DirectionHorizontal & lhs, const GameObject::DirectionHorizontal & rhs)
 {
