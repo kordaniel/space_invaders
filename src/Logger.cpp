@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "Logger.hpp"
 
 const char* const Logger::LevelNames[] = { "TRACE", "DEBUG", "INFO", "CRITICAL" };
 

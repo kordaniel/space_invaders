@@ -1,7 +1,7 @@
-#include "Game.h"
+#include "Game.hpp"
 
-#include "Input.h"
-#include "Timer.h"
+#include "Input.hpp"
+#include "Timer.hpp"
 
 #include <functional>   // std::bind
 #include <type_traits>

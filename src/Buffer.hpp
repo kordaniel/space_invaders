@@ -1,8 +1,8 @@
 #ifndef BUFFER_H
 #define BUFFER_H
 
-#include "global.h"
-#include "Size.h"
+#include "Global.hpp"
+#include "Size.hpp"
 
 #include <cstdlib>
 #include <cstdio>

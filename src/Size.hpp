@@ -1,7 +1,7 @@
 #ifndef SIZE_H
 #define SIZE_H
 
-#include "global.h"
+#include "Global.hpp"
 
 class Size
 {

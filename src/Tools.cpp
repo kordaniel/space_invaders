@@ -1,4 +1,4 @@
-#include "Tools.h"
+#include "Tools.hpp"
 
 #include <cmath>
 #include <cstdlib> // rand

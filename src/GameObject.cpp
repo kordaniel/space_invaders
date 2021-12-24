@@ -1,7 +1,7 @@
-#include "GameObject.h"
+#include "GameObject.hpp"
 
-#include "Buffer.h" // Includes GLFW
-#include "Input.h"
+#include "Buffer.hpp" // Includes GLFW
+#include "Input.hpp"
 
 #include <type_traits>
 #include <cmath> // std::abs

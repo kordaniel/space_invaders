@@ -1,5 +1,5 @@
-#include "Timer.h"
-#include "Io.h"
+#include "Timer.hpp"
+#include "Io.hpp"
 
 using namespace std::chrono;
 

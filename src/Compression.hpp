@@ -1,7 +1,7 @@
 #ifndef COMPRESSION_H
 #define COMPRESSION_H
 
-#include "global.h"
+#include "Global.hpp"
 
 #include <vector>
 

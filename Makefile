@@ -11,7 +11,7 @@ BUILDDIR    := build/rel
 BUILDDIRDBG := build/dbg
 TARGETDIR   := bin
 SRCEXT      := cpp
-HDREXT      := h
+HDREXT      := hpp
 
 TARGET      := $(TARGETDIR)/$(APPNAME)
 TARGETDBG   := $(TARGETDIR)/$(APPNAMEDBG)
@@ -63,7 +63,7 @@ $(TARGETDBG): $(OBJECTSDBG)
 	@echo " Linking binary: $@..."
 	$(CXX) $(CXXFLAGS) $(DBGCXXFLAGS) $(LDFLAGS) $(DBGLDFLAGS) $^ -o $(TARGETDIR)/$(APPNAMEDBG)
 
-$(BUILDDIRDBG)/%.o: $(SRCDIR)/%.$(SRCEXT) $(SRCDIR)/global.h $(SRCDIR)/%.$(HDREXT)
+$(BUILDDIRDBG)/%.o: $(SRCDIR)/%.$(SRCEXT) $(SRCDIR)/Global.hpp $(SRCDIR)/%.$(HDREXT)
 	@echo " Compiling object: $@.."
 	$(CXX) $(CXXFLAGS) $(DBGCXXFLAGS) -c -o $@ $<
 
@@ -73,7 +73,7 @@ $(TARGET): $(OBJECTS)
 	@echo " Linking binary: $@..."
 	$(CXX) $(CXXFLAGS) $(RELCXXFLAGS) $(LDFLAGS) $^ -o $(TARGETDIR)/$(APPNAME)
 
-$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT) $(SRCDIR)/global.h $(SRCDIR)/%.$(HDREXT)
+$(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT) $(SRCDIR)/Global.hpp $(SRCDIR)/%.$(HDREXT)
 	@echo " Compiling object: $@.."
 	$(CXX) $(CXXFLAGS) $(RELCXXFLAGS) -c -o $@ $<
 

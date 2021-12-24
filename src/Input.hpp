@@ -1,7 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include "global.h"
+#include "Global.hpp"
 
 #include <unordered_map>
 #include <vector>

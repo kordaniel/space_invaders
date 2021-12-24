@@ -1,9 +1,9 @@
 #ifndef GAMEOBJECT_H
 #define GAMEOBJECT_H
 
-#include "global.h"
-#include "Tools.h"
-#include "Sprites.h"
+#include "Global.hpp"
+#include "Tools.hpp"
+#include "Sprites.hpp"
 
 #include <memory>
 #include <vector>

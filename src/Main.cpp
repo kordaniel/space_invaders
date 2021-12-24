@@ -1,9 +1,9 @@
-#include "global.h"
+#include "Global.hpp"
 
-#include "Timer.h"
-#include "Io.h"
-#include "Buffer.h"
-#include "Game.h"
+#include "Timer.hpp"
+#include "Io.hpp"
+#include "Buffer.hpp"
+#include "Game.hpp"
 
 #include <cstring> // strcmp
 #include <cstdlib> // srand, rand

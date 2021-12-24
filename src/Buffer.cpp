@@ -1,8 +1,8 @@
-#include "Buffer.h"
+#include "Buffer.hpp"
 
-#include "Sprites.h"
-#include "Io.h"
-#include "Input.h"
+#include "Sprites.hpp"
+#include "Io.hpp"
+#include "Input.hpp"
 
 
 #ifndef NDEBUG

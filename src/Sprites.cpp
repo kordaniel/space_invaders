@@ -1,8 +1,8 @@
-#include "Sprites.h"
+#include "Sprites.hpp"
 
-#include "GameObject.h"
-#include "Io.h"
-#include "Compression.h"
+#include "GameObject.hpp"
+#include "Io.hpp"
+#include "Compression.hpp"
 
 
 Sprite::Sprite(const std::string& name)

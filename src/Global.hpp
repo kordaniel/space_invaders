@@ -6,7 +6,7 @@
 #include <string>
 #include <cassert>
 
-#include "Logger.h"
+#include "Logger.hpp"
 
 #ifndef NDEBUG
     #define assertpair(exp, arg1, arg2)\
