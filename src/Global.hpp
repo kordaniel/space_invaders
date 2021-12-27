@@ -1,7 +1,9 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#include "Config.hpp"
 #include <cstdint>
+#include <cstdlib>
 #include <cstddef>
 #include <string>
 #include <cassert>
@@ -30,9 +32,9 @@
 namespace SI {
     namespace GLOBAL {
         // Global variables
-        const double VERSION = 0.6;
-
+        const double VERSION = std::atoi(SpaceInvaders_VERSION_MAJOR) + 0.1 * std::atoi(SpaceInvaders_VERSION_MINOR);
     } // end namespace GLOBAL
+
     namespace FILEPATHS {
         const std::string FILE_LOG = "log.txt";
 

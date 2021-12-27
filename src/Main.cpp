@@ -19,7 +19,12 @@ void initialize([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
             io::print_to_stdout_varargs("Use '-log' to enable logging into the file '", SI::FILEPATHS::FILE_LOG, "'.");
         }
     }
-    Logger::Debug("Starting in DEBUG-mode");
+    Logger::Debug("Starting in DEBUG-mode. Built with:");
+    Logger::Debug("Compiler name:       %s.", COMPILER_NAME);
+    Logger::Debug("Compiler ID:         %s.", COMPILER_ID);
+    Logger::Debug("Compiler version:    %s.", COMPILER_VERSION);
+    Logger::Debug("Glew configuration:  %s.", GLEWLIB);
+    Logger::Debug("Glfw3 configuration: %s.", GLFWLIB);
 #endif
 
     Logger::Info("Space Invaders version: %.2f. Loading..", SI::GLOBAL::VERSION);
