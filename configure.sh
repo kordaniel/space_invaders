@@ -6,7 +6,7 @@
 _DBG_DIR="build/debug"
 _REL_DIR="build/release"
 
-if [ $# -eq 1 ] && [[ "$1" == rel* ]]; then
+if [ $# -eq 1 ] && [[ "$1" == r* ]]; then
     echo "Configuring RELEASE mode"
     cmake -D CMAKE_BUILD_TYPE=Release -S . -B ${_REL_DIR}
 else

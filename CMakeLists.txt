@@ -1,8 +1,12 @@
-# Should work with v. 3.15 but has only been tested with v. 3.22.1.
-cmake_minimum_required(VERSION 3.15)
+# Tested to work with cmake 3.16. Might work with an older version.
+cmake_minimum_required(VERSION 3.16)
 
 # Specify which compiler to use
 #set(CMAKE_CXX_COMPILER "g++-11")
+
+# Define min required versions of required libraries
+set(MIN_REQUIRED_GLEW "2.2")
+set(MIN_REQUIRED_GLFW "3.3")
 
 # Disable in-source builds.
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
@@ -37,55 +41,68 @@ list(APPEND CXX_FLAGS_DEBUG "-fsanitize=undefined" "-fsanitize=address" "-O0") #
 # At least MacOS clang linking (or only ld do?) requires the fsanitize flags to be set
 set(CXX_LDFLAGS_DEBUG "-fsanitize=undefined" "-fsanitize=address" "-rdynamic")
 
+
 find_package(OpenGL REQUIRED)
 find_package(GLEW REQUIRED)
-find_package(glfw3 3.3 REQUIRED)
+if("${GLEW_VERSION}" LESS "${MIN_REQUIRED_GLEW}")
+    # Macos/brew CMakeconfig for glew does not set the version so this check will never trigger.
+    # ##################
+    # USE version 2.2+!!
+    # ##################
+    message(WARNING "Found GLEW Version ${GLEW_VERSION} which is older than the oldest supported version: ${MIN_REQUIRED_GLEW}. Consider upgrading glew for best experience.")
+endif()
 
-#find_library(glewlib glew NAMES glew glew2 GLEW GLEW2 DOC "Glew lib")
+find_package(glfw3 "${MIN_REQUIRED_GLFW}" QUIET)
 
-#if("${glewlib}" STREQUAL myglewlib-NOTFOUND)
-#    message(FATAL_ERROR "[ERROR]: Glew not found!")
-#else()
-#    message(STATUS "Found Glew: ${glewlib}")
-#endif()
+# Compile glfw from submodule if shared glfw library is not found or the found version is too low
+if(NOT glfw3_FOUND OR "${glfw3_VERSION}" LESS "${MIN_REQUIRED_GLFW}")
+    message(STATUS "Shared systemlib GLFW was not found or its version was too low. Attempting to use the current version from glfw-repository")
+    find_package(Git) # QUIET
+    if(Git_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+        option(Git_SUBMODULE "Check submodules during build" ON)
+        if(Git_SUBMODULE)
+            message(STATUS "Submodule GLFW update")
+            execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw
+                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                            RESULT_VARIABLE GIT_SUBMOD_RESULT)
+            if(NOT GIT_SUBMOD_RESULT EQUAL "0")
+                message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMODULE_RESULT}, please checkout submodules")
+            endif()
+            set(GLFW_BUILD_TESTS OFF)
+            set(GLFW_BUILD_DOCS OFF) # Requires doxygen
+            set(glfw3_DIR "${PROJECT_SOURCE_DIR}/external/glfw")
+            add_subdirectory("${PROJECT_SOURCE_DIR}/external/glfw")
+        else()
+            message("Git submodule option set to OFF")
+        endif()
+    else()
+        message(FATAL_ERROR "Git not found: failed to download glfw sources.")
+    endif()
+else()
+    message(STATUS "Using systemwide shared glfw library: ${glfw3_VERSION}")
+endif()
 
-add_executable("${PROJECT_NAME}"
-    "${PROJECT_SOURCE_DIR}/src/Main.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Buffer.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Compression.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Game.cpp"
-    "${PROJECT_SOURCE_DIR}/src/GameObject.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Input.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Io.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Logger.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Size.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Sprites.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Timer.cpp"
-    "${PROJECT_SOURCE_DIR}/src/Tools.cpp"
-)
+# Only build tests in Debug builds
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    include(FetchContent)
+    FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/6b74da4757a549563d7c37c8fae3e704662a043b.zip
+    )
+    # For Windows: Prevent overriding the parent project's compiler/linker settings
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+endif()
 
-include_directories("${PROJECT_NAME}" PRIVATE "${PROJECT_BINARY_DIR}")
+# Main app
+add_subdirectory("${PROJECT_SOURCE_DIR}/src")
 
-configure_file("${CMAKE_SOURCE_DIR}/configuration/Config.hpp.in" Config.hpp @ONLY)
+configure_file("${CMAKE_SOURCE_DIR}/configuration/Config.hpp.in" "${PROJECT_BINARY_DIR}/src/Config.hpp" @ONLY)
 
+# Only build tests in Debug builds
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    enable_testing()
 
-target_compile_options("${PROJECT_NAME}" PRIVATE "${CXX_FLAGS}"
-     "$<$<CONFIG:Debug>:${CXX_FLAGS_DEBUG}>"
-     "$<$<CONFIG:Release>:${CXX_FLAGS_RELEASE}>"
-)
-
-target_link_options("${PROJECT_NAME}" PRIVATE
-    "$<$<CONFIG:Debug>:${CXX_LDFLAGS_DEBUG}>"
-)
-
-target_include_directories("${PROJECT_NAME}" PRIVATE "${PROJECT_BINARY_DIR}/src")
-
-#target_link_libraries("${PROJECT_NAME}" OpenGL::GL ${glewlib} glfw)
-target_link_libraries("${PROJECT_NAME}" PUBLIC OpenGL::GL GLEW::GLEW glfw)
-
-# Copy the required resources to the output directory
-add_custom_command(
-    TARGET "${PROJECT_NAME}" POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_directory ${CMAKE_SOURCE_DIR}/res/shaders $<TARGET_FILE_DIR:${PROJECT_NAME}>/res/shaders
-    COMMAND "${CMAKE_COMMAND}" -E copy_directory ${CMAKE_SOURCE_DIR}/res/spr $<TARGET_FILE_DIR:${PROJECT_NAME}>/res/spr
-)
+    add_subdirectory("${PROJECT_SOURCE_DIR}/test")
+    configure_file("${CMAKE_SOURCE_DIR}/configuration/Config.hpp.in" "${PROJECT_BINARY_DIR}/test/Config.hpp" @ONLY)
+endif()

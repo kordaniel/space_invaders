@@ -11,6 +11,16 @@
 class KeyInput
 {
 public:
+    static int constexpr SUPPORTED_KEYS[] = {
+        GLFW_KEY_RIGHT,
+        GLFW_KEY_LEFT,
+        GLFW_KEY_UP,
+        GLFW_KEY_DOWN,
+        GLFW_KEY_SPACE,
+        GLFW_KEY_ESCAPE,
+        GLFW_KEY_F,
+        GLFW_KEY_G
+    };
     static KeyInput & GetInstance(void);
     static void MainKeyCallback(GLFWwindow * window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);
     static void RegisterCallback(int key, int action, const std::function<void(void)> callback);
@@ -25,16 +35,6 @@ private:
     void setKeyStatus(int key, bool isPressed);
 
 private:
-    static int constexpr SUPPORTED_KEYS[] = {
-        GLFW_KEY_RIGHT,
-        GLFW_KEY_LEFT,
-        GLFW_KEY_UP,
-        GLFW_KEY_DOWN,
-        GLFW_KEY_SPACE,
-        GLFW_KEY_ESCAPE,
-        GLFW_KEY_F,
-        GLFW_KEY_G
-    };
     inline static std::unordered_map<int, std::vector<std::function<void(void)>>> s_keyPressCallbacks;
     inline static std::unordered_map<int, std::vector<std::function<void(void)>>> s_keyReleaseCallbacks;
 

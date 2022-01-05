@@ -6,7 +6,7 @@
 _DBG_DIR="build/debug"
 _REL_DIR="build/release"
 
-if [ $# -eq 1 ] && [[ "$1" == rel* ]]; then
+if [ $# -eq 1 ] && [[ "$1" == r* ]]; then
     if [ ! -d "${_REL_DIR}" ]; then
         echo "Directory './${_REL_DIR}' missing. Aborting."
         echo "Run './configure.sh release' first to set up the build environment."

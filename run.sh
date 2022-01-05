@@ -3,7 +3,7 @@
 _DBG_DIR="build/debug/bin"
 _REL_DIR="build/release/bin"
 
-if [ $# -eq 1 ] && [[ "$1" == rel* ]]; then
+if [ $# -eq 1 ] && [[ "$1" == r* ]]; then
     if [ ! -d "${_REL_DIR}" ]; then
         echo "Directory './${_REL_DIR}' missing. Aborting."
         exit 1
