@@ -3,27 +3,27 @@
  
 TEST(SizeTests, Width)
 {
-    double width = 8;
-    double height = 6;
+    int width = 8;
+    int height = 6;
     Size sizeobj(width, height);
-    double result = sizeobj.GetWidth();
+    int result = sizeobj.GetWidth();
     EXPECT_EQ(width, result);
 }
 
 TEST(SizeTests, Height)
 {
-    double width = 8;
-    double height = 6;
+    int width = 8;
+    int height = 6;
     Size sizeobj(width, height);
-    double result = sizeobj.GetHeight();
+    int result = sizeobj.GetHeight();
     EXPECT_EQ(height, result);
 }
 
 TEST(SizeTests, TotalSize)
 {
-    double width = 8;
-    double height = 6;
+    int width = 8;
+    int height = 6;
     Size sizeobj(width, height);
-    double result = sizeobj.GetTotalSize();
+    int result = sizeobj.GetTotalSize();
     EXPECT_EQ(width * height, result);
 }
