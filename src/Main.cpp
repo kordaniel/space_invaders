@@ -28,7 +28,7 @@ void initialize([[maybe_unused]] int argc, [[maybe_unused]] char* argv[]) {
 #endif
 
     Logger::Info("Space Invaders version: %.2f. Loading..", SI::GLOBAL::VERSION);
-    srand(time(nullptr));
+    srand(static_cast<unsigned int>(time(nullptr)));
 
     Logger::Info("Loading completed!");
 }

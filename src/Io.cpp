@@ -1,4 +1,5 @@
 #include "Io.hpp"
+#include <ios>
 
 void io::print_to_stdout(const std::string &msg)
 {
@@ -36,6 +37,7 @@ io::readTextFileIntoVector(const std::string& filepath,
 
 bool io::readBinaryFile(const std::string& filepath, std::vector<uint8_t>& buffer)
 {
+    static_assert(sizeof(std::streamsize) <= sizeof(size_t), "ERROR: Missmatching size_t and streamsize detected");
     std::ifstream ifs(filepath, std::ios::binary | std::ios::in | std::ios::ate);
     if (!ifs.is_open()) {
         return false;
@@ -45,7 +47,7 @@ bool io::readBinaryFile(const std::string& filepath, std::vector<uint8_t>& buffe
     std::streampos fileSize = ifs.tellg();
     ifs.seekg(0, std::ios::beg);
 
-    buffer.reserve(fileSize);
+    buffer.reserve(static_cast<size_t>(fileSize));
     buffer.insert(buffer.begin(),
                   std::istreambuf_iterator<char>(ifs),
                   std::istreambuf_iterator<char>()
@@ -71,7 +73,10 @@ bool io::writeBinaryFile(const std::string& filepath, const std::vector<uint8_t>
         return false;
     }
 
-    ofs.write(reinterpret_cast<const char*>(&buffer[0]), buffer.size() * sizeof(buffer[0]));
+    ofs.write(
+        reinterpret_cast<const char*>(&buffer[0]),
+        static_cast<std::streamsize>(buffer.size() * sizeof(buffer[0]))
+    );
     ofs.close();
 
     if (!ofs.good()) {

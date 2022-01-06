@@ -48,7 +48,8 @@ void Compression::CompressRLE(const uint8_t* current, const uint8_t* const last,
 
         if (count == 127 || *current != buff) {
             // 127 => waste 1/128 of the space to keep things simple (no real need for 0)
-            buff <<= 7;
+            //buff <<= 7; // implicit upcast to int and then back to uint8 => triggers compiler warnings
+            buff = static_cast<uint8_t>(buff << 7);
             buff  |= count;
             targetBuff.push_back(buff);
             buff = *current;
@@ -58,7 +59,8 @@ void Compression::CompressRLE(const uint8_t* current, const uint8_t* const last,
         }
 
         if (current == lastElem) {
-            buff <<= 7;
+            //buff <<= 7;
+            buff = static_cast<uint8_t>(buff << 7);
             buff |= count;
             targetBuff.push_back(buff);
         }
@@ -81,19 +83,20 @@ void Compression::CompressSpriteData(const uint8_t* arr, Tint width, Tint height
     auto pushBytesOfValue = [&targetBuff](Tint value) -> void {
         const size_t bytes = sizeof(value);
         for (size_t i = 0; i < bytes; ++i) {
-            targetBuff.push_back((uint8_t) value >> (i * 8));
+            targetBuff.push_back(static_cast<uint8_t>( value >> (i * 8) ));
         }
     };
    pushBytesOfValue(width);
    pushBytesOfValue(height);
    pushBytesOfValue(spritesCount);
 
-    const size_t length = spritesCount * width * height;
+    const size_t length = static_cast<size_t>(spritesCount) * width * height;
     size_t count = 0;
     uint8_t buff = 0;
 
     while (true) {
-        buff |= *arr << (count++ % 8);
+        //buff |= *arr << (count++ % 8);
+        buff = static_cast<uint8_t>( buff | (*arr << (count++ % 8)) );
         ++arr;
 
         if (count == length) {
@@ -117,12 +120,12 @@ void Compression::DecompressSpriteData(const std::vector<uint8_t>& compressed, s
 // static classmethod
 {
     auto constructUint16_tFromUint8_t = [&compressed](size_t i) -> uint16_t {
-        return (uint16_t) compressed[i] | (uint16_t) compressed[i+1] << 8;
+        return static_cast<uint16_t>(compressed[i] | (compressed[i+1] << 8));
     };
     uint16_t width        = constructUint16_tFromUint8_t(0);
     uint16_t height       = constructUint16_tFromUint8_t(2);
     uint16_t spritesCount = constructUint16_tFromUint8_t(4);
-    const size_t length   = spritesCount * width * height;
+    const size_t length   = static_cast<size_t>(spritesCount) * width * height;
 
     for (size_t i = 0; i < 6; ++i) {
         decompressed.push_back(compressed[i]);

@@ -65,7 +65,7 @@ void Game::Run(Buffer & buffer)
 
         while (accumulatedLag >= deltaTimeUpdate)
         {
-            Update(buffer, deltaTimeUpdate.count());
+            Update(buffer, static_cast<double>(deltaTimeUpdate.count()));
             accumulatedLag -= deltaTimeUpdate;
         }
 
@@ -79,7 +79,9 @@ void Game::Run(Buffer & buffer)
 #endif
         }
 
-        timeToSleep = (loopIterTargetTime - (time_point{Clock::now()} - timeCurrent)).count();
+        timeToSleep = static_cast<double>(
+            (loopIterTargetTime - (time_point{Clock::now()} - timeCurrent)).count()
+        );
         if (timeToSleep > 0)
         {
             if (framesLagCount > 0) {
@@ -333,7 +335,7 @@ void Game::update_ups(void)
         return;
     }
 
-    Logger::Debug("Game   UPS: %.3f", (updates / time_delta.count()));
+    Logger::Debug("Game   UPS: %.3f", (static_cast<double>(updates) / time_delta.count()));
 
     time_prev = time_now;
     updates = 0;

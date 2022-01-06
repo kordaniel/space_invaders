@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_options("-Wall" "-Wextra" "-Wshadow" "-Wunused-result" "-pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wshadow -pedantic -Wpedantic -Wunused-result -Wnon-virtual-dtor -Wcast-align -Woverloaded-virtual -Wconversion -Wsign-conversion -fdelete-null-pointer-checks -Wnull-dereference -Wdouble-promotion")
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
     add_compile_options("-Wshadow-field-in-constructor" "-Wsign-compare")

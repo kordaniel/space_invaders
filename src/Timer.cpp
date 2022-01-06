@@ -1,11 +1,11 @@
 #include "Timer.hpp"
 #include "Io.hpp"
 
-using namespace std::chrono;
+#include <ratio>
 
 Timer::Timer(const char* message)
     : m_message(message)
-    , m_startTimepoint(steady_clock::now())
+    , m_startTimepoint(std::chrono::steady_clock::now())
 {
     //
 }
@@ -18,37 +18,39 @@ Timer::Timer()
 
 Timer::~Timer(void)
 {
-    time_point<steady_clock> endTimepoint = steady_clock::now();
+    std::chrono::time_point<std::chrono::steady_clock> endTimepoint
+        = std::chrono::steady_clock::now();
     processResult(endTimepoint);
 }
 
 void Timer::reset(void)
 {
-    m_startTimepoint = steady_clock::now();
+    m_startTimepoint = std::chrono::steady_clock::now();
 }
 
-void Timer::processResult(const time_point<steady_clock>& endTimepoint) const
+void Timer::processResult(const std::chrono::time_point<std::chrono::steady_clock>& endTimepoint) const
 {
-    int64_t duration = duration_cast<nanoseconds>(endTimepoint - m_startTimepoint).count();
+    using namespace std::literals::chrono_literals;
+    using std::chrono::duration;
+    duration dur = endTimepoint - m_startTimepoint;
     const char* message = m_message ? m_message : "";
 
-    if (duration < 1000) {
-        io::print_to_stdout_varargs(message, duration, "ns.");
-    } else if (duration < 1e6) {
-        io::print_to_stdout_varargs(message, duration * 0.001, "us.");
-    } else if (duration < 1e9) {
-        io::print_to_stdout_varargs(message, duration * 0.000001, "ms.");
-    } else {
-        io::print_to_stdout_varargs(message, duration * 0.000000001, "s.");
-    }
+    if (dur < 1us)
+        io::print_to_stdout_varargs(message, duration<double, std::nano>(dur).count(), "ns.");
+    else if (dur < 1ms)
+        io::print_to_stdout_varargs(message, duration<double, std::micro>(dur).count(), "us.");
+    else if (dur < 1s)
+        io::print_to_stdout_varargs(message, duration<double, std::milli>(dur).count(), "ms.");
+    else
+        io::print_to_stdout_varargs(message, duration<double, std::ratio<1>>(dur).count(), "s.");
 }
 
 template<typename D>
 int64_t Timer::elapsed(void) const
 {
-    return duration_cast<D>(steady_clock::now() - m_startTimepoint).count();
+    return std::chrono::duration_cast<D>(std::chrono::steady_clock::now() - m_startTimepoint).count();
 }
-template int64_t Timer::elapsed<nanoseconds> (void) const;
-template int64_t Timer::elapsed<microseconds>(void) const;
-template int64_t Timer::elapsed<milliseconds>(void) const;
-template int64_t Timer::elapsed<seconds>     (void) const;
+template int64_t Timer::elapsed<std::chrono::nanoseconds> (void) const;
+template int64_t Timer::elapsed<std::chrono::microseconds>(void) const;
+template int64_t Timer::elapsed<std::chrono::milliseconds>(void) const;
+template int64_t Timer::elapsed<std::chrono::seconds>     (void) const;

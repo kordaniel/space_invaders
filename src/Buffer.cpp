@@ -57,7 +57,7 @@ Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight)
     , m_n_frames(0)
     , m_fps_prev(0)
 {
-    m_data = new uint32_t[GetTotalSize()];
+    m_data = new uint32_t[static_cast<size_t>(GetTotalSize())];
     clear();
 
     initialize_glfw_window();
@@ -107,7 +107,7 @@ void Buffer::drawSprite(int32_t x, int32_t y, const Sprite& sprite, colors::Colo
                 continue;
             }
 
-            if (!sprite[yi * sprite.GetWidth() + xi]) {
+            if (!sprite[static_cast<size_t>(yi * sprite.GetWidth() + xi)]) {
                 continue;
             }
             m_data[yStartIdx + xi] = color;
@@ -130,7 +130,7 @@ void Buffer::append_text(int32_t x, int32_t y,
                          colors::Colors color)
 {
     const int32_t stride       = text_spritesheet.GetTotalSize();
-    const int32_t str_width    = text.length() * (text_spritesheet.GetWidth() + m_character_gap) - m_character_gap;
+    const int32_t str_width    = static_cast<int32_t>(text.length()) * (text_spritesheet.GetWidth() + m_character_gap) - m_character_gap;
     const uint8_t* sprite_char = text_spritesheet.m_data;
     char currChar              = 0;
     int32_t xpos               = x + str_width < m_width ? x : m_width - str_width;
@@ -417,7 +417,7 @@ void Buffer::append_sprite(int32_t x, int32_t y, const uint8_t* sprite,
 
 int32_t Buffer::append_digits(int32_t x, int32_t y,
                               Sprite& text_spritesheet,
-                              int32_t number, size_t digits, colors::Colors color)
+                              int32_t number, int32_t digits, colors::Colors color)
 {
     if (number > 0) {
         x = append_digits(x, y, text_spritesheet, number / 10, ++digits, color);
