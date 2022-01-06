@@ -1,7 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
-#include "global.h"
+#include "Global.hpp"
 
 #include <memory>
 #include <string>

@@ -1,4 +1,4 @@
-#include "Tools.h"
+#include "Tools.hpp"
 
 #include <cmath>
 #include <cstdlib> // rand
@@ -35,9 +35,9 @@ namespace SI {
         {
             ++m_count;
             double delta = ts - m_mean;
-            m_mean      += delta / m_count;
+            m_mean      += delta / static_cast<double>(m_count);
             m_m2        += delta * (ts - m_mean);
-            m_estimate   = m_mean + std::sqrt(m_m2 / (m_count - 1)); // mean + stddev
+            m_estimate   = m_mean + std::sqrt(m_m2 / static_cast<double>(m_count - 1)); // mean + stddev
         }
 
         double TimeEstimate::GetEstimate(void) const { return m_estimate; }
@@ -57,13 +57,13 @@ namespace SI {
                 auto startTime = steady_clock::now();
                 std::this_thread::sleep_for(milliseconds(1));
                 auto endTime = steady_clock::now();
-                double duration = durationTimeToSecs * (endTime - startTime).count();
+                double duration = durationTimeToSecs * static_cast<double>((endTime - startTime).count());
                 seconds -= duration;
                 estimate.AddTimestep(duration);
             }
 
             auto startTime = steady_clock::now();
-            while (durationTimeToSecs * (steady_clock::now() - startTime).count() < seconds);
+            while (durationTimeToSecs * static_cast<double>((steady_clock::now() - startTime).count()) < seconds);
         }
 
     } // end namespace thread

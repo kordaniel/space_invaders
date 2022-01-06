@@ -1,7 +1,7 @@
-#include "GameObject.h"
+#include "GameObject.hpp"
 
-#include "Buffer.h" // Includes GLFW
-#include "Input.h"
+#include "Buffer.hpp" // Includes GLFW
+#include "Input.hpp"
 
 #include <type_traits>
 #include <cmath> // std::abs
@@ -151,13 +151,13 @@ GameObject::~GameObject(void)
 }
 
 void    GameObject::Draw(Buffer & buffer) const { m_graphicsComponent.Draw(*this, buffer); }
-int32_t GameObject::GetWidth(void)        const { return m_graphicsComponent.GetSpriteWidth(); };
-int32_t GameObject::GetHeight(void)       const { return m_graphicsComponent.GetSpriteHeight(); };
+int32_t GameObject::GetWidth(void)        const { return m_graphicsComponent.GetSpriteWidth(); }
+int32_t GameObject::GetHeight(void)       const { return m_graphicsComponent.GetSpriteHeight(); }
 int32_t GameObject::GetX(void)            const { return m_position.GetX(); }
 int32_t GameObject::GetRightMostX(void)   const { return GetX() + GetWidth(); }
 int32_t GameObject::GetY(void)            const { return m_position.GetY(); }
 int32_t GameObject::GetTopMostY(void)     const { return GetY() + GetHeight(); }
-int32_t GameObject::GetMiddleX(void)      const { return GetX() + (GetWidth() / 2); };
+int32_t GameObject::GetMiddleX(void)      const { return GetX() + (GetWidth() / 2); }
 int32_t GameObject::GetLivesAmount(void)  const { return m_lives; }
 int32_t GameObject::GetDeathCounter(void) const { return m_deathCounter; }
 bool    GameObject::IsAlive(void)         const { return GetLivesAmount() > 0; }

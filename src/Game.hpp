@@ -1,12 +1,12 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include "global.h"
+#include "Global.hpp"
 
-#include "Tools.h"
-#include "Size.h"
-#include "Buffer.h"
-#include "GameObject.h"
+#include "Tools.hpp"
+#include "Size.hpp"
+#include "Buffer.hpp"
+#include "GameObject.hpp"
 
 #include <list>
 #include <memory>

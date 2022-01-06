@@ -1,0 +1,14 @@
+#ifndef CONFIG_HPP
+#define CONFIG_HPP
+
+#define SpaceInvaders_VERSION_MAJOR "@SpaceInvaders_VERSION_MAJOR@"
+#define SpaceInvaders_VERSION_MINOR "@SpaceInvaders_VERSION_MINOR@"
+
+#define COMPILER_NAME "@CMAKE_CXX_COMPILER@"
+#define COMPILER_ID "@CMAKE_CXX_COMPILER_ID@"
+#define COMPILER_VERSION "@CMAKE_CXX_COMPILER_VERSION@"
+
+#define GLEWLIB "@GLEW_DIR@"
+#define GLFWLIB "@glfw3_DIR@"
+
+#endif

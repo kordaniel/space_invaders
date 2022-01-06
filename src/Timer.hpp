@@ -1,7 +1,7 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include "global.h"
+#include "Global.hpp"
 
 #include <chrono>
 

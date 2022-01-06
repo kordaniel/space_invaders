@@ -1,8 +1,8 @@
 #ifndef SPRITES_H
 #define SPRITES_H
 
-#include "global.h"
-#include "Size.h"
+#include "Global.hpp"
+#include "Size.hpp"
 
 #include <vector>
 

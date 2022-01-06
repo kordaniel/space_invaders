@@ -1,8 +1,8 @@
-#include "Sprites.h"
+#include "Sprites.hpp"
 
-#include "GameObject.h"
-#include "Io.h"
-#include "Compression.h"
+#include "GameObject.hpp"
+#include "Io.hpp"
+#include "Compression.hpp"
 
 
 Sprite::Sprite(const std::string& name)
@@ -46,20 +46,20 @@ void Sprite::deserialize(const std::vector<uint8_t>& spriteDataBitmap)
     }
 
     auto constructUint16_tFromUint8_t = [&decompressed](size_t i) -> uint16_t {
-        return (uint16_t) decompressed[i] | (uint16_t) decompressed[i+1] << 8;
+        return static_cast<uint16_t>( decompressed[i] | (decompressed[i+1] << 8) );
     };
 
-    m_width   = constructUint16_tFromUint8_t(0);
-    m_height  = constructUint16_tFromUint8_t(2);
-    m_count = constructUint16_tFromUint8_t(4);
+    m_width  = constructUint16_tFromUint8_t(0);
+    m_height = constructUint16_tFromUint8_t(2);
+    m_count  = constructUint16_tFromUint8_t(4);
 
-    if (m_count * GetTotalSize() != decompressed.size() - 6) {
+    if (m_count * static_cast<size_t>(GetTotalSize()) != decompressed.size() - 6) {
         Logger::Critical("[Sprite]: Error decompressing sprite %s data: size missmatch", m_name.c_str());
         throw "TODO: Something clever, fallback to default sprite instead of throw";
     }
 
-    NEWoper(m_data, new uint8_t[m_count * GetTotalSize()]);
-    for (size_t i = 0; i < m_count * GetTotalSize(); ++i) {
+    NEWoper(m_data, new uint8_t[m_count * static_cast<size_t>(GetTotalSize())]);
+    for (size_t i = 0; i < m_count * static_cast<size_t>(GetTotalSize()); ++i) {
         m_data[i] = decompressed[6+i];
     }
 }
@@ -83,7 +83,7 @@ const uint8_t* Sprite::getNumberSpritePtr(int32_t number) const
     //       that the size of the Sprite is the one that the Spritsheet has.
     assertpair(GetTotalSize() == 35, GetTotalSize(), 35);
     assert(0 <= number &&  number < 10);
-    return getSpritePtr(16 * GetTotalSize() + number * GetTotalSize());
+    return getSpritePtr(static_cast<size_t>(16 * GetTotalSize()) + static_cast<size_t>(number * GetTotalSize()));
 }
 
 bool Sprite::operator[](size_t i) const

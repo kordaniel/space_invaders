@@ -6,8 +6,8 @@
 #include <fstream>
 #include <vector>
 
-#include "global.h"
-//#include "Sprites.h"
+#include "Global.hpp"
+//#include "Sprites.hpp"
 
 //struct RLESprite; // forward declare
 

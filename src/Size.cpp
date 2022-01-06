@@ -1,4 +1,4 @@
-#include "Size.h"
+#include "Size.hpp"
 
 Size::Size(int32_t width, int32_t height):
     m_width(width),
