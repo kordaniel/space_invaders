@@ -4,6 +4,7 @@
 #include "Io.hpp"
 #include "Buffer.hpp"
 #include "Game.hpp"
+#include "Window.hpp"
 
 #include <cstring> // strcmp
 #include <cstdlib> // srand, rand
@@ -42,11 +43,9 @@ int main(int argc, char* argv[])
     initialize(argc, argv);
 
     const int32_t buff_width = 224, buff_height = 256;
-
-    Buffer buffer(buff_width, buff_height);
+    Window window("Space Invaders!", 3*buff_width, 3*buff_height);
+    Buffer buffer(buff_width, buff_height, window);
     Game game(buff_width, buff_height);
-
-    glfwSetWindowUserPointer(buffer.get_glfw_window(), &game);
 
     game.Run(buffer);
 

@@ -2,11 +2,11 @@
 #define INPUT_H
 
 #include "Global.hpp"
+#include "Window.hpp" // GLFW
 
 #include <unordered_map>
 #include <vector>
 #include <functional>
-#include <GLFW/glfw3.h>
 
 class KeyInput
 {
@@ -19,7 +19,7 @@ public:
         GLFW_KEY_SPACE,
         GLFW_KEY_ESCAPE,
         GLFW_KEY_F,
-        GLFW_KEY_G
+        GLFW_KEY_Q
     };
     static KeyInput & GetInstance(void);
     static void MainKeyCallback(GLFWwindow * window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods);

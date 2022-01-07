@@ -3,6 +3,7 @@
 
 #include "Global.hpp"
 #include "Size.hpp"
+#include "Window.hpp"
 
 #include <cstdlib>
 #include <cstdio>
@@ -100,7 +101,7 @@ namespace colors
 class Buffer: public Size
 {
 public:
-    Buffer(int32_t bufferWidth, int32_t bufferHeight);
+    Buffer(int32_t bufferWidth, int32_t bufferHeight, Window & window);
     Buffer(const Buffer& other) = delete;
     ~Buffer(void);
     void clear(void);
@@ -110,12 +111,13 @@ public:
     void append_text(int32_t, int32_t, const Sprite&, const std::string&, colors::Colors = colors::ORANGE);
     void append_integer(int32_t, int32_t, Sprite&, int32_t, colors::Colors color = colors::ORANGE);
     void draw(void);
-    GLFWwindow* get_glfw_window(void);
+    bool WindowShouldClose(void) const;
 
 private:
     uint32_t* m_data; // 8 bits each for R,G,B,Alpha values
     char m_window_title[26];
-    GLFWwindow* m_glfw_window;
+    //GLFWwindow* m_glfw_window;
+    Window & m_window;
     GLenum m_err;
     GLuint m_buffer_texture;
     GLuint m_fullscreen_triangle_vao;

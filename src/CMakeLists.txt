@@ -13,6 +13,7 @@ set(headers
     "Sprites.hpp"
     "Timer.hpp"
     "Tools.hpp"
+    "Window.hpp"
 )
 
 set(sources
@@ -28,6 +29,7 @@ set(sources
     "Sprites.cpp"
     "Timer.cpp"
     "Tools.cpp"
+    "Window.cpp"
 )
 
 add_executable("${PROJECT_NAME}" "${sources}" "${headers}") # EXCLUDE_FROM_ALL

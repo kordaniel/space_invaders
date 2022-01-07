@@ -25,10 +25,12 @@ set(InputTest "InputTest")
 set(InputTestSources
     "InputTest.cpp"
     "${CMAKE_SOURCE_DIR}/src/Input.cpp"
+    "${CMAKE_SOURCE_DIR}/src/Window.cpp"
+    "${CMAKE_SOURCE_DIR}/src/Logger.cpp"
 )
 
 add_executable("${InputTest}" "${InputTestSources}")
-target_link_libraries("${InputTest}" PRIVATE glfw)
+target_link_libraries("${InputTest}" PRIVATE OpenGL::GL GLEW::GLEW glfw)
 add_test(
     NAME "${InputTest}"
     COMMAND "${InputTest}"

@@ -31,28 +31,11 @@
     #define GLCall(x) x
 #endif
 
-// Section with 3 functions that should not be used outside this module
-// ----------------------------------------------------------------------
 
-void window_close_callback(GLFWwindow* window __attribute__((unused)))
-{
-    io::print_to_stdout("Window close callback called!");
-}
-
-void framebuffer_size_callback(GLFWwindow* window __attribute__((unused)), int width, int height)
-{
-    io::print_to_stdout_varargs("Framebuffer size: ", width, ", ", height);
-}
-
-void error_callback(int error __attribute__((unused)), const char* description)
-{
-    io::print_to_stderr_varargs("[ERROR]: ", description);
-}
-// ----------------------------------------------------------------------
-
-Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight)
+Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight, Window & window)
     : Size(bufferWidth, bufferHeight)
     , m_window_title("Space Invaders! FPS:     ")
+    , m_window(window)
     , m_time_prev_update(std::chrono::steady_clock::now())
     , m_n_frames(0)
     , m_fps_prev(0)
@@ -68,8 +51,6 @@ Buffer::Buffer(int32_t bufferWidth, int32_t bufferHeight)
 
 Buffer::~Buffer(void)
 {
-    GLCall(glfwDestroyWindow(m_glfw_window));
-    GLCall(glfwTerminate());
     GLCall(glDeleteProgram(m_shader_id));
     GLCall(glDeleteVertexArrays(1, &m_fullscreen_triangle_vao));
     delete[] m_data;
@@ -177,13 +158,14 @@ void Buffer::draw(void)
         m_data
     ));
     GLCall(glDrawArrays(GL_TRIANGLE_STRIP, 0, 4));
-    GLCall(glfwSwapBuffers(m_glfw_window));
+
+    m_window.Update();
     update_fps();
 }
 
-GLFWwindow* Buffer::get_glfw_window(void)
+bool Buffer::WindowShouldClose(void) const
 {
-    return m_glfw_window;
+    return m_window.ShouldClose();
 }
 
 // ----------------------------- PRIVATE METHODS -----------------------------
@@ -227,37 +209,11 @@ ShaderProgramSource Buffer::read_and_parse_shader(const std::string& filepath)
 
 void Buffer::initialize_glfw_window(void)
 {
-    glfwSetErrorCallback(error_callback);
-    if (!glfwInit()) {
-        io::print_to_stderr("[ERROR]: when trying to initialize glfw.");
-        delete[] m_data;
-        exit(EXIT_FAILURE);
-    }
-
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
-    m_glfw_window = glfwCreateWindow(m_width, m_height, m_window_title, nullptr, nullptr);
-    if (!m_glfw_window) {
-        io::print_to_stderr("[ERROR]: when trying to create glfw window.");
-        delete[] m_data;
-        glfwTerminate();
-        exit(EXIT_FAILURE);
-    }
-
-    glfwSetWindowCloseCallback(m_glfw_window, window_close_callback);
-    glfwSetFramebufferSizeCallback(m_glfw_window, framebuffer_size_callback);
-    glfwSetKeyCallback(m_glfw_window, KeyInput::MainKeyCallback);
-    glfwMakeContextCurrent(m_glfw_window);
     m_err = glewInit();
     if (m_err != GLEW_OK) {
         io::print_to_stderr("[ERROR]: initializing GLEW.");
         io::print_to_stderr_varargs(glewGetErrorString(m_err));
         delete[] m_data;
-        glfwTerminate();
         exit(EXIT_FAILURE);
     }
 }
@@ -273,12 +229,6 @@ void Buffer::initialize_opengl(void)
     Logger::Debug("Using OpenGL: %d.%d", glVersion[0], glVersion[1]);
     Logger::Debug("Renderer used: %s", glGetString(GL_RENDERER));
     Logger::Debug("Shading language: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
-
-#ifndef NDEBUG
-    GLCall(glfwSwapInterval(1)); // vsync 1 = ON, 0 = OFF
-#else
-    GLCall(glfwSwapInterval(1)); // vsync ON
-#endif
 
     GLCall(glClearColor(1.0, 0.0, 0.0, 1.0));
 }
@@ -432,8 +382,6 @@ int32_t Buffer::append_digits(int32_t x, int32_t y,
     return x + text_spritesheet.GetWidth() + m_character_gap;
 }
 
-
-
 void Buffer::update_fps(void)
 {
     using namespace std::chrono;
@@ -455,5 +403,6 @@ void Buffer::update_fps(void)
     }
 
     assert(m_n_frames == 0);
-    GLCall(glfwSetWindowTitle(m_glfw_window, m_window_title));
+
+    m_window.SetTitle(m_window_title);
 }

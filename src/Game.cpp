@@ -53,15 +53,13 @@ void Game::Run(Buffer & buffer)
     bool drawFrame          = true;
     int32_t framesLagCount  = 0;
 
-    while (!glfwWindowShouldClose(buffer.get_glfw_window()))
+    while (!buffer.WindowShouldClose())
     {
         //Timer gameLoopTimer("Game loop: ");
 
         timeCurrent = Clock::now();
         accumulatedLag += timeCurrent - timePrevious;
         timePrevious = timeCurrent;
-
-        glfwPollEvents();
 
         while (accumulatedLag >= deltaTimeUpdate)
         {

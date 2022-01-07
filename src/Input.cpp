@@ -1,6 +1,5 @@
 #include "Input.hpp"
 
-
 // PUBLIC functions
 // STATIC functions
 KeyInput & KeyInput::GetInstance(void)
@@ -11,16 +10,28 @@ KeyInput & KeyInput::GetInstance(void)
 
 void KeyInput::MainKeyCallback(GLFWwindow * window, int key, [[maybe_unused]] int scancode, int action, [[maybe_unused]] int mods)
 {
+    // window is NULL in tests so we need this check to avoid triggering GLFW asserts
+    // TODO: Refactor tests to pass ptr to a valid GLFWwindow / Window.cpp object
+    Window * windowPtr = window != nullptr
+                       ? static_cast<Window*>(glfwGetWindowUserPointer(window))
+                       : nullptr;
     callAllCallables(key, action);
     switch(key)
     {
         case GLFW_KEY_ESCAPE:
-            glfwSetWindowShouldClose(window, GLFW_TRUE); break;
+            if (action == GLFW_PRESS && windowPtr != nullptr) {
+                windowPtr->SetShouldClose(true);
+            }
+        case GLFW_KEY_Q:
+            if (action == GLFW_PRESS && windowPtr != nullptr) {
+                windowPtr->SetShouldClose(true);
+            }
         case GLFW_KEY_F:
-            glfwSetWindowMonitor(window, glfwGetPrimaryMonitor(), 0, 0, 2560, 1440, 60); break;
-        case GLFW_KEY_G:
-            glfwSetWindowMonitor(window, nullptr, 0, 0, 224, 256, 60); break;
+            if (action == GLFW_PRESS && windowPtr != nullptr) {
+                windowPtr->SetFullscreen(!windowPtr->IsFullscreen());
+            }
         default:
+            // Dont break in any previous case => always set the status of every key.
             GetInstance().setKeyStatus(key, action != GLFW_RELEASE);
             break;
     }
