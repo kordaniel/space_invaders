@@ -13,10 +13,12 @@ This is an ongoing project to learn C++, OpenGL, design patterns, build systems,
 
 ## Building and running
 ### Libraries
-Make sure you have version 2.2.0+ of GLEW installed. If you are running a lower version, there are some artifacts even if the project compiles and runs. In addition to GLEW, this project needs to be compiled and linked against [GLFW](https://www.glfw.org/index.html) version 3.3+. It is recommended that you install this library as a shared library in your system.
+Make sure you have version 2.1.0+ of GLEW installed. In addition to GLEW, this project needs to be compiled and linked against [GLFW](https://www.glfw.org/index.html) version 3.3+ and [GLM](https://github.com/g-truc/glm) version 0.9.9+.
 
 ### Building
-Cmake is used as the build system. There are scripts included in this repository that takes care of everything for you. If you don't have GLFW installed in your system or if its version is lower than 3.3, then cmake will pull the git submodule glfw and compile and link a static version when building.  
+Cmake is used as the build system. There are scripts included in this repository that takes care of everything for you.
+
+GLEW is the only library that is required to be installed on your system. It is recommended that you also install the required versions of GLFW and GLM as shared libraries on your system using your favorite package manager. However if GLFW or GLM is not found then Cmake will attempt to build and link local static versions of these libs.  
 
 There are 2 different build targets configured:
  - Debug - The default target that also configures and builds the tests utilizing the Google Test framework.
