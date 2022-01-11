@@ -1,5 +1,5 @@
-#ifndef TOOLS_H
-#define TOOLS_H
+#ifndef TOOLS_HPP
+#define TOOLS_HPP
 
 #include "Global.hpp"
 

@@ -1,5 +1,5 @@
-#ifndef GAMEOBJECT_H
-#define GAMEOBJECT_H
+#ifndef GAMEOBJECT_HPP
+#define GAMEOBJECT_HPP
 
 #include "Global.hpp"
 #include "Tools.hpp"

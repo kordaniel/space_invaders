@@ -1,5 +1,5 @@
-#ifndef COMPRESSION_H
-#define COMPRESSION_H
+#ifndef COMPRESSION_HPP
+#define COMPRESSION_HPP
 
 #include "Global.hpp"
 

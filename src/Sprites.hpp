@@ -1,5 +1,5 @@
-#ifndef SPRITES_H
-#define SPRITES_H
+#ifndef SPRITES_HPP
+#define SPRITES_HPP
 
 #include "Global.hpp"
 #include "Size.hpp"
