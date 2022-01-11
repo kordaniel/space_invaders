@@ -7,6 +7,7 @@ cmake_minimum_required(VERSION 3.16)
 # Define min required versions of required libraries
 set(MIN_REQUIRED_GLEW "2.2")
 set(MIN_REQUIRED_GLFW "3.3")
+set(MIN_REQUIRED_GLM "0.9")
 
 # Disable in-source builds.
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
@@ -56,7 +57,7 @@ find_package(glfw3 "${MIN_REQUIRED_GLFW}" QUIET)
 
 # Compile glfw from submodule if shared glfw library is not found or the found version is too low
 if(NOT glfw3_FOUND OR "${glfw3_VERSION}" LESS "${MIN_REQUIRED_GLFW}")
-    message(STATUS "Shared systemlib GLFW was not found or its version was too low. Attempting to use the current version from glfw-repository")
+    message(STATUS "Shared systemlib GLFW was not found or its version was too low. Using local git submodule version")
     find_package(Git) # QUIET
     if(Git_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
         option(Git_SUBMODULE "Check submodules during build" ON)
@@ -64,9 +65,9 @@ if(NOT glfw3_FOUND OR "${glfw3_VERSION}" LESS "${MIN_REQUIRED_GLFW}")
             message(STATUS "Submodule GLFW update")
             execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw
                             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                            RESULT_VARIABLE GIT_SUBMOD_RESULT)
-            if(NOT GIT_SUBMOD_RESULT EQUAL "0")
-                message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_SUBMODULE_RESULT}, please checkout submodules")
+                            RESULT_VARIABLE GIT_SUBMOD_GLFW_RESULT)
+            if(NOT GIT_SUBMOD_GLFW_RESULT EQUAL "0")
+                message(FATAL_ERROR "git submodule update --init ${CMAKE_CURRENT_SOURCE_DIR}/external/glfw failed with ${GIT_SUBMOD_GLFW_RESULT}, please checkout submodules")
             endif()
             set(GLFW_BUILD_TESTS OFF)
             set(GLFW_BUILD_DOCS OFF) # Requires doxygen
@@ -79,7 +80,33 @@ if(NOT glfw3_FOUND OR "${glfw3_VERSION}" LESS "${MIN_REQUIRED_GLFW}")
         message(FATAL_ERROR "Git not found: failed to download glfw sources.")
     endif()
 else()
-    message(STATUS "Using systemwide shared glfw library: ${glfw3_VERSION}")
+    message(STATUS "Using systemwide shared glfw library version ${glfw3_VERSION}")
+endif()
+
+find_package(GLM)
+if(NOT GLM_FOUND)
+    message(STATUS "Shared systemlib GLM was not found or its version was too low. Using local git submodule version")
+    find_package(Git) # QUIET
+    if(Git_FOUND AND EXISTS "${PROJECT_SOURCE_DIR}/.git")
+        option(Git_SUBMODULE "Check submodules during build" ON)
+        if(Git_SUBMODULE)
+            message(STATUS "Submodule GLM update")
+            execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init ${CMAKE_CURRENT_SOURCE_DIR}/external/glm
+                            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                            RESULT_VARIABLE GIT_SUBMOD_GLM_RESULT)
+            if(NOT GIT_SUBMOD_GLM_RESULT EQUAL "0")
+                message(FATAL_ERROR "git submodule update --init ${CMAKE_CURRENT_SOURCE_DIR}/external/glm failed with ${GIT_SUBMOD_GLM_RESULT}, please checkout submodules")
+            endif()
+            set(GLM_DIR "${PROJECT_SOURCE_DIR}/external/glm")
+            add_subdirectory("${PROJECT_SOURCE_DIR}/external/glm")
+        else()
+            message(FATAL_ERROR "Git submodule option set to OFF")
+        endif()
+    else()
+        message(FATAL_ERROR "Git not found: failed to download glm sources.")
+    endif()
+else()
+    message(STATUS "Using systemwide GLM library version ${GLM_VERSION}")
 endif()
 
 # Only build tests in Debug builds

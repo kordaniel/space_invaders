@@ -10,5 +10,6 @@
 
 #define GLEWLIB "@GLEW_DIR@"
 #define GLFWLIB "@glfw3_DIR@"
+#define GLMLIB "@GLM_DIR@"
 
 #endif
