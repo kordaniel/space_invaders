@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <cstdlib> // rand
-#include <chrono>
 #include <thread>
 
 
@@ -42,6 +41,39 @@ namespace SI {
 
         double TimeEstimate::GetEstimate(void) const { return m_estimate; }
         size_t TimeEstimate::GetCount(void)    const { return m_count; }
+
+        UpdatesCounter::UpdatesCounter(void)
+            : m_updatesPerSecond(0.0)
+            , m_updatesCnt(0)
+            , m_timePrev(std::chrono::steady_clock::now())
+        {
+            //
+        }
+
+        bool UpdatesCounter::UpdateUpdatesCounter(void)
+        {
+            using std::chrono::time_point;
+            using std::chrono::steady_clock;
+            using std::chrono::duration;
+            using namespace std::literals::chrono_literals;
+
+            ++m_updatesCnt;
+            time_point<steady_clock> timeNow = steady_clock::now();
+            duration<double> timeDelta = timeNow - m_timePrev;
+
+            if (timeDelta < 1.0s) {
+                return false;
+            }
+
+            m_updatesPerSecond = static_cast<double>(m_updatesCnt) / timeDelta.count();
+            m_timePrev = timeNow;
+            m_updatesCnt = 0;
+
+            return true;
+        }
+
+
+
 
     } // end namespace Timetools
 

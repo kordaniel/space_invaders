@@ -3,12 +3,15 @@
 
 #include "Global.hpp"
 
+#include <chrono>
+
 
 namespace SI {
     namespace Timetools {
 
         /// A convenient wrapper for one single double to represent a duation of time in seconds.
-        class Timestep {
+        class Timestep
+        {
         public:
             Timestep(double seconds = 0.0);
             void operator+=(double seconds);
@@ -27,7 +30,8 @@ namespace SI {
         /// Welford's online algorithm to compute the variance ovar all durations
         /// in a single pass.
         /// https://en.wikipedia.org/wiki/Algorithms_for_calculating_variance#Welford%27s_online_algorithm
-        class TimeEstimate {
+        class TimeEstimate
+        {
         public:
             TimeEstimate(Timestep estimate, double mean);
 
@@ -40,6 +44,20 @@ namespace SI {
             double m_mean;
             double m_m2;
             size_t m_count;
+        };
+
+        class UpdatesCounter
+        {
+        public:
+            UpdatesCounter(void);
+            bool UpdateUpdatesCounter(void);
+
+        protected:
+            double m_updatesPerSecond;
+
+        private:
+            size_t m_updatesCnt;
+            std::chrono::time_point<std::chrono::steady_clock> m_timePrev;
         };
 
     } // end namespace Timetools
