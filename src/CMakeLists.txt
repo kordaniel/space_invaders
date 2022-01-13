@@ -42,8 +42,13 @@ target_compile_options("${PROJECT_NAME}" PRIVATE "${CXX_FLAGS}"
 target_link_options("${PROJECT_NAME}" PRIVATE "$<$<CONFIG:Debug>:${CXX_LDFLAGS_DEBUG}>")
 
 target_include_directories("${PROJECT_NAME}" PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
+target_include_directories("${PROJECT_NAME}"
+    PRIVATE "${CMAKE_SOURCE_DIR}/external/stb_image"
+    PRIVATE "${CMAKE_CURRENT_BINARY_DIR}"
+)
 
 target_link_libraries("${PROJECT_NAME}" PUBLIC OpenGL::GL GLEW::GLEW glfw)
+target_link_libraries("${PROJECT_NAME}" PUBLIC OpenGL::GL GLEW::GLEW glfw glm::glm)
 
 # Copy the required resources to the output directory
 add_custom_command(
